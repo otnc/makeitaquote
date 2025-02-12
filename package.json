@@ -1,6 +1,6 @@
 {
   "name": "makeitaquote",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "Generate a quote.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -33,7 +33,7 @@
     "displus": "^2.0.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
+    "@types/node": "^20.17.17",
     "discord.js": "^13.17.1",
     "discord.js-infer": "^3.3.0",
     "discord.js-selfbot-v13": "^3.4.6"

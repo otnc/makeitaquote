@@ -1,5 +1,6 @@
 const axios = require('axios');
 const displus = require('displus');
+const { API_URL, BETA_API_URL } = require('./lib/config');
 
 /**
  * @class MiQ
@@ -160,8 +161,6 @@ class MiQ {
       throw new TypeError('returnRawImage must be boolean');
     }
 
-    const API_URL = "https://api.voids.top/fakequote";
-
     try {
       if (returnRawImage) {
         const response = (await axios.post(API_URL, this.format)).data;
@@ -194,10 +193,8 @@ class MiQ {
       throw new Error('Text is required');
     }
 
-    const API_URL = "https://api.voids.top/fakequotebeta";
-
     try {
-      const response = (await axios.post(API_URL, this.format, { responseType: 'arraybuffer' })).data;
+      const response = (await axios.post(BETA_API_URL, this.format, { responseType: 'arraybuffer' })).data;
       const image = Buffer.from(response);
       return image;
     } catch (error) {
