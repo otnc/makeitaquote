@@ -38,7 +38,7 @@ Requires Node.js 22 or newer.
 ## Contents
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
-- [Themes](#themes) — five presets, and how to change them
+- [Themes](#themes) — six presets, and how to change them
 - [Colors](#colors) — every notation, including transparency
 - [Size](#size) — scaling, and fitting to the avatar
 - [Fonts](#fonts) — automatic downloads, and the licence rules
@@ -176,12 +176,12 @@ Both are off by default.
 
 Every color accepts any of these:
 
-```ts
-'#RGB'  '#RGBA'  '#RRGGBB'  '#RRGGBBAA'      // hex, with or without alpha
-0xRRGGBB  0xRRGGBBAA                          // numbers
-[r, g, b]  [r, g, b, a]                       // channels 0–255, alpha 0–1 or 0–255
-'transparent'                                 // fully clear
-'rgb(…)'  'rgba(…)'                           // CSS functions
+```
+'#RGB'  '#RGBA'  '#RRGGBB'  '#RRGGBBAA'      hex, with or without alpha
+0xRRGGBB  0xRRGGBBAA                         numbers
+[r, g, b]  [r, g, b, a]                      channels 0–255, alpha 0–1 or 0–255
+'transparent'                                fully clear
+'rgb(…)'  'rgba(…)'                          CSS functions
 ```
 
 > A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so
