@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.3",
-    "discord.js": "^13.17.1",
+    "discord.js": "^14.27.0",
     "discord.js-infer": "^3.3.0",
     "discord.js-selfbot-v13": "^3.4.6"
   }
