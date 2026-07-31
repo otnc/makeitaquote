@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { hasDrawableFont } from '../__fixtures__/fonts'
 import { RenderError, ValidationError } from '../core/errors'
 import { MiQ } from '../core/MiQ'
 import { clearEmojiCache } from '../emoji/cache'
@@ -94,7 +95,7 @@ describe('render', () => {
     expect([r, g, b]).toEqual([255, 255, 255])
   })
 
-  it('draws something in the text area', async () => {
+  it.skipIf(!hasDrawableFont())('draws something in the text area', async () => {
     const canvas = await quote().render()
     const ctx = canvas.getContext('2d')
     const { data } = ctx.getImageData(700, 250, 400, 250)
@@ -181,13 +182,16 @@ describe('render', () => {
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
 
-  it('throws when the text cannot fit and overflow is error', async () => {
-    const miq = new MiQ({ autoFont: false })
-      .setText('あ'.repeat(2000))
-      .setTheme({ text: { overflow: 'error' } })
+  it.skipIf(!hasDrawableFont())(
+    'throws when the text cannot fit and overflow is error',
+    async () => {
+      const miq = new MiQ({ autoFont: false })
+        .setText('あ'.repeat(2000))
+        .setTheme({ text: { overflow: 'error' } })
 
-    await expect(miq.toBuffer()).rejects.toThrow(RenderError)
-  })
+      await expect(miq.toBuffer()).rejects.toThrow(RenderError)
+    },
+  )
 
   it('requires text', async () => {
     await expect(new MiQ({ autoFont: false }).toBuffer()).rejects.toThrow(ValidationError)
@@ -288,7 +292,7 @@ describe('flipped layout', () => {
   })
 })
 
-describe('font weight', () => {
+describe.skipIf(!hasDrawableFont())('font weight', () => {
   it('draws bold text with more ink than regular', async () => {
     const ink = async (weight: 'normal' | 'bold') => {
       const canvas = await new MiQ({ autoFont: false })
@@ -310,7 +314,7 @@ describe('font weight', () => {
   })
 })
 
-describe('divider and block quote marks', () => {
+describe.skipIf(!hasDrawableFont())('divider and block quote marks', () => {
   it('draws a rule when the divider is enabled', async () => {
     // A colour nothing else in the image uses, so it can be counted directly
     // without depending on where the divider lands.

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { hasDrawableFont } from '../__fixtures__/fonts'
 import { type Canvas, createCanvas } from './canvasFactory'
 import { fillText, isBold, resetBoldDetectionForTests, syntheticBoldWidth } from './textStyle'
 
@@ -52,7 +53,7 @@ describe('syntheticBoldWidth', () => {
 })
 
 describe('fillText', () => {
-  it('draws without a stroke when the width is zero', () => {
+  it.skipIf(!hasDrawableFont())('draws without a stroke when the width is zero', () => {
     const canvas = createCanvas(60, 60)
     const ctx = canvas.getContext('2d')
     ctx.fillStyle = '#FFFFFF'
@@ -63,7 +64,7 @@ describe('fillText', () => {
     expect(litPixels(canvas)).toBeGreaterThan(0)
   })
 
-  it('covers more pixels when stroked', () => {
+  it.skipIf(!hasDrawableFont())('covers more pixels when stroked', () => {
     const plain = renderGlyph(0)
     const stroked = renderGlyph(4)
 
