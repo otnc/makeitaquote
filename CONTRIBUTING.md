@@ -63,7 +63,7 @@ Rendering output isn't compared pixel by pixel — font versions, OS and Skia
 updates all move those pixels, and a suite that fails for those reasons stops
 being useful. Instead the layout logic is tested as pure functions with an
 injected measurer, and the pipeline gets smoke tests that check the image is
-valid, the right size, and the right colour in specific places.
+valid, the right size, and the right color in specific places.
 
 Nothing in the test suite touches the network. The emoji and font layers take
 an injectable fetcher for exactly this reason.

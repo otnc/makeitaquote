@@ -27,7 +27,7 @@ export interface QuoteInput {
   displayName?: string
   watermark?: string
   /**
-   * Keeps the avatar in colour instead of desaturating it.
+   * Keeps the avatar in color instead of desaturating it.
    *
    * On the local renderer this is a shortcut for `setTheme('color')`; the API
    * client sends it verbatim.

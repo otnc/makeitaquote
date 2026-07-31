@@ -67,9 +67,9 @@ await writeFile(
     .toBuffer('png'),
 )
 
-// Keep the avatar in colour instead of desaturating it.
+// Keep the avatar in color instead of desaturating it.
 await writeFile(
-  'colour-avatar.png',
+  'color-avatar.png',
   await quote()
     .setTheme({ avatar: { grayscale: false } })
     .toBuffer('png'),

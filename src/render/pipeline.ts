@@ -153,12 +153,12 @@ function candidateFamilies(request: string): string[] {
 
 const GENERIC_FAMILIES = new Set(['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'])
 
-/** A colour that may inherit from another when left null. */
+/** A color that may inherit from another when left null. */
 function inkFor(color: unknown, inherited: unknown, field: string) {
   return parseColor((color ?? inherited) as never, field)
 }
 
-/** Whether anything drawn in this colour would be invisible. */
+/** Whether anything drawn in this color would be invisible. */
 function invisible(color: unknown, field: string): boolean {
   return isTransparent(parseColor(color as never, field))
 }

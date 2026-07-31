@@ -51,7 +51,7 @@ export interface GradientTheme {
   direction: 'horizontal' | 'vertical'
   /** Where the fade starts, as a fraction of the canvas width or height. */
   startRatio: number
-  /** Where it reaches the background colour. */
+  /** Where it reaches the background color. */
   endRatio: number
   /** `[offset, alpha]` pairs, offsets in 0–1 across the gradient. */
   stops: Array<[offset: number, alpha: number]>
@@ -105,7 +105,7 @@ export interface QuoteMarkTheme {
   chars: [open: string, close: string]
   /** `block` only: size, as a fraction of the canvas height or in pixels. */
   size: number
-  /** `null` inherits the text colour. */
+  /** `null` inherits the text color. */
   color: ColorInput | null
   weight: FontWeight
   /** `block` only: space between the marks and the quote. */
@@ -119,7 +119,7 @@ export interface DividerTheme {
   widthRatio: number
   /** Line thickness, as a fraction of the canvas height or in pixels. */
   thickness: number
-  /** `null` inherits the display name's colour. */
+  /** `null` inherits the display name's color. */
   color: ColorInput | null
   /** Space above and below. */
   gap: number

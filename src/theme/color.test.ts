@@ -151,7 +151,7 @@ describe('withAlpha', () => {
     expect(withAlpha({ ...RED, a: 0.5 }, 0.5)).toBe('rgba(255, 0, 0, 0.25)')
   })
 
-  it('stays transparent when the colour is', () => {
+  it('stays transparent when the color is', () => {
     expect(withAlpha({ ...RED, a: 0 }, 1)).toBe('rgba(255, 0, 0, 0)')
   })
 })

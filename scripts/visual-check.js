@@ -172,7 +172,7 @@ add('01-themes', 'dark (default)', () =>
 add('01-themes', 'light', () =>
   base().setText(text.jaLong).setAvatar(avatars.illustration).setTheme('light'),
 )
-add('01-themes', 'color (avatar keeps its colour)', () =>
+add('01-themes', 'color (avatar keeps its color)', () =>
   base().setText(text.jaLong).setAvatar(avatars.illustration).setTheme('color'),
 )
 add('01-themes', 'portrait', () =>
@@ -384,7 +384,7 @@ add('08-avatar', 'illustration (png with alpha)', () =>
   base().setText(text.ja).setAvatar(avatars.illustration),
 )
 add('08-avatar', 'photo (jpg)', () => base().setText(text.ja).setAvatar(avatars.photo))
-add('08-avatar', 'colour kept', () =>
+add('08-avatar', 'color kept', () =>
   base()
     .setText(text.ja)
     .setAvatar(avatars.photo)
@@ -460,10 +460,10 @@ add('11-discord', 'from a minimal message (no avatar)', () =>
   new MiQ().setFromMessage({ content: text.ja, author: { username: 'someone' } }),
 )
 
-// --- 12-colours: the colour system ----------------------------------------
+// --- 12-colors: the color system ----------------------------------------
 
 add(
-  '12-colours',
+  '12-colors',
   'tokyo night',
   () =>
     base()
@@ -477,10 +477,10 @@ add(
         username: { color: '#565F89' },
         watermark: { color: '#414868' },
       }),
-  { note: 'custom starts fully transparent; every colour here is set explicitly' },
+  { note: 'custom starts fully transparent; every color here is set explicitly' },
 )
 add(
-  '12-colours',
+  '12-colors',
   'nord',
   () =>
     base()
@@ -496,7 +496,7 @@ add(
       }),
   { note: 'the same thing written as 0xRRGGBB numbers' },
 )
-add('12-colours', 'solarized, as rgba arrays', () =>
+add('12-colors', 'solarized, as rgba arrays', () =>
   base()
     .setText(text.ja)
     .setAvatar(avatars.illustration)
@@ -510,7 +510,7 @@ add('12-colours', 'solarized, as rgba arrays', () =>
     }),
 )
 add(
-  '12-colours',
+  '12-colors',
   'translucent background over the avatar',
   () =>
     base()
@@ -529,7 +529,7 @@ add(
   { note: '#RRGGBBAA — the avatar shows through the wash' },
 )
 add(
-  '12-colours',
+  '12-colors',
   'transparent background (checkerboard is the page)',
   () =>
     base()

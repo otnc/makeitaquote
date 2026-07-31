@@ -6,7 +6,7 @@ import type { Theme, ThemeInput, ThemeName } from './types'
  * Turns a partial theme into a complete one.
  *
  * Merges onto the preset named by `extends` (or `dark`), one level at a time —
- * so `{ text: { color: 'red' } }` changes the colour and leaves the rest of the
+ * so `{ text: { color: 'red' } }` changes the color and leaves the rest of the
  * text settings alone.
  */
 export function defineTheme(input: ThemeName | ThemeInput = 'dark'): Theme {

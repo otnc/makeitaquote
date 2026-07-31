@@ -81,10 +81,11 @@ describe('defineTheme', () => {
   })
 
   it('rejects an unknown property, rather than silently ignoring it', () => {
-    expect(() => defineTheme({ backgroundColour: '#FFF' } as object)).toThrow(ValidationError)
+    // A near-miss on a real property is exactly the typo worth catching.
+    expect(() => defineTheme({ backgroundColor: '#FFF' } as object)).toThrow(ValidationError)
   })
 
-  it('names the property it rejected', () => {
+  it('names the property it rejected, including its path', () => {
     expect(() => defineTheme({ text: { colour: '#FFF' } } as object)).toThrow(/theme\.text\.colour/)
   })
 
