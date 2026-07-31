@@ -1,0 +1,94 @@
+name: Bug report
+description: Something doesn't work the way it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: if the Voids API (`makeitaquote/api`) is down or
+        returning errors, that is not something this package can fix — the API
+        is operated by a third party.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: The smallest piece of code that shows the problem.
+      render: ts
+    validations:
+      required: true
+
+  - type: dropdown
+    id: entry
+    attributes:
+      label: Which entry point?
+      options:
+        - makeitaquote (local rendering)
+        - makeitaquote/api (Voids API)
+        - both
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: makeitaquote version
+      placeholder: 9.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      description: Output of `node -v`.
+      placeholder: v22.11.0
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: OS and architecture
+      description: |
+        `@napi-rs/canvas` loads a different binary per platform, so this
+        matters for anything rendering-related.
+      placeholder: Ubuntu 24.04 x64 / macOS 15 arm64 / Windows 11 x64
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where is it running?
+      options:
+        - Local machine
+        - Docker (glibc, e.g. node:22)
+        - Docker (Alpine / musl, e.g. node:22-alpine)
+        - Serverless
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: fonts
+    attributes:
+      label: Font setup
+      description: |
+        Only if the problem is with how text looks. Did you register a font
+        yourself, or leave `autoFont` on? Is `MIQ_FONT_CACHE_DIR` set?
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Errors or warnings
+      description: Any output from the package, in full.
+      render: shell

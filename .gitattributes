@@ -1,0 +1,4 @@
+# Normalize all text files to LF, regardless of the platform or the
+# contributor's core.autocrlf setting, so Biome's formatter (which writes LF)
+# never disagrees with what's checked out on Windows.
+* text=auto eol=lf
