@@ -44,5 +44,11 @@ jobs:
     container: node:22-alpine
     steps:
       - uses: actions/checkout@v4
+      # A bare Alpine image has no fonts at all, so text measures zero and
+      # paints nothing. The tests run with autoFont off — they must not depend
+      # on a download — so a font has to come from somewhere. Installing one
+      # here is also the realistic case: a container that renders text has
+      # fonts in it.
+      - run: apk add --no-cache font-noto font-noto-cjk
       - run: npm install
       - run: npm run test
