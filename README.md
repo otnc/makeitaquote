@@ -46,8 +46,9 @@ Requires Node.js 22 or newer.
 - [Text](#text) — wrapping, kinsoku, overflow
 - [Output](#output) — formats and streams
 - [Using an external API](#using-an-external-api) instead of rendering locally
-- [Errors](#errors) · [Platform support](#platform-support) · [Licence](#licence)
+- [Errors](#errors) · [Platform support](#platform-support)
 - [Migrating from v8](#migrating-from-v8)
+- [Author](#author) · [Licence](#licence)
 
 ---
 
@@ -473,6 +474,20 @@ On a platform without a binary, use `makeitaquote/api`.
 
 ---
 
+## Migrating from v8
+
+v9 is a rewrite: the API changed, and images render locally by default.
+See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9
+method table.
+
+---
+
+## Author
+
+otoneko. https://github.com/otnc
+
+---
+
 ## Licence
 
 ISC — see [LICENSE](LICENSE).
@@ -484,11 +499,3 @@ attribution** if you publish the images:
 > Emoji graphics by [Twemoji](https://github.com/jdecked/twemoji) (CC-BY 4.0).
 
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) has the details.
-
----
-
-## Migrating from v8
-
-v9 is a rewrite: the API changed, and images render locally by default.
-See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9
-method table.
