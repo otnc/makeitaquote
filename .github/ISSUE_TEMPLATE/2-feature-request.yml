@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest something new
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: What are you trying to do that you can't do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would it look like?
+      description: An API sketch is welcome, but not required.
+      render: ts
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything you tried instead?
+      description: |
+        Themes cover a lot of layout and colour changes, and `render()` hands
+        back the canvas if you want to draw on it yourself.

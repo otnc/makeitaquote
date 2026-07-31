@@ -1,16 +1,7 @@
 {
   "name": "makeitaquote",
-  "version": "8.0.1",
-  "description": "Generate a quote.",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/otoneko1102/makeitaquote.git"
-  },
+  "version": "9.0.0",
+  "description": "Generate \"Make it a Quote\" images locally, or via an external API.",
   "keywords": [
     "img",
     "image",
@@ -20,22 +11,77 @@
     "makeitaquote",
     "quote",
     "discord",
+    "canvas",
     "api"
   ],
-  "author": "otoneko.",
-  "license": "ISC",
+  "homepage": "https://github.com/otnc/makeitaquote#readme",
   "bugs": {
-    "url": "https://github.com/otoneko1102/makeitaquote/issues"
+    "url": "https://github.com/otnc/makeitaquote/issues"
   },
-  "homepage": "https://github.com/otoneko1102/makeitaquote#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otnc/makeitaquote.git"
+  },
+  "license": "ISC",
+  "author": "otoneko.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./api": {
+      "types": {
+        "import": "./dist/api/index.d.mts",
+        "require": "./dist/api/index.d.cts"
+      },
+      "import": "./dist/api/index.mjs",
+      "require": "./dist/api/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write",
+    "format:check": "biome format",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "check": "biome check --write",
+    "ci": "biome ci",
+    "check:build": "node scripts/check-build.js",
+    "visual": "node scripts/visual-check.js",
+    "prepublishOnly": "npm run build"
+  },
   "dependencies": {
-    "axios": "^1.7.5",
-    "displus": "^2.0.2"
+    "@napi-rs/canvas": "^1.0.3",
+    "@twemoji/parser": "^17.0.2",
+    "budoux": "^0.8.4",
+    "ky": "^2.0.2"
   },
   "devDependencies": {
-    "@types/node": "^25.2.3",
-    "discord.js": "^13.17.1",
-    "discord.js-infer": "^3.3.0",
-    "discord.js-selfbot-v13": "^3.4.6"
+    "@biomejs/biome": "^2.5.6",
+    "@types/node": "^22.20.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "tsdown": "^0.22.14",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
   }
 }
