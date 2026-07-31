@@ -146,7 +146,7 @@ describe('payload', () => {
 })
 
 describe('input', () => {
-  it('builds from a Discord message and keeps the colour flag', () => {
+  it('builds from a Discord message and keeps the color flag', () => {
     const data = new VoidsMiQ().setColor(true).setFromMessage(v14Message()).getData()
 
     expect(data.text).toBe('Hello World!')

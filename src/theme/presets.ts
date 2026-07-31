@@ -60,7 +60,7 @@ const dark: Theme = {
     enabled: true,
     direction: 'horizontal',
     startRatio: 0.22,
-    // Reaches the background colour exactly at the avatar's edge
+    // Reaches the background color exactly at the avatar's edge
     // (avatar.widthRatio), so the edge itself never shows as a hard line.
     endRatio: 0.5,
     stops: [
@@ -132,7 +132,7 @@ const light: Theme = {
   watermark: { ...dark.watermark, color: palettes.light.faint },
 }
 
-/** Leaves the avatar in colour — the v8 `setColor(true)` behaviour. */
+/** Leaves the avatar in color — the v8 `setColor(true)` behaviour. */
 const color: Theme = {
   ...clone(dark),
   avatar: { ...clone(dark).avatar, grayscale: false },
@@ -183,7 +183,7 @@ const portraitLight: Theme = {
  * A blank slate: everything transparent, for compositing over something else.
  *
  * The avatar and its gradient still draw — it is the background and the text
- * that start invisible, so you set exactly the colours you want and nothing
+ * that start invisible, so you set exactly the colors you want and nothing
  * else shows up uninvited.
  */
 const custom: Theme = {

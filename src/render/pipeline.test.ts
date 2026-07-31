@@ -81,7 +81,7 @@ describe('render', () => {
     expect(canvas.height).toBe(400)
   })
 
-  it('fills the background with the theme colour', async () => {
+  it('fills the background with the theme color', async () => {
     // Top-right: past the avatar box and the gradient, and above the text.
     const [r, g, b, a] = await pixelAt(quote(), 1275, 5)
 
@@ -118,7 +118,7 @@ describe('render', () => {
     expect(r).toBeGreaterThan(0)
   })
 
-  it('keeps the avatar in colour for the color theme', async () => {
+  it('keeps the avatar in color for the color theme', async () => {
     const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()).setTheme('color'), 100, 360)
 
     expect(r).toBeGreaterThan(200)
@@ -316,7 +316,7 @@ describe.skipIf(!hasDrawableFont())('font weight', () => {
 
 describe.skipIf(!hasDrawableFont())('divider and block quote marks', () => {
   it('draws a rule when the divider is enabled', async () => {
-    // A colour nothing else in the image uses, so it can be counted directly
+    // A color nothing else in the image uses, so it can be counted directly
     // without depending on where the divider lands.
     expect(await countRed({ divider: { enabled: true, color: '#FF0000' } })).toBeGreaterThan(0)
   })

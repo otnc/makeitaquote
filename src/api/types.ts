@@ -3,7 +3,7 @@ import type { QuoteData } from '../core/types'
 import type { EndpointPath } from './endpoints'
 
 export interface VoidsQuoteData extends QuoteData {
-  /** Keeps the avatar in colour. Sent verbatim to the API. */
+  /** Keeps the avatar in color. Sent verbatim to the API. */
   color: boolean
 }
 

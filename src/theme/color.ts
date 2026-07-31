@@ -1,7 +1,7 @@
 import { ValidationError } from '../core/errors'
 
 /**
- * A colour, in any of the notations this package accepts.
+ * A color, in any of the notations this package accepts.
  *
  * - `'#RGB'`, `'#RGBA'`, `'#RRGGBB'`, `'#RRGGBBAA'`
  * - `0xRRGGBB`, `0xRRGGBBAA` — plain numbers, so `0xFF0000` is red
@@ -54,7 +54,7 @@ export function parseColor(input: ColorInput, field = 'color'): RGBA {
   if (typeof input === 'string') return fromString(input, field)
 
   throw new ValidationError(
-    `${field} must be a colour string, a number like 0xRRGGBBAA, or [r, g, b, a]`,
+    `${field} must be a color string, a number like 0xRRGGBBAA, or [r, g, b, a]`,
     { field },
   )
 }
@@ -67,7 +67,7 @@ export function parseColor(input: ColorInput, field = 'color'): RGBA {
  * people write.
  *
  * A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` —
- * so a colour with a red channel of 0 and an alpha byte has to be written as
+ * so a color with a red channel of 0 and an alpha byte has to be written as
  * a string, where the length is part of the value.
  */
 function fromNumber(value: number, field: string): RGBA {
@@ -167,7 +167,7 @@ function fromString(input: string, field: string): RGBA {
   if (/^0x[0-9a-f]{6,8}$/i.test(value)) return fromNumber(Number(value), field)
 
   throw new ValidationError(
-    `${field}: could not read "${input}" as a colour. Use #RRGGBBAA, 0xRRGGBBAA, ` +
+    `${field}: could not read "${input}" as a color. Use #RRGGBBAA, 0xRRGGBBAA, ` +
       "[r, g, b, a], 'transparent', or rgb()/rgba().",
     { field },
   )
@@ -177,14 +177,14 @@ function double(digit: string): number {
   return Number.parseInt(`${digit}${digit}`, 16)
 }
 
-/** The canvas fill string for a colour. */
+/** The canvas fill string for a color. */
 export function toCSS(color: RGBA): string {
   return color.a >= 1
     ? `rgb(${color.r}, ${color.g}, ${color.b})`
     : `rgba(${color.r}, ${color.g}, ${color.b}, ${round(color.a)})`
 }
 
-/** The same colour at a given alpha, for gradient stops. */
+/** The same color at a given alpha, for gradient stops. */
 export function withAlpha(color: RGBA, alpha: number): string {
   return `rgba(${color.r}, ${color.g}, ${color.b}, ${round(clampAlpha(color.a * alpha))})`
 }

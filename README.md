@@ -39,7 +39,7 @@ Requires Node.js 22 or newer.
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
 - [Themes](#themes) — five presets, and how to change them
-- [Colours](#colours) — every notation, including transparency
+- [Colors](#colors) — every notation, including transparency
 - [Size](#size) — scaling, and fitting to the avatar
 - [Fonts](#fonts) — automatic downloads, and the licence rules
 - [Emoji](#emoji) — Twemoji, Discord, Misskey
@@ -93,10 +93,10 @@ one of them always renders.
 | --- | --- | --- |
 | `dark` | default | Black, avatar left, quote right — the original look |
 | `light` | | The same on white |
-| `color` | | `dark`, but the avatar keeps its colour |
+| `color` | | `dark`, but the avatar keeps its color |
 | `portrait` | | Avatar fills the canvas and fades down, quote over the bottom |
 | `portrait-light` | | The same on white |
-| `custom` | | Everything transparent, for you to colour in |
+| `custom` | | Everything transparent, for you to color in |
 
 ```ts
 new MiQ({ theme: 'portrait' })      // at construction
@@ -172,9 +172,9 @@ Both are off by default.
 
 ---
 
-## Colours
+## Colors
 
-Every colour accepts any of these:
+Every color accepts any of these:
 
 ```ts
 '#RGB'  '#RGBA'  '#RRGGBB'  '#RRGGBBAA'      // hex, with or without alpha
@@ -189,7 +189,7 @@ Every colour accepts any of these:
 
 ### Starting from nothing
 
-The `custom` preset begins fully transparent, so the only colours in the image
+The `custom` preset begins fully transparent, so the only colors in the image
 are the ones you name:
 
 ```ts

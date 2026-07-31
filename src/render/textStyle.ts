@@ -41,7 +41,7 @@ function detect(ctx: SKRSContext2D, family: string): boolean {
 /**
  * How wide to stroke text to fake bold, in pixels. `0` means don't.
  *
- * Stroking the glyph outline in the fill colour thickens it, which is the
+ * Stroking the glyph outline in the fill color thickens it, which is the
  * standard way to emulate bold on a canvas when no bold face is available.
  */
 export function syntheticBoldWidth(

@@ -22,5 +22,5 @@ body:
     attributes:
       label: Anything you tried instead?
       description: |
-        Themes cover a lot of layout and colour changes, and `render()` hands
+        Themes cover a lot of layout and color changes, and `render()` hands
         back the canvas if you want to draw on it yourself.
