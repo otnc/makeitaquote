@@ -86,7 +86,9 @@ describe('defineTheme', () => {
   })
 
   it('names the property it rejected, including its path', () => {
-    expect(() => defineTheme({ text: { colour: '#FFF' } } as object)).toThrow(/theme\.text\.colour/)
+    // `tint` isn't a real property anywhere in Theme — the point is only that
+    // the path prefix (`theme.text.`) comes through, not the property itself.
+    expect(() => defineTheme({ text: { tint: '#FFF' } } as object)).toThrow(/theme\.text\.tint/)
   })
 
   it('ignores explicit undefined', () => {
