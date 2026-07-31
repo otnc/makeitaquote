@@ -150,8 +150,17 @@ const portrait: Theme = {
   gradient: {
     ...clone(dark).gradient,
     direction: 'vertical',
-    startRatio: 0.12,
-    endRatio: 0.62,
+    // The avatar is the top half of a portrait quote, so it has to stay
+    // legible there. Fading from 12% swallowed the subject's face before the
+    // text needed the space; this keeps the fade below it and only reaches the
+    // background where the quote actually sits.
+    startRatio: 0.38,
+    endRatio: 0.74,
+    stops: [
+      [0, 0],
+      [0.6, 0.7],
+      [1, 1],
+    ],
   },
   text: { ...clone(dark).text, size: 0.055, minSize: 0.028, area: 'auto' },
   quoteMark: { ...clone(dark).quoteMark, display: 'block' },
