@@ -490,7 +490,7 @@ otoneko. https://github.com/otnc
 
 ## Licence
 
-ISC — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
 
 Third-party assets are fetched at runtime: fonts from Google Fonts (OFL /
 Apache 2.0 / UFL) and emoji from Twemoji, which is **CC-BY 4.0 and requires

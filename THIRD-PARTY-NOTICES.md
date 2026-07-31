@@ -1,6 +1,6 @@
 # Third-party notices
 
-`makeitaquote` itself is ISC licensed — see [LICENSE](LICENSE). This file covers
+`makeitaquote` itself is MIT licensed — see [LICENSE](LICENSE). This file covers
 the third-party code it depends on, and the third-party assets it fetches at
 runtime.
 

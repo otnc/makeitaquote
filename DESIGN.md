@@ -443,6 +443,11 @@ makeitaquote/
 }
 ```
 
+> **2026-08-01 での訂正**: `"license"` はその後 **ISC → MIT** に変更された。姉妹パッケージの
+> ライセンス方針に合わせたもので、v9 系がこの変更の起点。上のスナップショットは設計時点の
+> 記録としてそのまま残すが、現在の `package.json` / `LICENSE` / README / THIRD-PARTY-NOTICES.md
+> はすべて MIT を指している。
+
 - テンプレートの `setup` スクリプトと `scripts/setup.js` は**採用しない**。既存リポジトリでありプレースホルダの置換が不要なため。
 - `check:build` を追加（§5.8）。
 - `@types/node` は `engines` に合わせて **`^22`**（テンプレート準拠）。ランタイムが Node 22 なので 25 系の型を入れると存在しない API が型上通ってしまう。
@@ -816,8 +821,6 @@ jobs:
 - Node.js のバージョン
 - 実行環境（ローカル / Docker / Alpine / サーバーレス）
 - 使用しているエントリ（`makeitaquote` か `makeitaquote/api` か）
-
-`config.yml` の `contact_links` には既存の Discord サポートサーバー（`https://discord.gg/yKW8wWKCnS`）を残す。
 
 ---
 
