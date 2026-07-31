@@ -1,0 +1,183 @@
+import type { ColorInput } from './color'
+
+export type ThemeName = 'dark' | 'light' | 'color' | 'portrait' | 'portrait-light' | 'custom'
+
+/**
+ * How the avatar and the quote are arranged.
+ *
+ * - `side` puts them next to each other, the avatar fading sideways into the
+ *   background. This is the original Make it a Quote look.
+ * - `stacked` fills the canvas with the avatar and fades it downwards, with the
+ *   quote sitting over the bottom of it. Suits portrait canvases.
+ */
+export type LayoutMode = 'side' | 'stacked'
+
+/** BudouX model used to find phrase boundaries. `'none'` disables phrase breaking. */
+export type PhraseLocale = 'ja' | 'zh-hans' | 'zh-hant' | 'none'
+
+export type TextOverflow = 'ellipsis' | 'shrink' | 'error'
+
+/** A CSS font weight: a keyword, or 100–900. */
+export type FontWeight = 'normal' | 'bold' | 'lighter' | 'bolder' | number
+
+export interface AvatarTheme {
+  /** Draw the avatar in black and white. */
+  grayscale: boolean
+  /** Which side it sits on. Ignored when the layout is `stacked`. */
+  position: 'left' | 'right'
+  /** Fraction of the canvas width it occupies. Forced to 1 when `stacked`. */
+  widthRatio: number
+  /**
+   * How the image fills its box.
+   *
+   * - `cover` crops to fill it, the usual choice
+   * - `contain` fits the whole image inside, leaving background either side
+   *
+   * See also `MiQOptions.sizeToAvatar`, which reshapes the canvas around the
+   * image instead of reshaping the image.
+   */
+  fit: 'cover' | 'contain'
+  /** Drawn when there is no avatar, or fetching one failed. `null` leaves it blank. */
+  fallback: { background: ColorInput; color: ColorInput } | null
+}
+
+export interface GradientTheme {
+  enabled: boolean
+  /**
+   * Which way the avatar fades into the background.
+   *
+   * `horizontal` is mirrored automatically when the avatar is on the right.
+   */
+  direction: 'horizontal' | 'vertical'
+  /** Where the fade starts, as a fraction of the canvas width or height. */
+  startRatio: number
+  /** Where it reaches the background colour. */
+  endRatio: number
+  /** `[offset, alpha]` pairs, offsets in 0–1 across the gradient. */
+  stops: Array<[offset: number, alpha: number]>
+}
+
+/** A rectangle in fractions of the canvas size. */
+export interface Area {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
+ * Where the quote goes.
+ *
+ * `'auto'` derives it from the layout and the avatar's side, so flipping the
+ * avatar moves the text with it.
+ */
+export type AreaSetting = Area | 'auto'
+
+export interface TextTheme {
+  color: ColorInput
+  font: string
+  weight: FontWeight
+  /**
+   * Starting font size.
+   *
+   * Values in `(0, 1]` are read as a fraction of the canvas height; anything
+   * larger is taken as pixels.
+   */
+  size: number
+  /** Lower bound for the auto-fit search, same units as `size`. */
+  minSize: number
+  lineHeight: number
+  align: 'left' | 'center' | 'right'
+  overflow: TextOverflow
+  area: AreaSetting
+  /** Use BudouX phrase boundaries when breaking CJK lines. */
+  phraseBreak: boolean
+  locale: PhraseLocale
+}
+
+export interface QuoteMarkTheme {
+  /**
+   * - `inline` wraps the quote in the marks, as running text
+   * - `block` draws them large above the quote
+   * - `none` omits them
+   */
+  display: 'inline' | 'block' | 'none'
+  chars: [open: string, close: string]
+  /** `block` only: size, as a fraction of the canvas height or in pixels. */
+  size: number
+  /** `null` inherits the text colour. */
+  color: ColorInput | null
+  weight: FontWeight
+  /** `block` only: space between the marks and the quote. */
+  gap: number
+}
+
+export interface DividerTheme {
+  /** A rule between the quote and the attribution. */
+  enabled: boolean
+  /** Length, as a fraction of the text area's width. */
+  widthRatio: number
+  /** Line thickness, as a fraction of the canvas height or in pixels. */
+  thickness: number
+  /** `null` inherits the display name's colour. */
+  color: ColorInput | null
+  /** Space above and below. */
+  gap: number
+}
+
+export interface LabelTheme {
+  color: ColorInput
+  font: string
+  weight: FontWeight
+  size: number
+  prefix: string
+}
+
+export interface WatermarkTheme {
+  color: ColorInput
+  font: string
+  weight: FontWeight
+  size: number
+  /**
+   * `'auto'` keeps it clear of the avatar: opposite side for `side` layouts,
+   * bottom right for `stacked` ones.
+   */
+  position: 'auto' | 'bottom-right' | 'bottom-left' | 'bottom-center'
+}
+
+export interface EmojiTheme {
+  /** Horizontal padding around an emoji, as a fraction of the font size. */
+  sideMarginRatio: number
+  topMarginRatio: number
+  /** Pixel size requested from the CDN. */
+  size: 64 | 72 | 128
+}
+
+export interface Theme {
+  layout: LayoutMode
+  width: number
+  height: number
+  background: ColorInput
+  avatar: AvatarTheme
+  gradient: GradientTheme
+  text: TextTheme
+  quoteMark: QuoteMarkTheme
+  divider: DividerTheme
+  displayName: LabelTheme
+  username: LabelTheme
+  watermark: WatermarkTheme
+  emoji: EmojiTheme
+}
+
+export type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends Array<infer U>
+    ? Array<U>
+    : T[K] extends object | undefined
+      ? DeepPartial<NonNullable<T[K]>> | Extract<T[K], null | undefined | 'auto'>
+      : T[K]
+}
+
+export type ThemeInput = DeepPartial<Theme> & {
+  /** Preset to start from. Defaults to `'dark'`. */
+  extends?: ThemeName
+}
