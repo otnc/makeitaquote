@@ -48,12 +48,17 @@ export interface MessageLike {
     globalName?: string | null
     global_name?: string | null
     discriminator?: string | null
-    displayAvatarURL?: (options?: unknown) => string
+    // Method shorthand, not `displayAvatarURL?: (options?: unknown) => string`.
+    // TS checks a property's function type contravariantly under strict mode,
+    // so a real `(options?: ImageURLOptions) => string` from discord.js would
+    // not satisfy a `(options?: unknown) => string` property — only a
+    // shorthand method gets the bivariant check that accepts it.
+    displayAvatarURL?(options?: unknown): string
   }
   member?: {
     displayName?: string
     nickname?: string | null
-    displayAvatarURL?: (options?: unknown) => string
+    displayAvatarURL?(options?: unknown): string
   } | null
 }
 
