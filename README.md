@@ -31,6 +31,21 @@ const png = await new MiQ()
 await writeFile('quote.png', png)
 ```
 
+CommonJS works too — every entry point ships both `require` and `import`:
+
+```js
+const { writeFile } = require('node:fs/promises')
+const { MiQ } = require('makeitaquote')
+
+new MiQ()
+  .setText('吾輩は猫である。名前はまだ無い。')
+  .setAvatar('https://example.com/avatar.png')
+  .setUsername('otoneko.')
+  .setDisplayName('音猫｡')
+  .toBuffer('png')
+  .then((png) => writeFile('quote.png', png))
+```
+
 Requires Node.js 22 or newer.
 
 ---
@@ -62,6 +77,16 @@ const png = await new MiQ().setFromMessage(message).toBuffer('png')
 
 await message.reply({
   files: [new AttachmentBuilder(png, { name: 'quote.png' })],
+})
+```
+
+```js
+// CommonJS
+const { AttachmentBuilder } = require('discord.js')
+const { MiQ } = require('makeitaquote')
+
+new MiQ().setFromMessage(message).toBuffer('png').then((png) => {
+  message.reply({ files: [new AttachmentBuilder(png, { name: 'quote.png' })] })
 })
 ```
 
