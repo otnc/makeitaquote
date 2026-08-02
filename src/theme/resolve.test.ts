@@ -112,6 +112,10 @@ describe('defineTheme', () => {
     it('rejects a malformed quote pair', () => {
       expect(() => defineTheme({ text: { quotes: ['“'] } as object })).toThrow(ValidationError)
     })
+
+    it('rejects an unknown avatar shape', () => {
+      expect(() => defineTheme({ avatar: { shape: 'hexagon' as never } })).toThrow(ValidationError)
+    })
   })
 })
 

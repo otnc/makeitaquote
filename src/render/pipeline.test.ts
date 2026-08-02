@@ -140,6 +140,34 @@ describe('render', () => {
     expect([r, g, b]).toEqual([30, 30, 30])
   })
 
+  it('clips the avatar box to a circle', async () => {
+    // Dark theme, side layout: box is {x:0, y:0, width:711, height:800}, so
+    // its corner sits well outside the largest inscribed circle (r≈355.5).
+    const miq = quote()
+      .setAvatar(redSquare())
+      .setTheme({ avatar: { shape: 'circle' } })
+
+    const [, , , cornerAlpha] = await pixelAt(miq, 10, 10)
+    expect(cornerAlpha).toBe(255)
+    const [cr, cg, cb] = await pixelAt(miq, 10, 10)
+    expect([cr, cg, cb]).toEqual([0, 0, 0]) // untouched background, not the avatar
+
+    const [, cgCentre, cbCentre] = await pixelAt(miq, 355, 400)
+    expect(cgCentre).toBe(cbCentre) // inside the circle: desaturated red
+    expect(cgCentre).toBeGreaterThan(0)
+  })
+
+  it('clips the fallback tile to a circle too', async () => {
+    const miq = quote().setTheme({ avatar: { shape: 'circle' } })
+
+    const [r, g, b] = await pixelAt(miq, 10, 10)
+    expect([r, g, b]).toEqual([0, 0, 0]) // background, not the fallback tile's #1E1E1E
+
+    // Inside the circle but away from the centred initial letter's glyph.
+    const [fr, fg, fb] = await pixelAt(miq, 50, 400)
+    expect([fr, fg, fb]).toEqual([30, 30, 30])
+  })
+
   it('puts the avatar on the right when the theme says so', async () => {
     const miq = quote()
       .setAvatar(redSquare())
