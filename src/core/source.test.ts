@@ -25,6 +25,45 @@ describe('fromMessage', () => {
     expect(quote.text).toBe('bold message')
   })
 
+  it('resolves mentions by default', () => {
+    const quote = fromMessage(
+      v14Message({
+        content: 'hi <@1>',
+        mentions: { users: new Map([['1', { username: 'otoneko' }]]) },
+      }),
+    )
+
+    expect(quote.text).toBe('hi @otoneko')
+  })
+
+  it('leaves mentions as written when resolveMentions is false', () => {
+    const quote = fromMessage(
+      v14Message({
+        content: 'hi <@1>',
+        mentions: { users: new Map([['1', { username: 'otoneko' }]]) },
+      }),
+      { resolveMentions: false },
+    )
+
+    expect(quote.text).toBe('hi <@1>')
+  })
+
+  it('is a no-op when the message has no mentions field', () => {
+    expect(fromMessage(v14Message({ content: 'hi <@1>' })).text).toBe('hi <@1>')
+  })
+
+  it('resolves mentions before stripping markdown', () => {
+    const quote = fromMessage(
+      v14Message({
+        content: '**hi** <@1>',
+        mentions: { users: new Map([['1', { username: 'otoneko' }]]) },
+      }),
+      { stripMarkdown: true },
+    )
+
+    expect(quote.text).toBe('hi @otoneko')
+  })
+
   it('keeps the discriminator for legacy accounts', () => {
     expect(fromMessage(v13Message()).username).toBe('otoneko#6666')
   })
