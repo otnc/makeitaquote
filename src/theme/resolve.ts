@@ -108,6 +108,23 @@ function validate(theme: Theme): void {
     })
   }
 
+  if (theme.backgroundImage) {
+    const { fit, opacity } = theme.backgroundImage
+    if (fit !== 'cover' && fit !== 'contain') {
+      throw new ValidationError(
+        `Unknown backgroundImage fit "${fit}". Expected cover or contain.`,
+        {
+          field: 'theme.backgroundImage.fit',
+        },
+      )
+    }
+    if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) {
+      throw new ValidationError('theme.backgroundImage.opacity must be between 0 and 1', {
+        field: 'theme.backgroundImage.opacity',
+      })
+    }
+  }
+
   if (theme.text.area !== 'auto') {
     for (const key of ['x', 'y', 'width', 'height'] as const) {
       const value = theme.text.area[key]

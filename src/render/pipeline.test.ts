@@ -89,6 +89,55 @@ describe('render', () => {
     expect(a).toBe(255)
   })
 
+  it('draws a background image over the background color', async () => {
+    const miq = quote().setTheme({
+      backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 1 },
+    })
+
+    // Top-right, same spot the plain color test reads — now the image, not #000.
+    const [r, g, b] = await pixelAt(miq, 1275, 5)
+
+    expect([r, g, b]).toEqual([255, 0, 0])
+  })
+
+  it('blends a translucent background image with the background color', async () => {
+    const miq = quote().setTheme({
+      backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 0.5 },
+    })
+
+    const [r, g, b] = await pixelAt(miq, 1275, 5)
+
+    // Halfway between black background and pure red image.
+    expect(r).toBeGreaterThan(100)
+    expect(r).toBeLessThan(155)
+    expect(g).toBe(0)
+    expect(b).toBe(0)
+  })
+
+  it('letterboxes a contained background image with the background color', async () => {
+    const miq = quote().setTheme({
+      backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'contain', opacity: 1 },
+    })
+
+    // The square source, scaled into 1422x800, lands at x∈[311,1111] — both
+    // points read past the avatar box (x<711) so only the image is at play.
+    const [barR, barG, barB] = await pixelAt(miq, 1275, 5) // right of the image
+    expect([barR, barG, barB]).toEqual([0, 0, 0])
+
+    const [imgR, imgG, imgB] = await pixelAt(miq, 900, 400) // inside it
+    expect([imgR, imgG, imgB]).toEqual([255, 0, 0])
+  })
+
+  it('leaves the background plain when the image fails to load', async () => {
+    const miq = quote().setTheme({
+      backgroundImage: { source: 'https://invalid.test/nope.png', fit: 'cover', opacity: 1 },
+    })
+
+    const [r, g, b] = await pixelAt(miq, 1275, 5)
+
+    expect([r, g, b]).toEqual([0, 0, 0])
+  })
+
   it('uses white for the light theme background', async () => {
     const [r, g, b] = await pixelAt(quote().setTheme('light'), 1275, 5)
 

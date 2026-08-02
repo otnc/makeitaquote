@@ -116,6 +116,36 @@ describe('defineTheme', () => {
     it('rejects an unknown avatar shape', () => {
       expect(() => defineTheme({ avatar: { shape: 'hexagon' as never } })).toThrow(ValidationError)
     })
+
+    it('rejects an unknown backgroundImage fit', () => {
+      expect(() =>
+        defineTheme({
+          backgroundImage: { source: 'a.png', fit: 'stretch' as never, opacity: 1 },
+        }),
+      ).toThrow(ValidationError)
+    })
+
+    it('rejects a backgroundImage opacity outside 0-1', () => {
+      expect(() =>
+        defineTheme({ backgroundImage: { source: 'a.png', fit: 'cover', opacity: 1.5 } }),
+      ).toThrow(ValidationError)
+    })
+  })
+
+  it('leaves backgroundImage null by default', () => {
+    expect(defineTheme().backgroundImage).toBeNull()
+  })
+
+  it('accepts a full backgroundImage object', () => {
+    const theme = defineTheme({
+      backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'contain', opacity: 0.5 },
+    })
+
+    expect(theme.backgroundImage).toEqual({
+      source: 'https://cdn.test/bg.png',
+      fit: 'contain',
+      opacity: 0.5,
+    })
   })
 })
 

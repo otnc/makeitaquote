@@ -13,7 +13,7 @@ import { isTransparent, parseColor, toCSS } from '../theme/color'
 import { toPixels } from '../theme/resolve'
 import type { FontWeight, Theme } from '../theme/types'
 import { avatarBox, drawAvatar, loadAvatar } from './avatar'
-import { drawBackground, drawGradient } from './background'
+import { drawBackground, drawGradient, loadBackgroundImage } from './background'
 import { type Canvas, createCanvas, type SKRSContext2D } from './canvasFactory'
 import { coveringStack, needsGlyphFallback } from './glyphs'
 import { computeLayout, fontString, type Layout, sizeToAvatar, watermarkCorner } from './layout'
@@ -39,10 +39,11 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
     ...(options.misskey ? { misskey: options.misskey } : {}),
   })
 
-  const [images] = await Promise.all([
+  const [images, backgroundImage] = await Promise.all([
     prefetchEmoji(segments, {
       ...(options.signal ? { signal: options.signal } : {}),
     }),
+    loadBackgroundImage(requested, options.signal ? { signal: options.signal } : {}),
     prepareFonts(requested, data.text, options),
   ])
 
@@ -64,7 +65,7 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
   const ctx = canvas.getContext('2d')
   const layout = computeLayout(theme)
 
-  drawBackground(ctx, theme)
+  drawBackground(ctx, theme, backgroundImage)
 
   const box = avatarBox(layout)
   drawAvatar(ctx, avatar, {

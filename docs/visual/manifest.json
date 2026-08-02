@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-02T17:19:03.880Z",
+  "generatedAt": "2026-08-02T18:38:21.427Z",
   "version": "9.0.0",
   "offline": false,
   "counts": {
-    "total": 78,
-    "passed": 78,
+    "total": 79,
+    "passed": 79,
     "failed": 0
   },
   "groups": [
@@ -872,6 +872,17 @@
           "width": 1422,
           "height": 800,
           "bytes": 7604,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "background image",
+          "file": "12-colors/background-image.webp",
+          "note": "a photo behind the quote, dimmed by backgroundImage.opacity",
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 27366,
           "ok": true,
           "error": null
         }

@@ -553,6 +553,23 @@ add(
       }),
   { note: 'nothing is painted where the background would be' },
 )
+add(
+  '12-colors',
+  'background image',
+  () =>
+    base()
+      .setText(text.ja)
+      .setAvatar(avatars.none)
+      .setTheme({
+        extends: 'custom',
+        background: '#000000',
+        backgroundImage: { source: avatars.photo, fit: 'cover', opacity: 0.5 },
+        text: { color: '#FFFFFF' },
+        displayName: { color: '#FFFFFF' },
+        username: { color: '#CCCCCC' },
+      }),
+  { note: 'a photo behind the quote, dimmed by backgroundImage.opacity' },
+)
 
 // --- 09-sizing: scale and fitting -----------------------------------------
 
