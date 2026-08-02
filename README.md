@@ -53,6 +53,7 @@ Requires Node.js 22 or newer.
 ## Contents
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
+- [Conversations](#conversations) — several messages as one image
 - [Themes](#themes) — six presets, and how to change them
 - [Colors](#colors) — every notation, including transparency
 - [Size](#size) — scaling, and fitting to the avatar
@@ -133,6 +134,47 @@ not render those as links in message content either.
 A mention `message.mentions` has no name for (someone who has since left, for
 instance) is left exactly as written rather than guessed at. Set
 `resolveMentions: false` to always quote the raw tokens.
+
+---
+
+## Conversations
+
+`MiQ` quotes one message. `MiQConversation` renders several as one image — a
+message log, not a quote — each with its own avatar, name and wrapped text:
+
+```ts
+const png = await new MiQConversation()
+  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '吾輩は猫である。' })
+  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '名前はまだ無い。' })
+  .addMessage({ username: 'someone', text: 'Cats are liquid, by volume.' })
+  .toBuffer('png')
+```
+
+Consecutive messages from the same `username` collapse onto one avatar and
+name, the same way Discord's own client groups them.
+
+Straight from real messages, the same way `MiQ#setFromMessage()` reads one —
+content, name, avatar, and the same `avatar` / `name` / `stripMarkdown` /
+`resolveMentions` options:
+
+```ts
+new MiQConversation().setFromMessages(messages) // messages: an array, oldest first
+```
+
+A separate class rather than an array mode on `MiQ`, because it has none of a
+quote's per-field theming — two built-in looks, not the full `Theme` system:
+
+```ts
+new MiQConversation({ theme: 'light', width: 500 })
+```
+
+| Option | Default |
+| --- | --- |
+| `theme` | `'dark'` — `'light'` is the other |
+| `width` | `600` — height follows the content |
+
+Custom emoji, Twemoji and Misskey emoji all work inside a message the same
+way they do in `MiQ`, through the same `misskey` option.
 
 ---
 
