@@ -1,0 +1,61 @@
+{
+  "name": "09-sizing",
+  "title": "Sizing",
+  "cases": [
+    {
+      "name": "default (800 tall)",
+      "file": "09-sizing/default-800-tall.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19666,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "scale 0.5",
+      "file": "09-sizing/scale-0-5.png",
+      "note": "the same layout at half the resolution",
+      "format": "png",
+      "width": 711,
+      "height": 400,
+      "bytes": 93145,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "scale 2",
+      "file": "09-sizing/scale-2.webp",
+      "note": null,
+      "format": "png",
+      "width": 2844,
+      "height": 1600,
+      "bytes": 20218,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "sized to the avatar height",
+      "file": "09-sizing/sized-to-the-avatar-height.webp",
+      "note": "the avatar is drawn at its native resolution, never resampled",
+      "format": "png",
+      "width": 1820,
+      "height": 1024,
+      "bytes": 20338,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "avatar contained rather than cropped",
+      "file": "09-sizing/avatar-contained-rather-than-cropped.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20860,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

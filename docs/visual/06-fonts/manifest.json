@@ -1,0 +1,193 @@
+{
+  "name": "06-fonts",
+  "title": "Fonts",
+  "cases": [
+    {
+      "name": "Noto Sans JP",
+      "file": "06-fonts/noto-sans-jp.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18472,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "M PLUS Rounded 1c",
+      "file": "06-fonts/m-plus-rounded-1c.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19452,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Dela Gothic One",
+      "file": "06-fonts/dela-gothic-one.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19828,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "DotGothic16",
+      "file": "06-fonts/dotgothic16.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18866,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Hachi Maru Pop",
+      "file": "06-fonts/hachi-maru-pop.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20034,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Rampart One",
+      "file": "06-fonts/rampart-one.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20802,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Reggae One",
+      "file": "06-fonts/reggae-one.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19886,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "RocknRoll One",
+      "file": "06-fonts/rocknroll-one.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19976,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Zen Old Mincho",
+      "file": "06-fonts/zen-old-mincho.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19378,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Yuji Syuku",
+      "file": "06-fonts/yuji-syuku.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18914,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Yusei Magic",
+      "file": "06-fonts/yusei-magic.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19080,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Inconsolata",
+      "file": "06-fonts/inconsolata.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18656,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Exo 2",
+      "file": "06-fonts/exo-2.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18142,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Bruno Ace SC",
+      "file": "06-fonts/bruno-ace-sc.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19000,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Poltawski Nowy",
+      "file": "06-fonts/poltawski-nowy.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19482,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Vina Sans",
+      "file": "06-fonts/vina-sans.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18240,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Dancing Script",
+      "file": "06-fonts/dancing-script.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19268,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

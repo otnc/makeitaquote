@@ -1,0 +1,61 @@
+{
+  "name": "01-themes",
+  "title": "Themes",
+  "cases": [
+    {
+      "name": "dark (default)",
+      "file": "01-themes/dark-default.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 32780,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "light",
+      "file": "01-themes/light.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 31698,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "color (avatar keeps its color)",
+      "file": "01-themes/color-avatar-keeps-its-color.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 34896,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "portrait",
+      "file": "01-themes/portrait.webp",
+      "note": null,
+      "format": "png",
+      "width": 800,
+      "height": 1000,
+      "bytes": 22186,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "portrait-light",
+      "file": "01-themes/portrait-light.webp",
+      "note": null,
+      "format": "png",
+      "width": 800,
+      "height": 1000,
+      "bytes": 22520,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

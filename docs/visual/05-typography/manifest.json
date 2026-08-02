@@ -1,0 +1,50 @@
+{
+  "name": "05-typography",
+  "title": "Typography",
+  "cases": [
+    {
+      "name": "normal (default)",
+      "file": "05-typography/normal-default.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 23700,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "bold",
+      "file": "05-typography/bold.webp",
+      "note": "emulated by stroking when the font has no bold face",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 24958,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "weight 900",
+      "file": "05-typography/weight-900.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 24798,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "everything bold",
+      "file": "05-typography/everything-bold.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20232,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

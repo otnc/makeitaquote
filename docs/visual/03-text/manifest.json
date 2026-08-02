@@ -1,0 +1,116 @@
+{
+  "name": "03-text",
+  "title": "Text",
+  "cases": [
+    {
+      "name": "short",
+      "file": "03-text/short.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 17318,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "long — wraps and shrinks",
+      "file": "03-text/long-wraps-and-shrinks.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 32780,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "english wraps at spaces",
+      "file": "03-text/english-wraps-at-spaces.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 25410,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "kinsoku — no stranded punctuation",
+      "file": "03-text/kinsoku-no-stranded-punctuation.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 22058,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "phraseBreak off — breaks per character",
+      "file": "03-text/phrasebreak-off-breaks-per-character.webp",
+      "note": "compare with \"long — wraps and shrinks\"",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 32742,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "explicit newlines",
+      "file": "03-text/explicit-newlines.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18896,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "long url is force-broken",
+      "file": "03-text/long-url-is-force-broken.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 25126,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "overflow: ellipsis (default)",
+      "file": "03-text/overflow-ellipsis-default.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 59188,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "overflow: shrink",
+      "file": "03-text/overflow-shrink.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 81326,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "left aligned",
+      "file": "03-text/left-aligned.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 32520,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "name": "08-avatar",
+  "title": "Avatar",
+  "cases": [
+    {
+      "name": "illustration (png with alpha)",
+      "file": "08-avatar/illustration-png-with-alpha.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19666,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "photo (jpg)",
+      "file": "08-avatar/photo-jpg.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 22146,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "color kept",
+      "file": "08-avatar/color-kept.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 24386,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "from a remote url",
+      "file": "08-avatar/from-a-remote-url.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 11626,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "from a Buffer",
+      "file": "08-avatar/from-a-buffer.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19666,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "none — fallback tile with initial",
+      "file": "08-avatar/none-fallback-tile-with-initial.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7902,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unreachable url — same fallback",
+      "file": "08-avatar/unreachable-url-same-fallback.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7902,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "no fallback tile at all",
+      "file": "08-avatar/no-fallback-tile-at-all.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7266,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

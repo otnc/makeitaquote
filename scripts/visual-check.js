@@ -739,6 +739,10 @@ function pngSize(buffer) {
 // Run
 // ---------------------------------------------------------------------------
 
+// Every group that exists, regardless of --only — the index manifest lists
+// all of them even when this particular run only touches some.
+const allGroups = [...new Set(cases.map((testCase) => testCase.group))]
+
 const selected = cases.filter((testCase) => {
   if (offline && testCase.network) return false
   if (only.length === 0) return true
@@ -754,17 +758,16 @@ if (selected.length === 0) {
   process.exit(1)
 }
 
-// Read the previous manifest, if any, before wiping the directory — a
-// no-op regeneration reuses its timestamp below instead of rewriting it.
-let previousManifest = null
-try {
-  previousManifest = JSON.parse(await readFile(join(outDir, 'manifest.json'), 'utf8'))
-} catch {
-  // First run, or nothing there yet.
-}
-
-await rm(outDir, { recursive: true, force: true })
 await mkdir(outDir, { recursive: true })
+
+// Only the groups actually being (re)rendered are cleared — `--only` runs
+// leave every other group's images and manifest exactly as they were,
+// rather than wiping the whole gallery down to one group.
+const groupsToRender = [...new Set(selected.map((testCase) => testCase.group))]
+for (const group of groupsToRender) {
+  await rm(join(outDir, group), { recursive: true, force: true })
+  await mkdir(join(outDir, group), { recursive: true })
+}
 
 console.log(
   `visual-check: rendering ${selected.length} cases${offline ? ' (offline)' : ''} → ${outDir}`,
@@ -835,26 +838,19 @@ for (const testCase of selected) {
 // ---------------------------------------------------------------------------
 // Manifest
 //
-// The gallery itself lives in docs/ as a small static site; this only writes
-// the images and the list describing them, so the presentation can be edited
-// without touching the renderer.
+// Split one file per group (docs/visual/<group>/manifest.json) plus a small
+// index (docs/visual/manifest.json) listing which groups exist. Two PRs
+// touching different groups now touch different files, full stop — no shared
+// file for them to conflict on. Within a group's own file there is nothing
+// but a pure function of its cases: no timestamp, no counts, nothing that
+// changes between two runs unless the rendered output actually did.
 // ---------------------------------------------------------------------------
 
-const groups = [...new Set(results.map((result) => result.group))]
 const failed = results.filter((result) => result.problems.length > 0)
 const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1)
 
-// Everything here has to be a pure function of the rendered output — no
-// timings, no run duration. This is committed, and two branches that touch
-// different cases each regenerate the *whole* file; if unrelated cases came
-// out byte-for-byte the same both times, they merge without a conflict. A
-// `ms` field never does, since no two runs take the same number of
-// milliseconds — it used to turn every regeneration into a full-file diff.
-const content = {
-  version: packageVersion,
-  offline,
-  counts: { total: results.length, passed: results.length - failed.length, failed: failed.length },
-  groups: groups.map((group) => ({
+for (const group of groupsToRender) {
+  const groupManifest = {
     name: group,
     title: titleOf(group),
     cases: results
@@ -870,22 +866,25 @@ const content = {
         ok: result.problems.length === 0,
         error: result.error ?? (result.problems.length > 0 ? result.problems.join('; ') : null),
       })),
-  })),
+  }
+
+  await writeFile(
+    join(outDir, group, 'manifest.json'),
+    `${JSON.stringify(groupManifest, null, 2)}\n`,
+  )
 }
 
-// `generatedAt` is the one field that is not a pure function of the output —
-// it is wall-clock by nature. Reusing the previous run's value when nothing
-// else changed means a no-op regeneration writes an identical file rather
-// than a one-line diff, so it only ever moves when the gallery actually did.
-const unchanged =
-  previousManifest != null &&
-  JSON.stringify({ ...previousManifest, generatedAt: undefined }) === JSON.stringify(content)
-const manifest = {
-  generatedAt: unchanged ? previousManifest.generatedAt : new Date().toISOString(),
-  ...content,
+// The index has to list every group that exists, not just the ones this run
+// touched — `allGroups` comes from the full case list, so a partial `--only`
+// run never shrinks it. It changes only when a group is added or removed, or
+// on a version bump, which is rare enough that it is barely ever the thing
+// two branches collide on.
+const index = {
+  version: packageVersion,
+  groups: allGroups.map((group) => ({ name: group, title: titleOf(group) })),
 }
 
-await writeFile(join(outDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+await writeFile(join(outDir, 'manifest.json'), `${JSON.stringify(index, null, 2)}\n`)
 
 /** Turns `01-themes` into `Themes`, for the gallery headings. */
 function titleOf(group) {

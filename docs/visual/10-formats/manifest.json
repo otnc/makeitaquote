@@ -1,0 +1,50 @@
+{
+  "name": "10-formats",
+  "title": "Formats",
+  "cases": [
+    {
+      "name": "png",
+      "file": "10-formats/png.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19666,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "jpeg q40 (visibly lossy)",
+      "file": "10-formats/jpeg-q40-visibly-lossy.jpg",
+      "note": null,
+      "format": "jpeg",
+      "width": null,
+      "height": null,
+      "bytes": 38127,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "webp q90",
+      "file": "10-formats/webp-q90.webp",
+      "note": null,
+      "format": "webp",
+      "width": null,
+      "height": null,
+      "bytes": 40904,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "avif q60",
+      "file": "10-formats/avif-q60.avif",
+      "note": null,
+      "format": "avif",
+      "width": null,
+      "height": null,
+      "bytes": 8530,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

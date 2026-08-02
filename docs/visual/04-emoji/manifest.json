@@ -1,0 +1,72 @@
+{
+  "name": "04-emoji",
+  "title": "Emoji",
+  "cases": [
+    {
+      "name": "twemoji, including ZWJ and skin tone",
+      "file": "04-emoji/twemoji-including-zwj-and-skin-tone.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19718,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "discord custom emoji",
+      "file": "04-emoji/discord-custom-emoji.webp",
+      "note": "real ids from assets/discordemoji.json",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 17998,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "misskey custom emoji",
+      "file": "04-emoji/misskey-custom-emoji.webp",
+      "note": "instance: https://misskey.otnc.dev/",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18836,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "all three together",
+      "file": "04-emoji/all-three-together.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 17828,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "misskey off — drawn as plain text",
+      "file": "04-emoji/misskey-off-drawn-as-plain-text.webp",
+      "note": "Misskey emoji only resolve when an instance is configured",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19478,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "unfetchable emoji falls back to its source text",
+      "file": "04-emoji/unfetchable-emoji-falls-back-to-its-source-text.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19890,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

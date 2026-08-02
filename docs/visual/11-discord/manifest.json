@@ -1,0 +1,83 @@
+{
+  "name": "11-discord",
+  "title": "Discord",
+  "cases": [
+    {
+      "name": "from a discord.js v14 message",
+      "file": "11-discord/from-a-discord-js-v14-message.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7752,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "from a legacy message (discriminator kept)",
+      "file": "11-discord/from-a-legacy-message-discriminator-kept.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 11654,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "from a minimal message (no avatar)",
+      "file": "11-discord/from-a-minimal-message-no-avatar.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7458,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "markdown quoted as written (default)",
+      "file": "11-discord/markdown-quoted-as-written-default.webp",
+      "note": "stripMarkdown defaults to false — compare with the next card",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 8576,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "stripMarkdown: true",
+      "file": "11-discord/stripmarkdown-true.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7986,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "mentions resolved (default)",
+      "file": "11-discord/mentions-resolved-default.webp",
+      "note": "resolveMentions defaults to true — compare with the next card",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 10388,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "resolveMentions: false",
+      "file": "11-discord/resolvementions-false.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 9514,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

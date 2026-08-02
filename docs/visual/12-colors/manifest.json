@@ -1,0 +1,72 @@
+{
+  "name": "12-colors",
+  "title": "Colors",
+  "cases": [
+    {
+      "name": "tokyo night",
+      "file": "12-colors/tokyo-night.webp",
+      "note": "custom starts fully transparent; every color here is set explicitly",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 19364,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "nord",
+      "file": "12-colors/nord.webp",
+      "note": "the same thing written as 0xRRGGBB numbers",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 18904,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "solarized, as rgba arrays",
+      "file": "12-colors/solarized-as-rgba-arrays.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20858,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "translucent background over the avatar",
+      "file": "12-colors/translucent-background-over-the-avatar.webp",
+      "note": "#RRGGBBAA — the avatar shows through the wash",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 31646,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "transparent background (checkerboard is the page)",
+      "file": "12-colors/transparent-background-checkerboard-is-the-page.webp",
+      "note": "nothing is painted where the background would be",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 7604,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "background image",
+      "file": "12-colors/background-image.webp",
+      "note": "a photo behind the quote, dimmed by backgroundImage.opacity",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 27366,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

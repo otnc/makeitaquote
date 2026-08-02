@@ -1,0 +1,39 @@
+{
+  "name": "13-conversation",
+  "title": "Conversation",
+  "cases": [
+    {
+      "name": "dark (default) — consecutive messages from one speaker group",
+      "file": "13-conversation/dark-default-consecutive-messages-from-one-speaker-group.png",
+      "note": "the second message shares an avatar and name with the first",
+      "format": "png",
+      "width": 600,
+      "height": 186,
+      "bytes": 27870,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "light",
+      "file": "13-conversation/light.png",
+      "note": null,
+      "format": "png",
+      "width": 600,
+      "height": 140,
+      "bytes": 17001,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "from real messages (setFromMessages)",
+      "file": "13-conversation/from-real-messages-setfrommessages.png",
+      "note": "reads content/name/avatar the same way MiQ#setFromMessage() does",
+      "format": "png",
+      "width": 600,
+      "height": 107,
+      "bytes": 9250,
+      "ok": true,
+      "error": null
+    }
+  ]
+}
