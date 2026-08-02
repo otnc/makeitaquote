@@ -495,6 +495,13 @@ A missing emoji or avatar never throws by default — the image degrades instead
 (x64/arm64/arm, glibc **and musl**), Windows (x64/arm64) and Android arm64.
 Nothing to compile, Alpine included.
 
+**Node.js** is the tested runtime (22+). **Bun** loads the native binding fine
+and both entry points (ESM and CJS) render correctly — it isn't part of CI,
+so treat it as working rather than officially supported. **Deno** hasn't been
+verified: its Node-API compatibility for native addons like this one is still
+maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font
+files besides.
+
 On a platform without a binary, use `makeitaquote/api`.
 
 ---
