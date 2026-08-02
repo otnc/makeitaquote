@@ -13,6 +13,18 @@ describe('fromMessage', () => {
     expect(quote.avatar).toBe('https://cdn.discordapp.com/avatars/1/member.png?size=512')
   })
 
+  it('quotes the content exactly as written by default', () => {
+    const quote = fromMessage(v14Message({ content: '**bold** message' }))
+
+    expect(quote.text).toBe('**bold** message')
+  })
+
+  it('strips markdown when opted in', () => {
+    const quote = fromMessage(v14Message({ content: '**bold** message' }), { stripMarkdown: true })
+
+    expect(quote.text).toBe('bold message')
+  })
+
   it('keeps the discriminator for legacy accounts', () => {
     expect(fromMessage(v13Message()).username).toBe('otoneko#6666')
   })

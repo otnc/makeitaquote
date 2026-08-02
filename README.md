@@ -105,9 +105,27 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | --- | --- | --- |
 | `avatar` | `'guild'` — per-server avatar | `'global'` — account avatar |
 | `name` | `'nickname'` — server nickname | `'global'` — account name |
+| `stripMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
 
-Whichever you choose, the other is still the fallback, so a message with only
-one of them always renders.
+Whichever avatar or name you choose, the other is still the fallback, so a
+message with only one of them always renders.
+
+`message.content` normally comes through untouched — `**bold**` is quoted with
+its asterisks and all, since that is what was actually typed. Opt into
+plain text with `stripMarkdown: true`, or call the exported `stripMarkdown()`
+yourself on any text:
+
+```ts
+import { stripMarkdown } from 'makeitaquote'
+
+stripMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, strike, code'
+```
+
+It handles what Discord message content actually renders — bold, italic,
+underline, strikethrough, spoilers, code (inline and fenced), block quotes
+(`>` at the start of a line, same as Discord) and headers — and honours a
+backslash escape. `[text](url)`-style links are left alone, since Discord does
+not render those as links in message content either.
 
 ---
 
