@@ -3,12 +3,28 @@ import type { AvatarSource } from '../core/types'
 import { createClient } from '../http/client'
 import { parseColor, toCSS } from '../theme/color'
 import type { AvatarTheme } from '../theme/types'
+import {
+  cachedAvatar,
+  coalesceAvatar,
+  isKnownAvatarFailure,
+  rememberAvatar,
+  rememberAvatarFailure,
+} from './avatarCache'
 import { createCanvas, type Image, loadImage, type SKRSContext2D } from './canvasFactory'
 
 const http = createClient({ timeout: 15_000, retry: 2 })
 
+/** Fetches the bytes for a URL. Replaceable so tests never touch the network. */
+export type AvatarFetcher = (url: string, signal?: AbortSignal) => Promise<Buffer>
+
+const defaultFetcher: AvatarFetcher = async (url, signal) => {
+  const response = await http.get(url, signal ? { signal } : {})
+  return Buffer.from(await response.arrayBuffer())
+}
+
 export interface LoadAvatarOptions {
   signal?: AbortSignal
+  fetcher?: AvatarFetcher
 }
 
 /**
@@ -23,22 +39,49 @@ export async function loadAvatar(
 ): Promise<Image | null> {
   if (source === null) return null
 
-  try {
-    if (source instanceof Uint8Array) return await loadImage(source)
-
-    const url = source instanceof URL ? source.href : source
-
-    if (/^https?:\/\//i.test(url)) {
-      const response = await http.get(url, options.signal ? { signal: options.signal } : {})
-      return await loadImage(Buffer.from(await response.arrayBuffer()))
+  if (source instanceof Uint8Array) {
+    try {
+      return await loadImage(source)
+    } catch {
+      return null
     }
-
-    if (url.startsWith('data:')) return await loadImage(url)
-
-    return await loadImage(await readFile(url))
-  } catch {
-    return null
   }
+
+  const url = source instanceof URL ? source.href : source
+
+  if (url.startsWith('data:')) {
+    try {
+      return await loadImage(url)
+    } catch {
+      return null
+    }
+  }
+
+  // http(s) and local paths are worth caching: the same user's avatar is
+  // often requested again within seconds of the last quote. Buffers and
+  // data: URLs are already in memory, so caching them would only add
+  // bookkeeping for no benefit.
+  return loadCached(url, options)
+}
+
+async function loadCached(key: string, options: LoadAvatarOptions): Promise<Image | null> {
+  const cached = cachedAvatar(key)
+  if (cached) return cached
+  if (isKnownAvatarFailure(key)) return null
+
+  return coalesceAvatar(key, async () => {
+    try {
+      const bytes = /^https?:\/\//i.test(key)
+        ? await (options.fetcher ?? defaultFetcher)(key, options.signal)
+        : await readFile(key)
+      const image = await loadImage(bytes)
+      rememberAvatar(key, image)
+      return image
+    } catch {
+      rememberAvatarFailure(key)
+      return null
+    }
+  })
 }
 
 export interface AvatarBox {

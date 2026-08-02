@@ -409,6 +409,14 @@ new MiQ({ misskey: { instance: 'https://misskey.example', remote: false } })
 configureEmojiCache({ maxEntries: 512, ttlMs: 7_200_000 })
 ```
 
+Avatars get their own, separate cache — handy when the same user is quoted
+several times in a row. Its default TTL is much shorter (five minutes) since
+an avatar is one person's current picture, not a shared asset:
+
+```ts
+configureAvatarCache({ maxEntries: 128, ttlMs: 60_000 })
+```
+
 ---
 
 ## Text
