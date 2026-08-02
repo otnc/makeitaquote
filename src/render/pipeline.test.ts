@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { hasDrawableFont } from '../__fixtures__/fonts'
-import { RenderError, ValidationError } from '../core/errors'
+import { FontNotAvailableError, RenderError, ValidationError } from '../core/errors'
 import { MiQ } from '../core/MiQ'
 import { clearEmojiCache } from '../emoji/cache'
 import { resetAutoloadForTests } from '../font/autoload'
@@ -414,6 +414,45 @@ describe('output formats', () => {
     for await (const chunk of stream) chunks.push(chunk as Buffer)
 
     expect(Buffer.concat(chunks).subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+})
+
+describe('font asset errors', () => {
+  // Not on the machine, not in Google Fonts, not registered by hand — always
+  // "missing", regardless of what fonts the host actually has installed.
+  const MISSING_FONT = 'Definitely Not A Real Font 12345'
+
+  function withMissingFont(options: ConstructorParameters<typeof MiQ>[0] = {}) {
+    return new MiQ({ autoFont: false, ...options })
+      .setText('Hello World!')
+      .setUsername('otoneko.')
+      .setTheme({ text: { font: MISSING_FONT } })
+  }
+
+  it('defaults to a warning and still renders', async () => {
+    const buffer = await withMissingFont().toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+    expect(console.warn).toHaveBeenCalledOnce()
+  })
+
+  it('onAssetError: ignore renders without warning', async () => {
+    const buffer = await withMissingFont({ onAssetError: 'ignore' }).toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+    expect(console.warn).not.toHaveBeenCalled()
+  })
+
+  it('onAssetError: throw raises FontNotAvailableError', async () => {
+    await expect(withMissingFont({ onAssetError: 'throw' }).toBuffer('png')).rejects.toThrow(
+      FontNotAvailableError,
+    )
+  })
+
+  it('strictFonts overrides onAssetError: ignore', async () => {
+    await expect(
+      withMissingFont({ onAssetError: 'ignore', strictFonts: true }).toBuffer('png'),
+    ).rejects.toThrow(FontNotAvailableError)
   })
 })
 

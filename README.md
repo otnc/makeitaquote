@@ -344,6 +344,8 @@ fonts.cacheInfo()                  // what is cached, and how large
 new MiQ({ autoFont: false })                     // never fetch
 new MiQ({ autoFont: { online: false } })         // the same
 new MiQ({ autoFont: false, strictFonts: true })  // and throw if missing
+new MiQ({ autoFont: false, onAssetError: 'throw' })   // same, via the shared option
+new MiQ({ autoFont: false, onAssetError: 'ignore' })  // fall back with no warning
 ```
 
 The cache lives at `$MIQ_FONT_CACHE_DIR`, then `$XDG_CACHE_HOME`, then
@@ -479,13 +481,15 @@ Everything thrown extends `MiQError`:
 ```
 MiQError
 ├─ ValidationError          bad input (carries .field)
-├─ FontNotAvailableError    no font, with strictFonts on
+├─ FontNotAvailableError    no font, with strictFonts or onAssetError: 'throw'
 ├─ AssetFetchError          an avatar, emoji or font could not be fetched
 ├─ RenderError              drawing failed, or text could not be made to fit
 └─ VoidsApiError            the API refused or failed (.status, .body, .endpoint)
 ```
 
-A missing emoji or avatar never throws by default — the image degrades instead.
+A missing emoji, avatar or font never throws by default — the image degrades
+instead. All three follow `onAssetError`; `strictFonts` is a font-specific
+override for it.
 
 ---
 
