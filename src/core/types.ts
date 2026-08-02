@@ -60,6 +60,30 @@ export interface MessageLike {
     nickname?: string | null
     displayAvatarURL?(options?: unknown): string
   } | null
+  /**
+   * discord.js's per-message mention Collections. Optional, and each
+   * Collection independently so — a `Message` always has all four in
+   * practice, but nothing here requires it.
+   */
+  mentions?: {
+    /**
+     * Backing `<@!?id>`. Guild nickname wins over the account username.
+     * `null`, not just absent, in a DM — discord.js has no guild to resolve
+     * a member against there.
+     */
+    members?: {
+      get(id: string): { displayName?: string; nickname?: string | null } | undefined
+    } | null
+    users?: { get(id: string): { username?: string } | undefined }
+    /**
+     * Backing `<#id>`. `id` is here only so a DM channel — which carries no
+     * `name` at all, not even `null` — still structurally overlaps this type;
+     * only `name` is actually read.
+     */
+    channels?: { get(id: string): { id?: string; name?: string | null } | undefined }
+    /** Backing `<@&id>`. */
+    roles?: { get(id: string): { name?: string } | undefined }
+  }
 }
 
 /**
@@ -78,6 +102,13 @@ export interface MessageSourceOptions {
    * Default false — the content is quoted exactly as written unless you opt in.
    */
   stripMarkdown?: boolean
+  /**
+   * Turns `<@id>`, `<#id>` and `<@&id>` into `@name`/`#name` using
+   * `message.mentions`. Default true; a no-op when the message carries no
+   * `mentions` Collections, and a token whose target isn't in them (a mention
+   * of someone who has since left, for example) is left exactly as written.
+   */
+  resolveMentions?: boolean
 }
 
 /** One run of text, or one emoji to be drawn as an image. */

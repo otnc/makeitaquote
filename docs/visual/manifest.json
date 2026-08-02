@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-02T18:54:21.631Z",
+  "generatedAt": "2026-08-02T19:05:24.700Z",
   "version": "9.0.0",
   "offline": false,
   "counts": {
-    "total": 81,
-    "passed": 81,
+    "total": 83,
+    "passed": 83,
     "failed": 0
   },
   "groups": [
@@ -833,6 +833,28 @@
           "width": 1422,
           "height": 800,
           "bytes": 7986,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "mentions resolved (default)",
+          "file": "11-discord/mentions-resolved-default.webp",
+          "note": "resolveMentions defaults to true — compare with the next card",
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 10388,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "resolveMentions: false",
+          "file": "11-discord/resolvementions-false.webp",
+          "note": null,
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 9514,
           "ok": true,
           "error": null
         }

@@ -485,6 +485,35 @@ add('11-discord', 'stripMarkdown: true', () =>
     { stripMarkdown: true },
   ),
 )
+add(
+  '11-discord',
+  'mentions resolved (default)',
+  () =>
+    new MiQ().setFromMessage({
+      content: 'いってらっしゃい <@1>、今日は <#2> で <@&3> の集まりです',
+      author: { username: 'someone' },
+      mentions: {
+        users: new Map([['1', { username: 'otoneko' }]]),
+        channels: new Map([['2', { name: '雑談' }]]),
+        roles: new Map([['3', { name: 'メンバー' }]]),
+      },
+    }),
+  { note: 'resolveMentions defaults to true — compare with the next card' },
+)
+add('11-discord', 'resolveMentions: false', () =>
+  new MiQ().setFromMessage(
+    {
+      content: 'いってらっしゃい <@1>、今日は <#2> で <@&3> の集まりです',
+      author: { username: 'someone' },
+      mentions: {
+        users: new Map([['1', { username: 'otoneko' }]]),
+        channels: new Map([['2', { name: '雑談' }]]),
+        roles: new Map([['3', { name: 'メンバー' }]]),
+      },
+    },
+    { resolveMentions: false },
+  ),
+)
 
 // --- 12-colors: the color system ----------------------------------------
 

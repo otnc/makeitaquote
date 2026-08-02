@@ -106,6 +106,7 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | `avatar` | `'guild'` — per-server avatar | `'global'` — account avatar |
 | `name` | `'nickname'` — server nickname | `'global'` — account name |
 | `stripMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
+| `resolveMentions` | `true` — `<@id>` becomes `@name` | `false` — quoted as the raw token |
 
 Whichever avatar or name you choose, the other is still the fallback, so a
 message with only one of them always renders.
@@ -126,6 +127,12 @@ underline, strikethrough, spoilers, code (inline and fenced), block quotes
 (`>` at the start of a line, same as Discord) and headers — and honours a
 backslash escape. `[text](url)`-style links are left alone, since Discord does
 not render those as links in message content either.
+
+`<@id>`, `<#id>` and `<@&id>` are turned into `@name` / `#name` using
+`message.mentions`, which discord.js populates for you — nothing to configure.
+A mention `message.mentions` has no name for (someone who has since left, for
+instance) is left exactly as written rather than guessed at. Set
+`resolveMentions: false` to always quote the raw tokens.
 
 ---
 
