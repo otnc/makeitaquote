@@ -88,6 +88,14 @@ npm run visual -- --only theme,emoji  # only matching groups
 This is the right way to check a change that affects how images look. Please
 attach before/after images from it on any PR that moves pixels.
 
+**Do not commit `docs/visual/` yourself.** The gallery is regenerated as a
+whole and pushed straight to `main` by the `gallery` job in `release.yml`,
+after each release. A feature branch that commits its own regenerated copy
+racks up conflicts on `docs/visual/manifest.json` against every other open
+branch doing the same thing, for no benefit — the central regeneration
+overwrites it anyway. If you add a case to `scripts/visual-check.js`, commit
+that; leave `docs/visual/` alone.
+
 ## Dependencies
 
 There is no Dependabot here; updates are done by hand. Before a release, run
