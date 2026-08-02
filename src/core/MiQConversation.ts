@@ -2,6 +2,7 @@ import type { Readable } from 'node:stream'
 import { encode, encodeDataURL, encodeStream } from '../output/encode'
 import type { Canvas } from '../render/canvasFactory'
 import { renderConversation } from '../render/conversationPipeline'
+import { fromNote } from './note'
 import { fromMessage } from './source'
 import type {
   ConversationMessage,
@@ -10,6 +11,7 @@ import type {
   EncodeOptions,
   MessageLike,
   MessageSourceOptions,
+  NoteSourceOptions,
   OutputFormat,
 } from './types'
 
@@ -58,6 +60,20 @@ export class MiQConversation {
   setFromMessages(messages: readonly unknown[], options?: MessageSourceOptions): this {
     this.#messages = messages.map((message) => {
       const quote = fromMessage(message as MessageLike, options)
+      return {
+        text: quote.text,
+        username: quote.username,
+        displayName: quote.displayName,
+        avatar: quote.avatar,
+      }
+    })
+    return this
+  }
+
+  /** The same, for Misskey notes. See `MiQ#setFromNote()`. */
+  setFromNotes(notes: readonly unknown[], options?: NoteSourceOptions): this {
+    this.#messages = notes.map((note) => {
+      const quote = fromNote(note, options)
       return {
         text: quote.text,
         username: quote.username,

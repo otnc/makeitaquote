@@ -78,6 +78,17 @@
       "bytes": 9514,
       "ok": true,
       "error": null
+    },
+    {
+      "name": "slash commands, timestamps and navigation tabs",
+      "file": "11-discord/slash-commands-timestamps-and-navigation-tabs.webp",
+      "note": "these carry everything they need in the token — no lookup involved",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 11480,
+      "ok": true,
+      "error": null
     }
   ]
 }

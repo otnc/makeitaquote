@@ -515,6 +515,49 @@ add('11-discord', 'resolveMentions: false', () =>
   ),
 )
 
+add(
+  '11-discord',
+  'slash commands, timestamps and navigation tabs',
+  () =>
+    new MiQ().setFromMessage({
+      content: '</remind set:1> で <t:1618935630:F> に、詳しくは <id:guide> を見てね',
+      author: { username: 'someone' },
+    }),
+  { note: 'these carry everything they need in the token — no lookup involved' },
+)
+
+// --- 14-misskey: notes, and MFM -------------------------------------------
+
+add(
+  '14-misskey',
+  'a note, MFM stripped (default)',
+  () =>
+    new MiQ().setFromNote({
+      text: '$[jelly おはよう] **今日** はいい天気',
+      user: { username: 'otoneko', name: who.displayName, host: null, avatarUrl: required.png },
+    }),
+  { note: 'the display name goes over the @handle, exactly as Misskey writes it' },
+)
+add('14-misskey', 'stripMfm: false', () =>
+  new MiQ().setFromNote(
+    {
+      text: '$[jelly おはよう] **今日** はいい天気',
+      user: { username: 'otoneko', name: who.displayName, host: null, avatarUrl: required.png },
+    },
+    { stripMfm: false },
+  ),
+)
+add(
+  '14-misskey',
+  'a remote author, quoted from a note',
+  () =>
+    new MiQ().setFromNote({
+      text: 'リモートのノートも同じように引用できます',
+      user: { username: 'someone', name: null, host: 'misskey.example', avatarUrl: null },
+    }),
+  { note: '@user@host, and the username stands in when there is no display name' },
+)
+
 // --- 12-colors: the color system ----------------------------------------
 
 add(

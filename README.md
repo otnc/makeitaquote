@@ -53,6 +53,7 @@ Requires Node.js 22 or newer.
 ## Contents
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
+- [Misskey notes](#misskey-notes) — quoting a note, and MFM
 - [Conversations](#conversations) — several messages as one image
 - [Themes](#themes) — six presets, and how to change them
 - [Colors](#colors) — every notation, including transparency
@@ -126,14 +127,81 @@ stripMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, st
 It handles what Discord message content actually renders — bold, italic,
 underline, strikethrough, spoilers, code (inline and fenced), block quotes
 (`>` at the start of a line, same as Discord) and headers — and honours a
-backslash escape. `[text](url)`-style links are left alone, since Discord does
-not render those as links in message content either.
+backslash escape. A code span stays literal, so `` `**x**` `` keeps its
+asterisks. `[text](url)`-style links are left alone, since Discord does not
+render those as links in message content either.
 
-`<@id>`, `<#id>` and `<@&id>` are turned into `@name` / `#name` using
-`message.mentions`, which discord.js populates for you — nothing to configure.
-A mention `message.mentions` has no name for (someone who has since left, for
-instance) is left exactly as written rather than guessed at. Set
-`resolveMentions: false` to always quote the raw tokens.
+### Tokens
+
+Discord writes several things as markup only the client expands. All of them
+are resolved by default:
+
+| Written as | Becomes |
+| --- | --- |
+| `<@id>`, `<@!id>` | `@nickname` |
+| `<@&id>` | `@role` |
+| `<#id>` | `#channel` |
+| `</name:id>`, `</name sub:id>` | `/name sub` |
+| `<t:1618935630:F>` | `Tuesday, 20 April 2021 at 16:20` |
+| `<id:customize>` | `Channels & Roles` |
+
+Names come from `message.mentions`, which discord.js populates for you —
+nothing to configure. A mention it has no name for (someone who has since
+left) is left exactly as written rather than guessed at; the rest carry
+everything they need in the token. Set `resolveMentions: false` to quote the
+raw tokens instead.
+
+A `<t:…>` timestamp is the one token whose text depends on who is looking —
+Discord renders it in the reader's own locale and zone. An image has no
+reader to ask, so it uses UTC and `en-GB`:
+
+```ts
+new MiQ().setFromMessage(message, {
+  resolveMentions: { locale: 'ja-JP', timeZone: 'Asia/Tokyo' },
+})
+```
+
+---
+
+## Misskey notes
+
+`setFromNote()` reads a note the way `setFromMessage()` reads a message. It
+takes what the API returns, unchanged:
+
+```ts
+const note = await fetch('https://misskey.example/api/notes/show', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ noteId }),
+}).then((r) => r.json())
+
+const png = await new MiQ({ misskey: 'https://misskey.example' })
+  .setFromNote(note)
+  .toBuffer('png')
+```
+
+The display name goes over the handle, which is written `@user` locally and
+`@user@host` for a remote author — exactly as Misskey writes it.
+
+| Option | Default |
+| --- | --- |
+| `stripMfm` | `true` — `$[jelly x]` becomes `x` |
+| `preferCw` | `false` — quotes the note, not the content warning |
+
+MFM is stripped by default, unlike Discord's markdown, because the markup
+differs: `**bold**` still reads as its own text with the asterisks left in,
+while `$[jelly ぷりん]` does not — the function name and brackets are
+scaffolding that was never meant to be read.
+
+`stripMfm()` is exported on its own too, and handles decoration functions
+(including nested ones), `<b>`/`<i>`/`<s>`/`<small>`, `<center>`, quotes,
+code, maths and links. Custom emoji, mentions and hashtags are deliberately
+left alone — the emoji layer draws the first, and unlike Discord, a Misskey
+mention is written `@user@host` in the note already, so there is no id to
+resolve.
+
+`MiQConversation` has `setFromNotes()` for the same thing across several
+notes.
 
 ---
 

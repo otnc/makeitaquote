@@ -87,6 +87,22 @@ export interface MessageLike {
 }
 
 /**
+ * How `<t:…>` timestamps are rendered when mentions are resolved.
+ *
+ * A timestamp is the one token whose text depends on who is looking: Discord
+ * renders it in the reader's own locale and zone. An image has no reader to
+ * ask, so it renders in UTC and `en-GB` unless told otherwise.
+ */
+export interface MentionOptions {
+  /** BCP 47 tag, e.g. `'ja-JP'`. Default `'en-GB'`. */
+  locale?: string
+  /** IANA zone, e.g. `'Asia/Tokyo'`. Default `'UTC'`. */
+  timeZone?: string
+  /** What `<t:…:R>` counts from. Defaults to now; mostly a test seam. */
+  now?: Date
+}
+
+/**
  * Which version of a Discord user's avatar and name to quote.
  *
  * Both default to the server's, since that is what a reader of that server
@@ -103,12 +119,57 @@ export interface MessageSourceOptions {
    */
   stripMarkdown?: boolean
   /**
-   * Turns `<@id>`, `<#id>` and `<@&id>` into `@name`/`#name` using
-   * `message.mentions`. Default true; a no-op when the message carries no
-   * `mentions` Collections, and a token whose target isn't in them (a mention
-   * of someone who has since left, for example) is left exactly as written.
+   * Expands Discord's raw tokens into the text a reader saw: user, role and
+   * channel mentions, slash commands, `<t:…>` timestamps and guild
+   * navigation tabs. Default true.
+   *
+   * Names come from `message.mentions`, so a mention whose target isn't
+   * there (someone who has since left) is left exactly as written; the rest
+   * carry what they need in the token and resolve regardless. Pass an object
+   * to control how timestamps are rendered.
    */
-  resolveMentions?: boolean
+  resolveMentions?: boolean | MentionOptions
+}
+
+/**
+ * The shape of a Misskey note that `setFromNote()` understands.
+ *
+ * Structural, like `MessageLike`: this is what the API actually returns for
+ * a note, so a response passed straight through fits without adaptation.
+ */
+export interface NoteLike {
+  text?: string | null
+  /** Content warning. Only read when `setFromNote` is told to prefer it. */
+  cw?: string | null
+  user: {
+    username: string
+    /** Display name. Null when the account never set one. */
+    name?: string | null
+    /** Instance the author is on. Null or absent when they are local. */
+    host?: string | null
+    avatarUrl?: string | null
+  }
+}
+
+export interface NoteSourceOptions {
+  /**
+   * Runs the note through `stripMfm()` before quoting it. Default **true**,
+   * unlike `stripMarkdown` for Discord.
+   *
+   * The two differ because the markup does. `**bold**` still reads as its
+   * own text with the asterisks left in; `$[jelly ぷりん]` does not — the
+   * function name and brackets are scaffolding that was never meant to be
+   * read, so leaving them in a picture is just noise.
+   */
+  stripMfm?: boolean
+  /**
+   * Quote the content warning instead of the text it hides. Default false.
+   *
+   * A CW is what a reader saw *before* choosing to open the note, so it is
+   * occasionally the honest thing to quote — but the note itself is the
+   * usual intent.
+   */
+  preferCw?: boolean
 }
 
 /** One run of text, or one emoji to be drawn as an image. */

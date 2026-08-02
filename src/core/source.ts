@@ -93,7 +93,13 @@ export function fromMessage(message: unknown, options: MessageSourceOptions = {}
 
   const quote = emptyQuote()
   const withMentions =
-    options.resolveMentions === false ? message.content : resolveMentions(message.content, message)
+    options.resolveMentions === false
+      ? message.content
+      : resolveMentions(
+          message.content,
+          message,
+          typeof options.resolveMentions === 'object' ? options.resolveMentions : {},
+        )
   quote.text = options.stripMarkdown ? stripMarkdown(withMentions) : withMentions
   quote.username = formatUsername(message.author)
   quote.displayName = preferGlobalName
