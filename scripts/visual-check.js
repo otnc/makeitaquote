@@ -62,7 +62,7 @@ if (!existsSync(distEntry)) {
   process.exit(1)
 }
 
-const { MiQ, FONT_CATALOGUE } = await import(pathToFileURL(distEntry).href)
+const { MiQ, MiQConversation, FONT_CATALOGUE } = await import(pathToFileURL(distEntry).href)
 
 const packageVersion = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).version
 
@@ -647,6 +647,47 @@ add('09-sizing', 'avatar contained rather than cropped', () =>
     .setText(text.ja)
     .setAvatar(avatars.photo)
     .setTheme({ avatar: { fit: 'contain' } }),
+)
+
+// --- 13-conversation: MiQConversation, several messages as one image ------
+
+add(
+  '13-conversation',
+  'dark (default) — consecutive messages from one speaker group',
+  () =>
+    new MiQConversation()
+      .addMessage({
+        username: who.username,
+        displayName: who.displayName,
+        avatar: avatars.illustration,
+        text: text.ja,
+      })
+      .addMessage({
+        username: who.username,
+        displayName: who.displayName,
+        avatar: avatars.illustration,
+        text: 'どこで生れたか頓と見当がつかぬ。',
+      })
+      .addMessage({ username: 'someone', text: text.en }),
+  { note: 'the second message shares an avatar and name with the first' },
+)
+add('13-conversation', 'light', () =>
+  new MiQConversation({ theme: 'light' })
+    .addMessage({ username: who.username, avatar: avatars.photo, text: text.short })
+    .addMessage({ username: 'someone', text: 'Quoting a whole thread, not just one line.' }),
+)
+add(
+  '13-conversation',
+  'from real messages (setFromMessages)',
+  () =>
+    new MiQConversation().setFromMessages([
+      {
+        content: `おはよう ${discordEmoji[0]}`,
+        author: { username: 'otoneko.', globalName: '音猫｡', displayAvatarURL: () => avatars.url },
+      },
+      { content: 'いい天気ですね', author: { username: 'otoneko.', globalName: '音猫｡' } },
+    ]),
+  { network: true, note: 'reads content/name/avatar the same way MiQ#setFromMessage() does' },
 )
 
 // ---------------------------------------------------------------------------

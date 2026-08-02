@@ -249,3 +249,25 @@ export interface MiQOptions {
   onAssetError?: 'ignore' | 'text' | 'throw'
   signal?: AbortSignal
 }
+
+/** One message in a `MiQConversation`. */
+export interface ConversationMessage {
+  text: string
+  username: string
+  displayName?: string
+  avatar?: AvatarSource | null
+}
+
+/** `MiQConversation` has two built-in looks, not the full `Theme` system. */
+export type ConversationThemeName = 'dark' | 'light'
+
+export interface ConversationOptions {
+  theme?: ConversationThemeName
+  /** Canvas width in pixels; height follows the content. Default 600. */
+  width?: number
+  misskey?: string | MisskeyOptions
+  autoFont?: boolean | AutoFontOptions
+  strictFonts?: boolean
+  onAssetError?: 'ignore' | 'text' | 'throw'
+  signal?: AbortSignal
+}

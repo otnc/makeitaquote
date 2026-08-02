@@ -6,9 +6,13 @@ export {
   ValidationError,
 } from './core/errors'
 export { MiQ } from './core/MiQ'
+export { MiQConversation } from './core/MiQConversation'
 export type {
   AutoFontOptions,
   AvatarSource,
+  ConversationMessage,
+  ConversationOptions,
+  ConversationThemeName,
   EncodeOptions,
   FontSource,
   MessageLike,
