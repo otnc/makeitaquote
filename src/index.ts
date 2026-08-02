@@ -15,8 +15,11 @@ export type {
   ConversationThemeName,
   EncodeOptions,
   FontSource,
+  MentionOptions,
   MessageLike,
   MiQOptions,
+  NoteLike,
+  NoteSourceOptions,
   OutputFormat,
   QuoteData,
   QuoteInput,
@@ -38,6 +41,7 @@ export { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from './font/sources'
 export type { AvatarCacheOptions } from './render/avatarCache'
 export { avatarCacheInfo, clearAvatarCache, configureAvatarCache } from './render/avatarCache'
 export { stripMarkdown } from './text/markdown'
+export { stripMfm } from './text/mfm'
 export type { ColorInput, RGBA } from './theme/color'
 export { isTransparent, parseColor, toCSS, toHex } from './theme/color'
 export { DEFAULT_LONG_EDGE, palettes, themes } from './theme/presets'

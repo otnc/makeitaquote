@@ -6,6 +6,7 @@ import { defineTheme } from '../theme/resolve'
 import type { Theme, ThemeInput, ThemeName } from '../theme/types'
 import { deprecate } from './deprecate'
 import { ValidationError } from './errors'
+import { fromNote } from './note'
 import {
   applyInput,
   emptyQuote,
@@ -26,6 +27,8 @@ import type {
   MessageLike,
   MessageSourceOptions,
   MiQOptions,
+  NoteLike,
+  NoteSourceOptions,
   OutputFormat,
   QuoteData,
   QuoteInput,
@@ -81,6 +84,17 @@ export class MiQ {
 
   setFromMessage(message: MessageLike, options?: MessageSourceOptions): this {
     this.#data = fromMessage(message, options)
+    return this
+  }
+
+  /**
+   * Reads a Misskey note the way `setFromMessage()` reads a Discord message.
+   *
+   * Takes what the API returns for a note, unchanged. MFM is stripped by
+   * default — see `NoteSourceOptions`.
+   */
+  setFromNote(note: NoteLike, options?: NoteSourceOptions): this {
+    this.#data = fromNote(note, options)
     return this
   }
 

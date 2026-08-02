@@ -35,6 +35,34 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('`code`')).toBe('code')
   })
 
+  describe('code spans are literal', () => {
+    // Discord renders a code span verbatim, so markdown inside one is text.
+    // Unwrapping the backticks first and letting the later passes see the
+    // contents would silently eat it.
+    it('keeps markdown inside inline code', () => {
+      expect(stripMarkdown('`**not bold**`')).toBe('**not bold**')
+      expect(stripMarkdown('`*x*`')).toBe('*x*')
+      expect(stripMarkdown('`~~x~~`')).toBe('~~x~~')
+    })
+
+    it('keeps markdown inside a fenced block', () => {
+      expect(stripMarkdown('```\n**x**\n```')).toBe('**x**')
+      expect(stripMarkdown('```js\nconst a = **b**\n```')).toBe('const a = **b**')
+    })
+
+    it('still strips real markdown either side of a code span', () => {
+      expect(stripMarkdown('a `**b**` c **d**')).toBe('a **b** c d')
+    })
+
+    it('keeps each of several code spans separate, in order', () => {
+      expect(stripMarkdown('`**a**` then `~~b~~`')).toBe('**a** then ~~b~~')
+    })
+
+    it('leaves a backslash literal inside code, since it escapes nothing there', () => {
+      expect(stripMarkdown('`\\*x\\*`')).toBe('\\*x\\*')
+    })
+  })
+
   it('strips a fenced code block, language tag included', () => {
     expect(stripMarkdown('```js\nconst a = 1\n```')).toBe('const a = 1')
   })
