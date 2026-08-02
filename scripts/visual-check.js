@@ -218,6 +218,16 @@ add('02-layout', 'no gradient', () =>
     .setAvatar(avatars.illustration)
     .setTheme({ gradient: { enabled: false } }),
 )
+add(
+  '02-layout',
+  'circular avatar',
+  () =>
+    base()
+      .setText(text.ja)
+      .setAvatar(avatars.illustration)
+      .setTheme({ avatar: { shape: 'circle', widthRatio: 0.32 }, gradient: { enabled: false } }),
+  { note: 'clipped to the largest circle that fits the box; the fallback tile matches' },
+)
 
 // --- 03-text: wrapping and fitting ----------------------------------------
 

@@ -54,6 +54,7 @@ const dark: Theme = {
     position: 'left',
     widthRatio: 0.5,
     fit: 'cover',
+    shape: 'rectangle',
     fallback: { ...palettes.dark.avatarFallback },
   },
   gradient: {

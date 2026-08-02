@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-02T16:39:35.701Z",
+  "generatedAt": "2026-08-02T17:19:03.880Z",
   "version": "9.0.0",
   "offline": false,
   "counts": {
-    "total": 77,
-    "passed": 77,
+    "total": 78,
+    "passed": 78,
     "failed": 0
   },
   "groups": [
@@ -125,6 +125,17 @@
           "width": 1422,
           "height": 800,
           "bytes": 23638,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "circular avatar",
+          "file": "02-layout/circular-avatar.webp",
+          "note": "clipped to the largest circle that fits the box; the fallback tile matches",
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 15370,
           "ok": true,
           "error": null
         }

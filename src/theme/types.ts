@@ -37,6 +37,14 @@ export interface AvatarTheme {
    * image instead of reshaping the image.
    */
   fit: 'cover' | 'contain'
+  /**
+   * The mask the avatar (and its fallback tile) is clipped to.
+   *
+   * `circle` inscribes the largest circle that fits the box, centred — for a
+   * wide or tall box that leaves background showing at the sides or top and
+   * bottom, same as a round profile picture would on any other card shape.
+   */
+  shape: 'rectangle' | 'circle'
   /** Drawn when there is no avatar, or fetching one failed. `null` leaves it blank. */
   fallback: { background: ColorInput; color: ColorInput } | null
 }

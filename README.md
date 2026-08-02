@@ -155,6 +155,17 @@ The quote area, the gradient and the watermark all mirror automatically —
 from where the avatar is. Only set `text.area` yourself if you want to place
 the quote by hand.
 
+### Avatar shape
+
+```ts
+.setTheme({ avatar: { shape: 'circle' } })
+```
+
+Clips the avatar, and its fallback tile, to the largest circle that fits the
+box — the default `'rectangle'` uses the whole box instead. On a wide or tall
+box that leaves background showing at the sides or top and bottom, the same as
+a round profile picture would anywhere else.
+
 ### Portrait
 
 ```ts

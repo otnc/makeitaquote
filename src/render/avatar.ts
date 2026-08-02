@@ -145,6 +145,20 @@ export interface DrawAvatarOptions {
   fallbackFont?: string
 }
 
+/**
+ * Clips to the largest circle that fits inside `box`, centred.
+ *
+ * A wide or tall box leaves background showing at the sides or top and
+ * bottom — same as a round profile picture would on any other card shape.
+ */
+function clipToCircle(ctx: SKRSContext2D, box: AvatarBox): void {
+  const radius = Math.min(box.width, box.height) / 2
+  ctx.beginPath()
+  ctx.arc(box.x + box.width / 2, box.y + box.height / 2, radius, 0, Math.PI * 2)
+  ctx.closePath()
+  ctx.clip()
+}
+
 /** Draws the avatar, or a placeholder tile when there is none. */
 export function drawAvatar(
   ctx: SKRSContext2D,
@@ -154,6 +168,8 @@ export function drawAvatar(
   const { theme, box } = options
 
   ctx.save()
+
+  if (theme.shape === 'circle') clipToCircle(ctx, box)
 
   if (image) {
     const useFilter = theme.grayscale && supportsFilter()

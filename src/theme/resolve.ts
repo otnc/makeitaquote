@@ -95,6 +95,13 @@ function validate(theme: Theme): void {
     )
   }
 
+  if (theme.avatar.shape !== 'rectangle' && theme.avatar.shape !== 'circle') {
+    throw new ValidationError(
+      `Unknown avatar shape "${theme.avatar.shape}". Expected rectangle or circle.`,
+      { field: 'theme.avatar.shape' },
+    )
+  }
+
   if (theme.quoteMark.chars.length !== 2) {
     throw new ValidationError('theme.quoteMark.chars must be a pair', {
       field: 'theme.quoteMark.chars',
