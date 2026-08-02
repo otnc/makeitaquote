@@ -161,11 +161,30 @@ export interface EmojiTheme {
   size: 64 | 72 | 128
 }
 
+/**
+ * Anything that can stand in for a background image.
+ *
+ * The same shape as `AvatarSource` in `core/types.ts`, restated here rather
+ * than imported — `core/types.ts` imports `Theme` from this module, so the
+ * other way round would be circular.
+ */
+export type BackgroundImageSource = string | URL | Buffer | Uint8Array
+
+export interface BackgroundImageTheme {
+  source: BackgroundImageSource
+  /** `cover` (default) crops to fill the canvas; `contain` fits it whole. */
+  fit: 'cover' | 'contain'
+  /** 0–1, default 1. Blended over `background`, not a replacement for it. */
+  opacity: number
+}
+
 export interface Theme {
   layout: LayoutMode
   width: number
   height: number
   background: ColorInput
+  /** Drawn over `background` and behind everything else. `null` (default): none. */
+  backgroundImage: BackgroundImageTheme | null
   avatar: AvatarTheme
   gradient: GradientTheme
   text: TextTheme

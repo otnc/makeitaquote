@@ -245,6 +245,24 @@ await new MiQ()
 Leave `background` alone and you get a PNG with a transparent background, ready
 to composite. Anything left transparent is not drawn at all.
 
+### Background image
+
+```ts
+.setTheme({
+  backgroundImage: { source: bannerUrl, fit: 'cover', opacity: 0.4 },
+})
+```
+
+Drawn over `background` and behind everything else — `source` takes the same
+things `setAvatar()` does (a URL, a local path, a `Buffer`). `fit` is `'cover'`
+(crops to fill) or `'contain'` (fits whole, letterboxed in `background`).
+`null` (the default on every preset) means no image.
+
+The avatar-fade gradient is skipped automatically once a background image is
+set — it fades the avatar into a *flat* background color, which a canvas
+gradient does by painting an opaque wash over most of the canvas, and that
+would hide the image. There's no way to have both at once.
+
 ---
 
 ## Size
