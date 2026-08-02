@@ -73,6 +73,11 @@ export interface MessageSourceOptions {
   avatar?: 'guild' | 'global'
   /** `'nickname'` (default) prefers a per-server nickname; `'global'` the account's. */
   name?: 'nickname' | 'global'
+  /**
+   * Runs `message.content` through `stripMarkdown()` before quoting it.
+   * Default false — the content is quoted exactly as written unless you opt in.
+   */
+  stripMarkdown?: boolean
 }
 
 /** One run of text, or one emoji to be drawn as an image. */

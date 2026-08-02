@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-02T18:38:21.427Z",
+  "generatedAt": "2026-08-02T18:54:21.631Z",
   "version": "9.0.0",
   "offline": false,
   "counts": {
-    "total": 79,
-    "passed": 79,
+    "total": 81,
+    "passed": 81,
     "failed": 0
   },
   "groups": [
@@ -811,6 +811,28 @@
           "width": 1422,
           "height": 800,
           "bytes": 7458,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "markdown quoted as written (default)",
+          "file": "11-discord/markdown-quoted-as-written-default.webp",
+          "note": "stripMarkdown defaults to false — compare with the next card",
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 8576,
+          "ok": true,
+          "error": null
+        },
+        {
+          "name": "stripMarkdown: true",
+          "file": "11-discord/stripmarkdown-true.webp",
+          "note": null,
+          "format": "png",
+          "width": 1422,
+          "height": 800,
+          "bytes": 7986,
           "ok": true,
           "error": null
         }

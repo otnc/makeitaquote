@@ -1,3 +1,4 @@
+import { stripMarkdown } from '../text/markdown'
 import { ValidationError } from './errors'
 import { emptyQuote } from './quote'
 import type { MessageLike, MessageSourceOptions, QuoteData } from './types'
@@ -90,7 +91,7 @@ export function fromMessage(message: unknown, options: MessageSourceOptions = {}
   const userAvatar = avatarURL(message.author)
 
   const quote = emptyQuote()
-  quote.text = message.content
+  quote.text = options.stripMarkdown ? stripMarkdown(message.content) : message.content
   quote.username = formatUsername(message.author)
   quote.displayName = preferGlobalName
     ? (globalName(message) ?? guildName(message) ?? message.author.username)
