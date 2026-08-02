@@ -179,7 +179,13 @@ export interface MiQOptions {
   misskey?: string | MisskeyOptions
   /** Default true. Fetches missing fonts from a CDN on first use. */
   autoFont?: boolean | AutoFontOptions
-  /** Throw `FontNotAvailableError` instead of warning when a font is missing. */
+  /**
+   * Throw `FontNotAvailableError` instead of warning when a font is missing.
+   *
+   * A font-specific override for `onAssetError`: with this unset, a missing
+   * font follows `onAssetError` too (`'text'` warns and falls through,
+   * `'ignore'` does neither, `'throw'` raises `FontNotAvailableError`).
+   */
   strictFonts?: boolean
   /**
    * Sizes the canvas so the avatar is drawn at its native resolution.
@@ -193,11 +199,16 @@ export interface MiQOptions {
    */
   sizeToAvatar?: 'width' | 'height' | false
   /**
-   * What to do when an emoji or avatar can't be fetched.
+   * What to do when an emoji, avatar or font can't be fetched.
    *
-   * - `'text'` (default) draws the raw text the emoji came from
-   * - `'ignore'` drops it silently
-   * - `'throw'` raises `AssetFetchError`
+   * - `'text'` (default) draws the raw text an emoji came from, and warns
+   *   once for a missing font
+   * - `'ignore'` drops it silently — an emoji or avatar just doesn't draw,
+   *   and a missing font warns not at all
+   * - `'throw'` raises `AssetFetchError` for an emoji or avatar, or
+   *   `FontNotAvailableError` for a font
+   *
+   * `strictFonts` overrides this for fonts specifically.
    */
   onAssetError?: 'ignore' | 'text' | 'throw'
   signal?: AbortSignal
