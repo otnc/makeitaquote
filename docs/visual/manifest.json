@@ -1,8 +1,7 @@
 {
-  "generatedAt": "2026-08-01T04:21:02.795Z",
+  "generatedAt": "2026-08-02T16:39:35.701Z",
   "version": "9.0.0",
   "offline": false,
-  "seconds": 13,
   "counts": {
     "total": 77,
     "passed": 77,
@@ -21,7 +20,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32780,
-          "ms": 338,
           "ok": true,
           "error": null
         },
@@ -33,7 +31,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 31698,
-          "ms": 99,
           "ok": true,
           "error": null
         },
@@ -45,7 +42,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 34896,
-          "ms": 104,
           "ok": true,
           "error": null
         },
@@ -57,7 +53,6 @@
           "width": 800,
           "height": 1000,
           "bytes": 22186,
-          "ms": 102,
           "ok": true,
           "error": null
         },
@@ -69,7 +64,6 @@
           "width": 800,
           "height": 1000,
           "bytes": 22520,
-          "ms": 106,
           "ok": true,
           "error": null
         }
@@ -87,7 +81,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32780,
-          "ms": 116,
           "ok": true,
           "error": null
         },
@@ -99,7 +92,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32642,
-          "ms": 112,
           "ok": true,
           "error": null
         },
@@ -111,7 +103,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 29138,
-          "ms": 91,
           "ok": true,
           "error": null
         },
@@ -123,7 +114,6 @@
           "width": 1280,
           "height": 720,
           "bytes": 19186,
-          "ms": 154,
           "ok": true,
           "error": null
         },
@@ -135,7 +125,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 23638,
-          "ms": 96,
           "ok": true,
           "error": null
         }
@@ -153,7 +142,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 17318,
-          "ms": 94,
           "ok": true,
           "error": null
         },
@@ -165,7 +153,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32780,
-          "ms": 110,
           "ok": true,
           "error": null
         },
@@ -177,7 +164,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 25410,
-          "ms": 101,
           "ok": true,
           "error": null
         },
@@ -189,7 +175,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 22058,
-          "ms": 94,
           "ok": true,
           "error": null
         },
@@ -201,7 +186,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32742,
-          "ms": 98,
           "ok": true,
           "error": null
         },
@@ -213,7 +197,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18896,
-          "ms": 106,
           "ok": true,
           "error": null
         },
@@ -225,7 +208,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 25126,
-          "ms": 97,
           "ok": true,
           "error": null
         },
@@ -237,7 +219,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 59188,
-          "ms": 146,
           "ok": true,
           "error": null
         },
@@ -249,7 +230,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 81326,
-          "ms": 141,
           "ok": true,
           "error": null
         },
@@ -261,7 +241,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 32520,
-          "ms": 96,
           "ok": true,
           "error": null
         }
@@ -279,7 +258,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19718,
-          "ms": 704,
           "ok": true,
           "error": null
         },
@@ -291,7 +269,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 17998,
-          "ms": 276,
           "ok": true,
           "error": null
         },
@@ -303,7 +280,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18836,
-          "ms": 329,
           "ok": true,
           "error": null
         },
@@ -315,7 +291,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 17828,
-          "ms": 91,
           "ok": true,
           "error": null
         },
@@ -327,7 +302,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19478,
-          "ms": 96,
           "ok": true,
           "error": null
         },
@@ -339,7 +313,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19890,
-          "ms": 496,
           "ok": true,
           "error": null
         }
@@ -357,7 +330,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 23700,
-          "ms": 97,
           "ok": true,
           "error": null
         },
@@ -369,7 +341,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 24958,
-          "ms": 111,
           "ok": true,
           "error": null
         },
@@ -381,7 +352,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 24798,
-          "ms": 96,
           "ok": true,
           "error": null
         },
@@ -393,7 +363,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20232,
-          "ms": 96,
           "ok": true,
           "error": null
         }
@@ -411,7 +380,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18472,
-          "ms": 101,
           "ok": true,
           "error": null
         },
@@ -423,7 +391,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19452,
-          "ms": 91,
           "ok": true,
           "error": null
         },
@@ -435,7 +402,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19828,
-          "ms": 239,
           "ok": true,
           "error": null
         },
@@ -447,7 +413,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18866,
-          "ms": 172,
           "ok": true,
           "error": null
         },
@@ -459,7 +424,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20034,
-          "ms": 353,
           "ok": true,
           "error": null
         },
@@ -471,7 +435,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20802,
-          "ms": 158,
           "ok": true,
           "error": null
         },
@@ -483,7 +446,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19886,
-          "ms": 184,
           "ok": true,
           "error": null
         },
@@ -495,7 +457,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19976,
-          "ms": 174,
           "ok": true,
           "error": null
         },
@@ -507,7 +468,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19378,
-          "ms": 177,
           "ok": true,
           "error": null
         },
@@ -519,7 +479,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18914,
-          "ms": 170,
           "ok": true,
           "error": null
         },
@@ -531,7 +490,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19080,
-          "ms": 174,
           "ok": true,
           "error": null
         },
@@ -543,7 +501,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18656,
-          "ms": 156,
           "ok": true,
           "error": null
         },
@@ -555,7 +512,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18142,
-          "ms": 176,
           "ok": true,
           "error": null
         },
@@ -567,7 +523,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19000,
-          "ms": 236,
           "ok": true,
           "error": null
         },
@@ -579,7 +534,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19482,
-          "ms": 162,
           "ok": true,
           "error": null
         },
@@ -591,7 +545,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18240,
-          "ms": 175,
           "ok": true,
           "error": null
         },
@@ -603,7 +556,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19268,
-          "ms": 165,
           "ok": true,
           "error": null
         }
@@ -621,7 +573,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 96,
           "ok": true,
           "error": null
         },
@@ -633,7 +584,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19804,
-          "ms": 118,
           "ok": true,
           "error": null
         },
@@ -645,7 +595,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19856,
-          "ms": 88,
           "ok": true,
           "error": null
         },
@@ -657,7 +606,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20130,
-          "ms": 95,
           "ok": true,
           "error": null
         },
@@ -669,7 +617,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 92,
           "ok": true,
           "error": null
         }
@@ -687,7 +634,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 90,
           "ok": true,
           "error": null
         },
@@ -699,7 +645,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 22146,
-          "ms": 141,
           "ok": true,
           "error": null
         },
@@ -711,7 +656,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 24386,
-          "ms": 187,
           "ok": true,
           "error": null
         },
@@ -723,7 +667,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 11626,
-          "ms": 181,
           "ok": true,
           "error": null
         },
@@ -735,7 +678,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 88,
           "ok": true,
           "error": null
         },
@@ -747,7 +689,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7902,
-          "ms": 57,
           "ok": true,
           "error": null
         },
@@ -759,7 +700,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7902,
-          "ms": 1036,
           "ok": true,
           "error": null
         },
@@ -771,7 +711,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7266,
-          "ms": 56,
           "ok": true,
           "error": null
         }
@@ -789,7 +728,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 95,
           "ok": true,
           "error": null
         },
@@ -801,7 +739,6 @@
           "width": null,
           "height": null,
           "bytes": 38127,
-          "ms": 31,
           "ok": true,
           "error": null
         },
@@ -813,7 +750,6 @@
           "width": null,
           "height": null,
           "bytes": 40904,
-          "ms": 66,
           "ok": true,
           "error": null
         },
@@ -825,7 +761,6 @@
           "width": null,
           "height": null,
           "bytes": 8530,
-          "ms": 969,
           "ok": true,
           "error": null
         }
@@ -843,7 +778,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7752,
-          "ms": 135,
           "ok": true,
           "error": null
         },
@@ -855,7 +789,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 11654,
-          "ms": 235,
           "ok": true,
           "error": null
         },
@@ -867,7 +800,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7458,
-          "ms": 74,
           "ok": true,
           "error": null
         }
@@ -885,7 +817,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19364,
-          "ms": 94,
           "ok": true,
           "error": null
         },
@@ -897,7 +828,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 18904,
-          "ms": 94,
           "ok": true,
           "error": null
         },
@@ -909,7 +839,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20858,
-          "ms": 120,
           "ok": true,
           "error": null
         },
@@ -921,7 +850,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 31646,
-          "ms": 146,
           "ok": true,
           "error": null
         },
@@ -933,7 +861,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 7604,
-          "ms": 61,
           "ok": true,
           "error": null
         }
@@ -951,7 +878,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 19666,
-          "ms": 89,
           "ok": true,
           "error": null
         },
@@ -963,7 +889,6 @@
           "width": 711,
           "height": 400,
           "bytes": 93145,
-          "ms": 26,
           "ok": true,
           "error": null
         },
@@ -975,7 +900,6 @@
           "width": 2844,
           "height": 1600,
           "bytes": 20218,
-          "ms": 258,
           "ok": true,
           "error": null
         },
@@ -987,7 +911,6 @@
           "width": 1820,
           "height": 1024,
           "bytes": 20338,
-          "ms": 125,
           "ok": true,
           "error": null
         },
@@ -999,7 +922,6 @@
           "width": 1422,
           "height": 800,
           "bytes": 20860,
-          "ms": 142,
           "ok": true,
           "error": null
         }

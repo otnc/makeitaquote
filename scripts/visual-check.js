@@ -641,6 +641,15 @@ if (selected.length === 0) {
   process.exit(1)
 }
 
+// Read the previous manifest, if any, before wiping the directory — a
+// no-op regeneration reuses its timestamp below instead of rewriting it.
+let previousManifest = null
+try {
+  previousManifest = JSON.parse(await readFile(join(outDir, 'manifest.json'), 'utf8'))
+} catch {
+  // First run, or nothing there yet.
+}
+
 await rm(outDir, { recursive: true, force: true })
 await mkdir(outDir, { recursive: true })
 
@@ -666,7 +675,6 @@ for (const testCase of selected) {
     console.log(`\n  ${currentGroup}`)
   }
 
-  const began = Date.now()
   const result = { ...testCase, format, file, problems: [] }
 
   try {
@@ -703,7 +711,6 @@ for (const testCase of selected) {
     result.problems.push('threw')
   }
 
-  result.ms = Date.now() - began
   results.push(result)
 
   const status = result.problems.length === 0 ? 'ok' : 'FAIL'
@@ -724,11 +731,15 @@ const groups = [...new Set(results.map((result) => result.group))]
 const failed = results.filter((result) => result.problems.length > 0)
 const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1)
 
-const manifest = {
-  generatedAt: new Date().toISOString(),
+// Everything here has to be a pure function of the rendered output — no
+// timings, no run duration. This is committed, and two branches that touch
+// different cases each regenerate the *whole* file; if unrelated cases came
+// out byte-for-byte the same both times, they merge without a conflict. A
+// `ms` field never does, since no two runs take the same number of
+// milliseconds — it used to turn every regeneration into a full-file diff.
+const content = {
   version: packageVersion,
   offline,
-  seconds: Number(elapsed),
   counts: { total: results.length, passed: results.length - failed.length, failed: failed.length },
   groups: groups.map((group) => ({
     name: group,
@@ -743,11 +754,22 @@ const manifest = {
         width: result.size?.width ?? null,
         height: result.size?.height ?? null,
         bytes: result.bytes ?? null,
-        ms: result.ms,
         ok: result.problems.length === 0,
         error: result.error ?? (result.problems.length > 0 ? result.problems.join('; ') : null),
       })),
   })),
+}
+
+// `generatedAt` is the one field that is not a pure function of the output —
+// it is wall-clock by nature. Reusing the previous run's value when nothing
+// else changed means a no-op regeneration writes an identical file rather
+// than a one-line diff, so it only ever moves when the gallery actually did.
+const unchanged =
+  previousManifest != null &&
+  JSON.stringify({ ...previousManifest, generatedAt: undefined }) === JSON.stringify(content)
+const manifest = {
+  generatedAt: unchanged ? previousManifest.generatedAt : new Date().toISOString(),
+  ...content,
 }
 
 await writeFile(join(outDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
