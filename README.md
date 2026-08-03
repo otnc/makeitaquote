@@ -126,10 +126,16 @@ stripMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, st
 
 It handles what Discord message content actually renders — bold, italic,
 underline, strikethrough, spoilers, code (inline and fenced), block quotes
-(`>` at the start of a line, same as Discord) and headers — and honours a
-backslash escape. A code span stays literal, so `` `**x**` `` keeps its
-asterisks. `[text](url)`-style links are left alone, since Discord does not
-render those as links in message content either.
+(`>` at the start of a line, same as Discord), headers, subtext (`-# `) and
+list markers (`-`, `*`, `1.`) — and honours a backslash escape. A code span
+stays literal, so `` `**x**` `` keeps its asterisks. `[text](url)`-style links
+are left alone, since Discord does not render those as links in message
+content either.
+
+This is Discord's own dialect, not CommonMark — a generic Markdown stripper
+gets real things wrong here, like reading `__x__` as bold instead of
+underline, or deleting the URL out of a `[text](url)` that Discord never
+turned into a link in the first place.
 
 ### Tokens
 

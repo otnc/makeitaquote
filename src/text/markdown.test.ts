@@ -85,6 +85,40 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('### Header')).toBe('Header')
   })
 
+  it('strips subtext', () => {
+    expect(stripMarkdown('-# fine print')).toBe('fine print')
+  })
+
+  it('does not mistake subtext for a bulleted list item', () => {
+    // The list marker regex requires whitespace right after `-`; `-#` never
+    // has that, so it must fall to the subtext pass instead.
+    expect(stripMarkdown('-# not a list')).toBe('not a list')
+  })
+
+  describe('lists', () => {
+    it('strips an unordered list marker, either character', () => {
+      expect(stripMarkdown('- item')).toBe('item')
+      expect(stripMarkdown('* item')).toBe('item')
+    })
+
+    it('strips an ordered list marker', () => {
+      expect(stripMarkdown('1. first')).toBe('first')
+      expect(stripMarkdown('12. twelfth')).toBe('twelfth')
+    })
+
+    it('keeps indentation, so a nested item still reads as nested', () => {
+      expect(stripMarkdown('- top\n  - nested')).toBe('top\n  nested')
+    })
+
+    it('leaves a number followed by a decimal alone', () => {
+      expect(stripMarkdown('3.14 is pi')).toBe('3.14 is pi')
+    })
+
+    it('leaves italics starting a line alone — no space after the marker', () => {
+      expect(stripMarkdown('*emphasis* at line start')).toBe('emphasis at line start')
+    })
+  })
+
   it('nests markers of different kinds', () => {
     expect(stripMarkdown('**bold _and italic_**')).toBe('bold and italic')
   })

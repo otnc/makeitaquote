@@ -8,11 +8,18 @@
  * on any text.
  *
  * Handles what Discord message content actually renders: bold, italic,
- * underline, strikethrough, spoilers, inline code, code blocks, block quotes
- * and headers. A backslash escapes the character after it, same as Discord.
- * `[text](url)`-style links are left alone — Discord does not render those as
- * links in message content, so stripping them would change what the message
- * actually said.
+ * underline, strikethrough, spoilers, inline code, code blocks, block quotes,
+ * headers, subtext and list markers. A backslash escapes the character after
+ * it, same as Discord. `[text](url)`-style links are left alone — Discord
+ * does not render those as links in message content, so stripping them would
+ * change what the message actually said.
+ *
+ * This is a hand-rolled, Discord-flavoured pass rather than a generic
+ * Markdown/CommonMark stripper on purpose: Discord's dialect disagrees with
+ * CommonMark in ways a generic library gets wrong for this use case —
+ * `__x__` is underline here, not bold, `[text](url)` must survive with its
+ * brackets intact, and there is no CommonMark equivalent of `||spoiler||` or
+ * `-# subtext` at all.
  *
  * Markers of the same kind nest fine (`**bold _and italic_**`); the same
  * character used for two different constructs at once (`**bold *and*
@@ -36,6 +43,19 @@ export function stripMarkdown(text: string): string {
   out = out.replace(/^>\s?/gm, '')
 
   out = out.replace(/^#{1,3}\s+/gm, '')
+
+  // A line starting with `-# ` (subtext: small, muted text). The `#` must sit
+  // right against the dash — no space between them — which is also what
+  // keeps this from ever matching a `-` bullet.
+  out = out.replace(/^-#\s+/gm, '')
+
+  // Unordered (`-`/`*`) and ordered (`1.`) list markers. Only the marker
+  // goes; leading indentation is kept so a nested item still reads as
+  // nested. Both require whitespace right after the marker, same as Discord
+  // itself, which is what keeps `*bold*` and `1.5` from being mistaken for
+  // list items.
+  out = out.replace(/^( *)[*-]( +)/gm, '$1')
+  out = out.replace(/^( *)\d+\.( +)/gm, '$1')
 
   // Longest marker first, so *** isn't read as * immediately followed by **.
   out = out.replace(/\*\*\*([^*]+)\*\*\*/g, '$1')
