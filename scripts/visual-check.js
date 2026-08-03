@@ -594,6 +594,22 @@ add(
       }),
   { note: 'the same thing written as 0xRRGGBB numbers' },
 )
+add(
+  '12-colors',
+  'CSS colour names and hsl()',
+  () =>
+    base()
+      .setText(text.ja)
+      .setAvatar(avatars.illustration)
+      .setTheme({
+        extends: 'custom',
+        background: 'midnightblue',
+        text: { color: 'lavender' },
+        displayName: { color: 'hsl(45, 100%, 70%)' },
+        username: { color: 'slategray' },
+      }),
+  { note: 'strings go through the color package, so all of CSS is available' },
+)
 add('12-colors', 'solarized, as rgba arrays', () =>
   base()
     .setText(text.ja)

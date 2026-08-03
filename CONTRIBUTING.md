@@ -100,8 +100,18 @@ Nothing in a group's file changes between runs unless its images did.
 There is no Dependabot here; updates are done by hand. Before a release, run
 `npm outdated` and `npm audit` and deal with anything that turns up.
 
-New dependencies are a real cost for this package — it already carries a ~10MB
-native binary. If a small amount of code would do, prefer writing it.
+A dependency is worth it when it owns a specification this package does not.
+`mfm-js` is Misskey's own MFM parser and `color` is the CSS colour syntax —
+both are moving targets that a local regex only approximates, and both
+replaced code that had already been wrong once. Something small and settled,
+like the LRU in `src/util/`, is cheaper to keep than to depend on: `lru-cache`
+is 2.8MB against 89 lines that do the job.
+
+**An ESM-only dependency must go in `deps.alwaysBundle`** in
+`tsdown.config.ts`, or the CJS build emits a `require()` of it and throws for
+anyone using `require('makeitaquote')`. `check-build.js` works out which
+dependencies those are from their own `package.json` and fails if one is
+left external, so this is caught rather than remembered.
 
 ## Releasing
 

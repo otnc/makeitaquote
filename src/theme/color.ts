@@ -1,3 +1,4 @@
+import Color from 'color'
 import { ValidationError } from '../core/errors'
 
 /**
@@ -6,8 +7,13 @@ import { ValidationError } from '../core/errors'
  * - `'#RGB'`, `'#RGBA'`, `'#RRGGBB'`, `'#RRGGBBAA'`
  * - `0xRRGGBB`, `0xRRGGBBAA` — plain numbers, so `0xFF0000` is red
  * - `[r, g, b]` or `[r, g, b, a]`, channels 0–255 and alpha 0–1 or 0–255
- * - `'transparent'`
- * - any `rgb()` / `rgba()` string the canvas understands
+ * - `'transparent'`, and any CSS colour name (`'rebeccapurple'`)
+ * - `rgb()` / `rgba()` / `hsl()` / `hwb()` and the rest of CSS's functions
+ *
+ * Strings go through the `color` package, so the whole CSS colour syntax is
+ * accepted rather than the handful of shapes a local regex could keep up
+ * with. Numbers and arrays are this package's own conventions and are read
+ * here.
  */
 export type ColorInput = string | number | readonly number[]
 
@@ -20,12 +26,6 @@ export interface RGBA {
 }
 
 export const TRANSPARENT: RGBA = { r: 0, g: 0, b: 0, a: 0 }
-
-const HEX_3 = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i
-const HEX_4 = /^#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/i
-const HEX_6 = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i
-const HEX_8 = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i
-const RGB_FN = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.%]+))?\s*\)$/i
 
 function clampChannel(value: number): number {
   return Math.max(0, Math.min(255, Math.round(value)))
@@ -105,76 +105,25 @@ function fromArray(value: readonly number[], field: string): RGBA {
 function fromString(input: string, field: string): RGBA {
   const value = input.trim()
 
-  if (value.toLowerCase() === 'transparent') return { ...TRANSPARENT }
-
-  const hex4 = HEX_4.exec(value)
-  if (hex4) {
-    return {
-      r: double(hex4[1] as string),
-      g: double(hex4[2] as string),
-      b: double(hex4[3] as string),
-      a: double(hex4[4] as string) / 255,
-    }
-  }
-
-  const hex3 = HEX_3.exec(value)
-  if (hex3) {
-    return {
-      r: double(hex3[1] as string),
-      g: double(hex3[2] as string),
-      b: double(hex3[3] as string),
-      a: 1,
-    }
-  }
-
-  const hex8 = HEX_8.exec(value)
-  if (hex8) {
-    return {
-      r: Number.parseInt(hex8[1] as string, 16),
-      g: Number.parseInt(hex8[2] as string, 16),
-      b: Number.parseInt(hex8[3] as string, 16),
-      a: Number.parseInt(hex8[4] as string, 16) / 255,
-    }
-  }
-
-  const hex6 = HEX_6.exec(value)
-  if (hex6) {
-    return {
-      r: Number.parseInt(hex6[1] as string, 16),
-      g: Number.parseInt(hex6[2] as string, 16),
-      b: Number.parseInt(hex6[3] as string, 16),
-      a: 1,
-    }
-  }
-
-  const fn = RGB_FN.exec(value)
-  if (fn) {
-    const alpha = fn[4]
-    return {
-      r: clampChannel(Number(fn[1])),
-      g: clampChannel(Number(fn[2])),
-      b: clampChannel(Number(fn[3])),
-      a:
-        alpha === undefined
-          ? 1
-          : alpha.endsWith('%')
-            ? clampAlpha(Number.parseFloat(alpha) / 100)
-            : readAlpha(Number(alpha)),
-    }
-  }
-
-  // `0xRRGGBB` written as a string, which is easy to end up with from JSON.
+  // `0xRRGGBB` as a string, which is easy to end up with coming back out of
+  // JSON. Not CSS, so the library would rightly reject it.
   if (/^0x[0-9a-f]{6,8}$/i.test(value)) return fromNumber(Number(value), field)
 
-  throw new ValidationError(
-    `${field}: could not read "${input}" as a color. Use #RRGGBBAA, 0xRRGGBBAA, ` +
-      "[r, g, b, a], 'transparent', or rgb()/rgba().",
-    { field },
-  )
-}
-
-function double(digit: string): number {
-  return Number.parseInt(`${digit}${digit}`, 16)
+  try {
+    const [r, g, b] = Color(value).rgb().array()
+    return {
+      r: clampChannel(r as number),
+      g: clampChannel(g as number),
+      b: clampChannel(b as number),
+      a: clampAlpha(Color(value).alpha()),
+    }
+  } catch {
+    throw new ValidationError(
+      `${field}: could not read "${input}" as a color. Use a CSS color, ` +
+        '0xRRGGBBAA, or [r, g, b, a].',
+      { field },
+    )
+  }
 }
 
 /** The canvas fill string for a color. */

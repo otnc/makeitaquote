@@ -117,9 +117,25 @@ describe('parseColor', () => {
     })
   })
 
+  describe('the rest of CSS, via the color package', () => {
+    it('reads a colour name', () => {
+      expect(parseColor('rebeccapurple')).toEqual({ r: 102, g: 51, b: 153, a: 1 })
+      expect(parseColor('red')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+    })
+
+    it('reads hsl and hwb, converting to rgb', () => {
+      expect(parseColor('hsl(0, 100%, 50%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+      expect(parseColor('hwb(0, 0%, 0%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+    })
+
+    it('reads the space-separated form with a slash alpha', () => {
+      expect(parseColor('rgb(255 0 0 / 50%)')).toEqual({ r: 255, g: 0, b: 0, a: 0.5 })
+    })
+  })
+
   it('rejects anything it cannot read, and says what it takes', () => {
-    expect(() => parseColor('rebeccapurple')).toThrow(/#RRGGBBAA/)
     expect(() => parseColor('#GG0000')).toThrow(ValidationError)
+    expect(() => parseColor('not a color')).toThrow(/0xRRGGBBAA/)
     expect(() => parseColor(null as unknown as string)).toThrow(ValidationError)
   })
 

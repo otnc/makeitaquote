@@ -1,118 +1,92 @@
+import type { MfmNode } from 'mfm-js'
+import * as mfm from 'mfm-js'
+
 /**
  * Strips MFM — Misskey Flavoured Markup — down to plain text.
  *
  * The Misskey counterpart to `stripMarkdown()`, and needed for the same
  * reason: a note's raw text carries markup the client expands, so quoting it
- * verbatim puts `$[jelly ...]` and `<center>` in the picture.
+ * verbatim puts `$[jelly …]` and `<center>` in the picture.
  *
- * Handles what a note actually renders: bold, italic, strike, small, centre,
- * quotes, inline code and code blocks, maths, links, and the `$[fn …]`
- * decoration functions — including nested ones, which is why they are matched
- * by scanning brackets rather than with a regex.
+ * Parsing goes through `mfm-js`, Misskey's own parser, rather than a local
+ * approximation. MFM has enough corners — `$[fn …]` re-parses its contents so
+ * functions nest, `<center>` is a block that only counts at the start of a
+ * line, code and maths are verbatim — that matching the reference
+ * implementation is worth the dependency. What is left here is only the walk
+ * from its AST back down to text.
  *
- * Deliberately left alone:
+ * Deliberately kept rather than stripped:
  *
  * - `:name:` custom emoji, which the emoji layer draws as images
  * - `@user` and `@user@host` mentions — unlike Discord, MFM writes these as
  *   the readable name already, so there is nothing to resolve
- * - `#hashtag`, for the same reason
+ * - `#hashtag`, and a bare URL, for the same reason
  */
 export function stripMfm(text: string): string {
-  const code: string[] = []
-
-  // Code first, and set aside rather than merely unwrapped: a code span is
-  // literal, so markup inside one is text and must survive every pass below.
-  let out = text.replace(/```(?:[^\n`]*\n)?([\s\S]*?)```/g, (_, inner: string) =>
-    stash(code, inner.trim()),
-  )
-  out = out.replace(/`([^`\n]+)`/g, (_, inner: string) => stash(code, inner))
-
-  // Maths is likewise verbatim content in a wrapper.
-  out = out.replace(/\\\[([\s\S]*?)\\\]/g, (_, inner: string) => stash(code, inner.trim()))
-  out = out.replace(/\\\(([\s\S]*?)\\\)/g, (_, inner: string) => stash(code, inner.trim()))
-
-  out = stripFunctions(out)
-
-  // `<center>` is a *block*: MFM only reads it as one when it opens a line,
-  // and treats it as literal text anywhere else. Checked against the
-  // reference parser (misskey-dev/mfm.js), which parses `a <center>x</center>`
-  // as one text node and `<center>x</center>` on its own line as a centre.
-  out = out.replace(/^<center>([\s\S]*?)<\/center>/gm, '$1')
-
-  // The rest are inline, and unwrap wherever they appear.
-  out = out.replace(/<\/?(?:b|i|s|small|plain)>/g, '')
-
-  out = out.replace(/^>\s?/gm, '')
-
-  // Longest marker first, so *** is not read as * then **.
-  out = out.replace(/\*\*\*([^*]+)\*\*\*/g, '$1')
-  out = out.replace(/\*\*([^*]+)\*\*/g, '$1')
-  out = out.replace(/__([^_]+)__/g, '$1')
-  out = out.replace(/(?<![*\w])\*([^*]+)\*(?!\w)/g, '$1')
-  out = out.replace(/(?<![_\w])_([^_]+)_(?!\w)/g, '$1')
-  out = out.replace(/~~([^~]+)~~/g, '$1')
-
-  // MFM renders these as real links, so the label is what was on screen.
-  // `?[…](…)` is the same thing without a preview.
-  out = out.replace(/\??\[([^\]]*)\]\((?:[^)]*)\)/g, '$1')
-
-  return restore(out, code)
+  return joinBlocks(mfm.parse(text))
 }
 
 /**
- * Unwraps every `$[fn …]`, innermost first.
+ * The node types MFM treats as blocks, each of which owns its own line.
  *
- * A regex cannot do this: the contents are parsed again, so functions nest
- * (`$[spin $[flip x]]`) and a lazy match would stop at the first `]`. Walking
- * the string and counting brackets is the honest way to find the real end.
+ * The parser consumes the newline that separates two blocks, since there it
+ * is syntax rather than content. Flattening without putting it back would run
+ * the lines together — `あ\n<center>ね</center>` would come out as `あね` —
+ * so a break goes back wherever a block meets a neighbour. Text inside one
+ * paragraph is untouched: the parser keeps those newlines itself.
  */
-function stripFunctions(text: string): string {
-  let out = text
+const BLOCKS = new Set(['quote', 'search', 'blockCode', 'mathBlock', 'center'])
 
-  for (;;) {
-    const start = out.indexOf('$[')
-    if (start === -1) return out
+function joinBlocks(nodes: readonly MfmNode[]): string {
+  return nodes.reduce((out, node, index) => {
+    const previous = nodes[index - 1]
+    const separator =
+      previous && (BLOCKS.has(previous.type) || BLOCKS.has(node.type)) && !out.endsWith('\n')
+        ? '\n'
+        : ''
+    return out + separator + toPlainNode(node)
+  }, '')
+}
 
-    const end = matchingBracket(out, start + 1)
-    if (end === -1) return out
+function toPlainNode(node: MfmNode): string {
+  switch (node.type) {
+    case 'text':
+      return node.props.text
 
-    const body = out.slice(start + 2, end)
-    // `$[fn content]` and `$[fn.a=1,b=2 content]` — the name and its
-    // parameters run to the first space, and everything after it is content.
-    const space = body.indexOf(' ')
-    const content = space === -1 ? '' : body.slice(space + 1)
+    // Written back as the source spelled them: an emoji shortcode has to
+    // survive for the emoji layer to swap a picture in, and the rest are
+    // already the readable form.
+    case 'emojiCode':
+      return `:${node.props.name}:`
+    case 'unicodeEmoji':
+      return node.props.emoji
+    case 'mention':
+      return node.props.acct
+    case 'hashtag':
+      return `#${node.props.hashtag}`
+    case 'url':
+      return node.props.url
 
-    out = out.slice(0, start) + content + out.slice(end + 1)
+    // Verbatim content in a wrapper — the wrapper goes, the content stays
+    // exactly as it was written.
+    case 'inlineCode':
+    case 'blockCode':
+      return node.props.code
+    case 'mathInline':
+    case 'mathBlock':
+      return node.props.formula
+    case 'search':
+      return node.props.query
+
+    // A link renders as its label, which is what a reader saw. The label is
+    // never empty: `[](url)` is not a link to MFM at all — it parses as a
+    // bare url with brackets around it, and arrives here as `url`.
+    case 'link':
+      return joinBlocks(node.children)
+
+    // Everything else is decoration around children: bold, italic, strike,
+    // small, centre, quote, plain, and every `$[fn …]`.
+    default:
+      return 'children' in node && node.children ? joinBlocks(node.children) : ''
   }
-}
-
-/** Index of the `]` closing the `[` at `open`, or -1 if it never closes. */
-function matchingBracket(text: string, open: number): number {
-  let depth = 0
-
-  for (let i = open; i < text.length; i++) {
-    if (text[i] === '[') depth++
-    else if (text[i] === ']') {
-      depth--
-      if (depth === 0) return i
-    }
-  }
-
-  return -1
-}
-
-/** A private-use codepoint, so a note can never contain the sentinel itself. */
-const SENTINEL = ''
-
-function stash(store: string[], value: string): string {
-  store.push(value)
-  return `${SENTINEL}${store.length - 1}${SENTINEL}`
-}
-
-function restore(text: string, store: string[]): string {
-  if (store.length === 0) return text
-  return text.replace(
-    new RegExp(`${SENTINEL}(\\d+)${SENTINEL}`, 'g'),
-    (whole, index: string) => store[Number(index)] ?? whole,
-  )
 }

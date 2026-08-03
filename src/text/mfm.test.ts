@@ -89,6 +89,36 @@ describe('stripMfm', () => {
     })
   })
 
+  describe('corners the reference parser settles', () => {
+    it('honours <plain>, which switches MFM off inside it', () => {
+      expect(stripMfm('<plain>$[jelly x]</plain>')).toBe('$[jelly x]')
+    })
+
+    it('keeps the line break where a block meets its neighbour', () => {
+      // The parser treats that newline as block syntax and consumes it;
+      // putting it back is what keeps two lines from running together.
+      expect(stripMfm('あ\n<center>ね</center>')).toBe('あ\nね')
+      expect(stripMfm('> q\nあ')).toBe('q\nあ')
+    })
+
+    it('leaves a newline inside one paragraph exactly as it was', () => {
+      expect(stripMfm('あ\nい')).toBe('あ\nい')
+    })
+
+    it('keeps a bare url, bracketed or not', () => {
+      expect(stripMfm('MFM https://misskey.io です')).toBe('MFM https://misskey.io です')
+      expect(stripMfm('<https://misskey.io>')).toBe('https://misskey.io')
+    })
+
+    it('treats an empty label as a bare url, not a link', () => {
+      expect(stripMfm('?[](https://misskey.io)')).toBe('?[](https://misskey.io)')
+    })
+
+    it('unwraps markup and nesting inside a function together', () => {
+      expect(stripMfm('$[fg.color=f00 **bold** and $[flip nested]]')).toBe('bold and nested')
+    })
+  })
+
   describe('left alone on purpose', () => {
     it('keeps custom emoji for the emoji layer to draw', () => {
       expect(stripMfm(':blobcat:')).toBe(':blobcat:')
