@@ -114,6 +114,7 @@ What has been turned down, and why, so it need not be re-litigated:
 | `env-paths` | Returns different paths from the ones README documents, so upgrading would orphan every existing font cache. |
 | `css-tree` / `postcss` | 1.9MB / 327K to read three fields out of one API's machine-generated `@font-face` blocks. |
 | `discord-markdown`, `simple-markdown` | Last published 2021; pull in `highlight.js` and `@types/react`. |
+| `remove-markdown` | CommonMark, not Discord's dialect: reads `__x__` as bold instead of underline, and strips the URL out of `[text](url)`, which `stripMarkdown()` deliberately leaves alone since Discord never turned it into a link to begin with. |
 
 **An ESM-only dependency must go in `deps.alwaysBundle`** in
 `tsdown.config.ts`, or the CJS build emits a `require()` of it and throws for

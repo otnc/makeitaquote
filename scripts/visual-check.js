@@ -469,19 +469,24 @@ add(
 add('11-discord', 'from a minimal message (no avatar)', () =>
   new MiQ().setFromMessage({ content: text.ja, author: { username: 'someone' } }),
 )
+const markdownSample = [
+  '**このパッケージ**は自分で*太字*を解除しません',
+  '- リストの記号も',
+  '-# こういう小さい文字も',
+].join('\n')
 add(
   '11-discord',
   'markdown quoted as written (default)',
   () =>
     new MiQ().setFromMessage({
-      content: '**このパッケージ**は自分で*太字*を解除しません',
+      content: markdownSample,
       author: { username: 'someone' },
     }),
   { note: 'stripMarkdown defaults to false — compare with the next card' },
 )
 add('11-discord', 'stripMarkdown: true', () =>
   new MiQ().setFromMessage(
-    { content: '**このパッケージ**は自分で*太字*を解除しません', author: { username: 'someone' } },
+    { content: markdownSample, author: { username: 'someone' } },
     { stripMarkdown: true },
   ),
 )
