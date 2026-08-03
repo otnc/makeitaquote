@@ -100,12 +100,20 @@ Nothing in a group's file changes between runs unless its images did.
 There is no Dependabot here; updates are done by hand. Before a release, run
 `npm outdated` and `npm audit` and deal with anything that turns up.
 
-A dependency is worth it when it owns a specification this package does not.
-`mfm-js` is Misskey's own MFM parser and `color` is the CSS colour syntax —
-both are moving targets that a local regex only approximates, and both
-replaced code that had already been wrong once. Something small and settled,
-like the LRU in `src/util/`, is cheaper to keep than to depend on: `lru-cache`
-is 2.8MB against 89 lines that do the job.
+A dependency is worth it when it owns a specification this package does not,
+or when it is simply smaller than the code it deletes. `mfm-js` is Misskey's
+own MFM parser and `color` is the CSS colour syntax — both moving targets a
+local regex only approximates, and both replaced code that had already been
+wrong once. `quick-lru` replaced 89 lines outright.
+
+What has been turned down, and why, so it need not be re-litigated:
+
+| Candidate | Why not |
+| --- | --- |
+| `lru-cache` | 2.8MB, against `quick-lru`'s 36K for the same job. |
+| `env-paths` | Returns different paths from the ones README documents, so upgrading would orphan every existing font cache. |
+| `css-tree` / `postcss` | 1.9MB / 327K to read three fields out of one API's machine-generated `@font-face` blocks. |
+| `discord-markdown`, `simple-markdown` | Last published 2021; pull in `highlight.js` and `@types/react`. |
 
 **An ESM-only dependency must go in `deps.alwaysBundle`** in
 `tsdown.config.ts`, or the CJS build emits a `require()` of it and throws for

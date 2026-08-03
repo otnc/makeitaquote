@@ -1,6 +1,7 @@
-import { LRU } from './lru'
+import QuickLRU from 'quick-lru'
 
 export interface AssetCacheOptions {
+  /** `0` disables storing entirely, the same as `enabled: false`. */
   maxEntries?: number
   ttlMs?: number
   negativeTtlMs?: number
@@ -35,39 +36,57 @@ export interface AssetCache<V> {
  */
 export function createAssetCache<V>(defaults: Required<AssetCacheOptions>): AssetCache<V> {
   let settings: Required<AssetCacheOptions> = { ...defaults }
-  let values = new LRU<string, V>({ maxEntries: settings.maxEntries, ttlMs: settings.ttlMs })
-  let failures = new LRU<string, true>({
-    maxEntries: settings.maxEntries,
-    ttlMs: settings.negativeTtlMs,
-  })
+  let values = build<V>(settings.maxEntries, settings.ttlMs)
+  let failures = build<true>(settings.maxEntries, settings.negativeTtlMs)
   const inFlight = new Map<string, Promise<V | null>>()
+
+  /**
+   * `QuickLRU` rejects a `maxSize` of 0, but 0 is a meaningful setting here —
+   * "remember nothing" — so it is answered with `null` and every read and
+   * write below treats that as a miss.
+   */
+  function build<T>(maxEntries: number, ttlMs: number): QuickLRU<string, T> | null {
+    if (maxEntries <= 0) return null
+    return new QuickLRU<string, T>({
+      maxSize: maxEntries,
+      // 0 means "no expiry" here, which QuickLRU spells as Infinity.
+      maxAge: ttlMs > 0 ? ttlMs : Number.POSITIVE_INFINITY,
+    })
+  }
+
+  /** Storing is off when the cache is disabled, or sized out of existence. */
+  const storing = () => settings.enabled
 
   return {
     configure(options) {
       settings = { ...settings, ...options }
-      values = new LRU({ maxEntries: settings.maxEntries, ttlMs: settings.ttlMs })
-      failures = new LRU({ maxEntries: settings.maxEntries, ttlMs: settings.negativeTtlMs })
+      values = build<V>(settings.maxEntries, settings.ttlMs)
+      failures = build<true>(settings.maxEntries, settings.negativeTtlMs)
       inFlight.clear()
     },
     clear() {
-      values.clear()
-      failures.clear()
+      values?.clear()
+      failures?.clear()
       inFlight.clear()
     },
     info() {
-      return { entries: values.size, failures: failures.size, inFlight: inFlight.size }
+      return {
+        entries: values?.size ?? 0,
+        failures: failures?.size ?? 0,
+        inFlight: inFlight.size,
+      }
     },
     cached(key) {
-      return settings.enabled ? values.get(key) : undefined
+      return storing() ? values?.get(key) : undefined
     },
     remember(key, value) {
-      if (settings.enabled) values.set(key, value)
+      if (storing()) values?.set(key, value)
     },
     isKnownFailure(key) {
-      return settings.enabled ? failures.has(key) : false
+      return storing() ? (failures?.has(key) ?? false) : false
     },
     rememberFailure(key) {
-      if (settings.enabled) failures.set(key, true)
+      if (storing()) failures?.set(key, true)
     },
     coalesce(key, load) {
       const existing = inFlight.get(key)
