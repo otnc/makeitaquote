@@ -75,10 +75,13 @@
     "@napi-rs/canvas": "^1.0.3",
     "@twemoji/parser": "^17.0.2",
     "budoux": "^0.8.4",
-    "ky": "^2.0.2"
+    "color": "^5.0.3",
+    "ky": "^2.0.2",
+    "mfm-js": "^0.26.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
+    "@types/color": "^4.2.1",
     "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "^4.1.10",
     "tsdown": "^0.22.14",

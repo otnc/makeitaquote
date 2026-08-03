@@ -25,6 +25,17 @@
       "error": null
     },
     {
+      "name": "CSS colour names and hsl()",
+      "file": "12-colors/css-colour-names-and-hsl.webp",
+      "note": "strings go through the color package, so all of CSS is available",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 20668,
+      "ok": true,
+      "error": null
+    },
+    {
       "name": "solarized, as rgba arrays",
       "file": "12-colors/solarized-as-rgba-arrays.webp",
       "note": null,

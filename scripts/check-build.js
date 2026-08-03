@@ -7,6 +7,7 @@
 // living up to what package.json promises are checked here instead.
 // No dependencies — Node >= 22 built-ins only.
 
+import { readFileSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -154,16 +155,48 @@ for (const entry of ['api/index.cjs', 'api/index.mjs']) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. ky is ESM-only, so the CJS output must inline it rather than require() it.
+// 5. An ESM-only dependency must be inlined, never require()d from the CJS
+//    output — `require()` of one throws the moment anything calls into it.
+//
+//    Which dependencies those are is worked out from their own package.json
+//    rather than listed here, so a new one is caught the day it is installed
+//    instead of the day someone remembers to add it.
 // ---------------------------------------------------------------------------
 
+/** True when a package publishes ESM only, with no CJS entry to fall back to. */
+function isEsmOnly(dependency) {
+  let manifest
+  try {
+    manifest = require(`${dependency}/package.json`)
+  } catch {
+    // Not every package exports its own package.json. Read it off disk.
+    try {
+      const path = join(root, 'node_modules', dependency, 'package.json')
+      manifest = JSON.parse(readFileSync(path, 'utf8'))
+    } catch {
+      return false
+    }
+  }
+
+  if (manifest.type !== 'module') return false
+
+  // `exports` may still offer a `require` condition, which makes it dual.
+  const exported = JSON.stringify(manifest.exports ?? '')
+  return !exported.includes('"require"') && !manifest.main?.endsWith('.cjs')
+}
+
+const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
+const esmOnly = Object.keys(manifest.dependencies ?? {}).filter(isEsmOnly)
+check('found the ESM-only dependencies to police', esmOnly.length > 0, 'expected at least ky')
+
 for (const file of files.filter((f) => f.endsWith('.cjs'))) {
-  const source = await readFile(file, 'utf8')
-  check(
-    `dist/${name(file)} does not require('ky')`,
-    !/require\(\s*['"]ky['"]\s*\)/.test(source),
-    "ky is ESM-only; tsdown's deps.alwaysBundle must inline it.",
-  )
+  for (const dependency of esmOnly) {
+    check(
+      `dist/${name(file)} does not require('${dependency}')`,
+      !new RegExp(`require\\(\\s*['"]${dependency}['"]\\s*\\)`).test(await readFile(file, 'utf8')),
+      `${dependency} is ESM-only; tsdown's deps.alwaysBundle must inline it.`,
+    )
+  }
 }
 
 // ---------------------------------------------------------------------------

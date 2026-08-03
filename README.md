@@ -350,9 +350,14 @@ Every color accepts any of these:
 '#RGB'  '#RGBA'  '#RRGGBB'  '#RRGGBBAA'      hex, with or without alpha
 0xRRGGBB  0xRRGGBBAA                         numbers
 [r, g, b]  [r, g, b, a]                      channels 0–255, alpha 0–1 or 0–255
-'transparent'                                fully clear
-'rgb(…)'  'rgba(…)'                          CSS functions
+'transparent'  'rebeccapurple'  'red'        any CSS colour name
+'rgb(…)'  'rgba(…)'  'hsl(…)'  'hwb(…)'      CSS colour functions
 ```
+
+Strings go through the [`color`](https://www.npmjs.com/package/color) package,
+which brings the 148 CSS colour names and `hsl()`/`hwb()`, converted to RGB
+for you. (`lab()` and `lch()` are not among them.) The number and array forms
+are this package's own.
 
 > A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so
 > write those as strings, where the length is part of the value.
