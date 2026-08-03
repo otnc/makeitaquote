@@ -77,7 +77,8 @@
     "budoux": "^0.8.4",
     "color": "^5.0.3",
     "ky": "^2.0.2",
-    "mfm-js": "^0.26.0"
+    "mfm-js": "^0.26.0",
+    "quick-lru": "^7.3.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.6",
