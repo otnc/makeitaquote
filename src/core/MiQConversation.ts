@@ -55,7 +55,8 @@ export class MiQConversation {
   /**
    * Replaces every message with these, read off real Discord messages the
    * same way `MiQ#setFromMessage()` reads one — content, name and avatar,
-   * with the same `avatar`/`name`/`stripMarkdown`/`resolveMentions` options.
+   * with the same `avatar`/`name`/`stripDiscordMarkdown`/`resolveMentions`
+   * options.
    */
   setFromMessages(messages: readonly unknown[], options?: MessageSourceOptions): this {
     this.#messages = messages.map((message) => {

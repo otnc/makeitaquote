@@ -4,7 +4,7 @@ import * as mfm from 'mfm-js'
 /**
  * Strips MFM — Misskey Flavoured Markup — down to plain text.
  *
- * The Misskey counterpart to `stripMarkdown()`, and needed for the same
+ * The Misskey counterpart to `stripDiscordMarkdown()`, and needed for the same
  * reason: a note's raw text carries markup the client expands, so quoting it
  * verbatim puts `$[jelly …]` and `<center>` in the picture.
  *

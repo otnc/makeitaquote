@@ -114,10 +114,11 @@ export interface MessageSourceOptions {
   /** `'nickname'` (default) prefers a per-server nickname; `'global'` the account's. */
   name?: 'nickname' | 'global'
   /**
-   * Runs `message.content` through `stripMarkdown()` before quoting it.
-   * Default false — the content is quoted exactly as written unless you opt in.
+   * Runs `message.content` through `stripDiscordMarkdown()` before quoting
+   * it. Default false — the content is quoted exactly as written unless you
+   * opt in.
    */
-  stripMarkdown?: boolean
+  stripDiscordMarkdown?: boolean
   /**
    * Expands Discord's raw tokens into the text a reader saw: user, role and
    * channel mentions, slash commands, `<t:…>` timestamps and guild
@@ -154,7 +155,7 @@ export interface NoteLike {
 export interface NoteSourceOptions {
   /**
    * Runs the note through `stripMfm()` before quoting it. Default **true**,
-   * unlike `stripMarkdown` for Discord.
+   * unlike `stripDiscordMarkdown` for Discord.
    *
    * The two differ because the markup does. `**bold**` still reads as its
    * own text with the asterisks left in; `$[jelly ぷりん]` does not — the

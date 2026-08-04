@@ -1,0 +1,28 @@
+{
+  "name": "15-markdown",
+  "title": "Markdown",
+  "cases": [
+    {
+      "name": "plain text, quoted as written",
+      "file": "15-markdown/plain-text-quoted-as-written.webp",
+      "note": ".setText() does not strip markdown on its own — compare with the next card",
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 29968,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "stripMarkdown(text) composed with setText",
+      "file": "15-markdown/stripmarkdown-text-composed-with-settext.webp",
+      "note": null,
+      "format": "png",
+      "width": 1422,
+      "height": 800,
+      "bytes": 28974,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

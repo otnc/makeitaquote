@@ -38,7 +38,7 @@
     {
       "name": "markdown quoted as written (default)",
       "file": "11-discord/markdown-quoted-as-written-default.webp",
-      "note": "stripMarkdown defaults to false — compare with the next card",
+      "note": "stripDiscordMarkdown defaults to false — compare with the next card",
       "format": "png",
       "width": 1422,
       "height": 800,
@@ -47,8 +47,8 @@
       "error": null
     },
     {
-      "name": "stripMarkdown: true",
-      "file": "11-discord/stripmarkdown-true.webp",
+      "name": "stripDiscordMarkdown: true",
+      "file": "11-discord/stripdiscordmarkdown-true.webp",
       "note": null,
       "format": "png",
       "width": 1422,

@@ -54,6 +54,7 @@ Requires Node.js 22 or newer.
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
 - [Misskey notes](#misskey-notes) — quoting a note, and MFM
+- [Markdown](#markdown) — plain CommonMark, for anything else
 - [Conversations](#conversations) — several messages as one image
 - [Themes](#themes) — six presets, and how to change them
 - [Colors](#colors) — every notation, including transparency
@@ -107,7 +108,7 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | --- | --- | --- |
 | `avatar` | `'guild'` — per-server avatar | `'global'` — account avatar |
 | `name` | `'nickname'` — server nickname | `'global'` — account name |
-| `stripMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
+| `stripDiscordMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
 | `resolveMentions` | `true` — `<@id>` becomes `@name` | `false` — quoted as the raw token |
 
 Whichever avatar or name you choose, the other is still the fallback, so a
@@ -115,13 +116,13 @@ message with only one of them always renders.
 
 `message.content` normally comes through untouched — `**bold**` is quoted with
 its asterisks and all, since that is what was actually typed. Opt into
-plain text with `stripMarkdown: true`, or call the exported `stripMarkdown()`
-yourself on any text:
+plain text with `stripDiscordMarkdown: true`, or call the exported
+`stripDiscordMarkdown()` yourself on any text:
 
 ```ts
-import { stripMarkdown } from 'makeitaquote'
+import { stripDiscordMarkdown } from 'makeitaquote'
 
-stripMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, strike, code'
+stripDiscordMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, strike, code'
 ```
 
 It handles what Discord message content actually renders — bold, italic,
@@ -219,6 +220,37 @@ notes.
 
 ---
 
+## Markdown
+
+For a source that is neither Discord nor Misskey — a blog post, a GitHub
+comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus
+the common GFM extras: strikethrough, tables, task lists). `.setText()` has
+no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it
+takes a bare string with no source to opt out of stripping *from*:
+
+```ts
+import { stripMarkdown } from 'makeitaquote'
+
+new MiQ().setText(stripMarkdown(text))
+
+stripMarkdown('**bold**, *italic*, ~~strike~~, [a link](url)')
+// → 'bold, italic, strike, a link'
+```
+
+A link or image keeps its label/alt text and drops the URL — that is what a
+reader saw, not the address behind it — and raw inline/block HTML is dropped
+rather than rendered or left as literal tag text. A list item becomes one
+line, a table becomes tab-separated cells, and a hard line break (two
+trailing spaces) becomes a real one.
+
+This is built on [`marked`](https://www.npmjs.com/package/marked) rather
+than a local approximation, the same reasoning as `stripDiscordMarkdown()`
+and `stripMfm()`: CommonMark has enough corners — reference-style
+`[label][ref]` links, loose vs. tight lists, a fenced code block's language
+tag — that matching a real implementation is worth the dependency.
+
+---
+
 ## Conversations
 
 `MiQ` quotes one message. `MiQConversation` renders several as one image — a
@@ -236,8 +268,8 @@ Consecutive messages from the same `username` collapse onto one avatar and
 name, the same way Discord's own client groups them.
 
 Straight from real messages, the same way `MiQ#setFromMessage()` reads one —
-content, name, avatar, and the same `avatar` / `name` / `stripMarkdown` /
-`resolveMentions` options:
+content, name, avatar, and the same `avatar` / `name` / `stripDiscordMarkdown`
+/ `resolveMentions` options:
 
 ```ts
 new MiQConversation().setFromMessages(messages) // messages: an array, oldest first
