@@ -102,9 +102,19 @@ There is no Dependabot here; updates are done by hand. Before a release, run
 
 A dependency is worth it when it owns a specification this package does not,
 or when it is simply smaller than the code it deletes. `mfm-js` is Misskey's
-own MFM parser and `color` is the CSS colour syntax — both moving targets a
-local regex only approximates, and both replaced code that had already been
-wrong once. `quick-lru` replaced 89 lines outright.
+own MFM parser, `color` is the CSS colour syntax and `discomd` is Discord's
+own Markdown dialect — all three moving targets a local regex only
+approximates, and all three replaced code that had already been wrong once.
+`quick-lru` replaced 89 lines outright.
+
+`discomd` disagrees with this package's own prior implementation in two
+narrow, accepted ways: a backslash escape resolves even inside a code span
+(Discord's client leaves it literal there), and an intraword underscore
+(`snake_case_var`) is read as italic rather than left alone. Both are pinned
+in `markdown.test.ts` rather than worked around, and reported upstream
+([discomd#2](https://github.com/otnc/discomd/issues/2),
+[discomd#3](https://github.com/otnc/discomd/issues/3), both fixed by 1.0.1)
+for the two that were genuine bugs rather than accepted differences.
 
 What has been turned down, and why, so it need not be re-litigated:
 

@@ -128,14 +128,22 @@ It handles what Discord message content actually renders — bold, italic,
 underline, strikethrough, spoilers, code (inline and fenced), block quotes
 (`>` at the start of a line, same as Discord), headers, subtext (`-# `) and
 list markers (`-`, `*`, `1.`) — and honours a backslash escape. A code span
-stays literal, so `` `**x**` `` keeps its asterisks. `[text](url)`-style links
-are left alone, since Discord does not render those as links in message
-content either.
+keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks
+(a backslash escape is the one exception — `` `\*x\*` `` still resolves to
+`*x*`, since Discord's own client is the only thing that treats a code
+span's contents as fully inert).
 
-This is Discord's own dialect, not CommonMark — a generic Markdown stripper
-gets real things wrong here, like reading `__x__` as bold instead of
-underline, or deleting the URL out of a `[text](url)` that Discord never
-turned into a link in the first place.
+`[text](url)`-style masked links are left alone: they only render as
+clickable links in embeds, webhooks and messages a bot sent, never in a
+message a person typed themselves — which is the case this function exists
+for — so stripping the brackets there would show something the reader's
+screen never did.
+
+This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's
+own dialect rather than CommonMark. A generic Markdown stripper gets real
+things wrong here, like reading `__x__` as bold instead of underline, or
+deleting the URL out of a `[text](url)` Discord never turned into a link in
+the first place.
 
 ### Tokens
 

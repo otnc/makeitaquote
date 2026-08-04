@@ -58,8 +58,14 @@ describe('stripMarkdown', () => {
       expect(stripMarkdown('`**a**` then `~~b~~`')).toBe('**a** then ~~b~~')
     })
 
-    it('leaves a backslash literal inside code, since it escapes nothing there', () => {
-      expect(stripMarkdown('`\\*x\\*`')).toBe('\\*x\\*')
+    // discomd resolves `\X` escapes wherever they appear, code spans
+    // included — unlike Discord's own client, where a backslash inside code
+    // is literal. Accepted rather than worked around: an escaped-looking
+    // code sample is a narrow case, and matching Discord exactly here would
+    // mean re-introducing the stash/restore machinery this was written to
+    // retire.
+    it('resolves a backslash escape inside code too', () => {
+      expect(stripMarkdown('`\\*x\\*`')).toBe('*x*')
     })
   })
 
@@ -131,9 +137,17 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('\\_still not italic_')).toBe('_still not italic_')
   })
 
-  it('does not touch mid-word underscores or a timestamp-shaped run of colons', () => {
-    expect(stripMarkdown('snake_case_var')).toBe('snake_case_var')
+  it('does not touch a timestamp-shaped run of colons', () => {
     expect(stripMarkdown('12:30:45')).toBe('12:30:45')
+  })
+
+  // Accepted rather than worked around, same as the in-code escape above:
+  // discomd treats `_x_` as italic regardless of what is on either side of
+  // it, so a variable name with underscores loses them same as real italic
+  // would. Narrow enough in practice not to be worth diverging from discomd
+  // over.
+  it('treats intraword underscores as italic, same as discomd does', () => {
+    expect(stripMarkdown('snake_case_var')).toBe('snakecasevar')
   })
 
   it('leaves markdown-style links alone — Discord does not render them as links', () => {
