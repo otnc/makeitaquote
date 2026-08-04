@@ -1422,10 +1422,7 @@ export const createClient = (options: HttpOptions = {}) =>
       statusCodes: [408, 413, 429, 500, 502, 503, 504],
       backoffLimit: 3_000,
     },
-    headers: {
-      'user-agent': `makeitaquote/${VERSION} (+https://github.com/otnc/makeitaquote)`,
-      ...options.headers,
-    },
+    headers: options.headers,
   })
 ```
 
