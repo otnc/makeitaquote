@@ -1,9 +1,5 @@
 import ky, { type KyInstance, type Options } from 'ky'
 
-export const VERSION = '9.0.0'
-
-export const USER_AGENT = `makeitaquote/${VERSION} (+https://github.com/otnc/makeitaquote)`
-
 export interface HttpOptions {
   timeout?: number
   retry?: number
@@ -61,9 +57,6 @@ export function createClient(options: HttpOptions = {}): KyInstance {
       statusCodes: [408, 413, 429, 500, 502, 503, 504],
       backoffLimit: 3_000,
     },
-    headers: {
-      'user-agent': USER_AGENT,
-      ...options.headers,
-    },
+    headers: options.headers,
   })
 }
