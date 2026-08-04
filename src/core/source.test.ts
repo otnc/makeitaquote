@@ -20,7 +20,9 @@ describe('fromMessage', () => {
   })
 
   it('strips markdown when opted in', () => {
-    const quote = fromMessage(v14Message({ content: '**bold** message' }), { stripMarkdown: true })
+    const quote = fromMessage(v14Message({ content: '**bold** message' }), {
+      stripDiscordMarkdown: true,
+    })
 
     expect(quote.text).toBe('bold message')
   })
@@ -58,7 +60,7 @@ describe('fromMessage', () => {
         content: '**hi** <@1>',
         mentions: { users: new Map([['1', { username: 'otoneko' }]]) },
       }),
-      { stripMarkdown: true },
+      { stripDiscordMarkdown: true },
     )
 
     expect(quote.text).toBe('hi @otoneko')

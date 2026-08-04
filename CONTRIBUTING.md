@@ -102,19 +102,27 @@ There is no Dependabot here; updates are done by hand. Before a release, run
 
 A dependency is worth it when it owns a specification this package does not,
 or when it is simply smaller than the code it deletes. `mfm-js` is Misskey's
-own MFM parser, `color` is the CSS colour syntax and `discomd` is Discord's
-own Markdown dialect — all three moving targets a local regex only
-approximates, and all three replaced code that had already been wrong once.
-`quick-lru` replaced 89 lines outright.
+own MFM parser, `color` is the CSS colour syntax, `discomd` is Discord's own
+Markdown dialect and `marked` is a CommonMark/GFM parser — all four moving
+targets a local regex only approximates, and all four replaced code that had
+already been wrong once. `quick-lru` replaced 89 lines outright.
 
 `discomd` disagrees with this package's own prior implementation in two
 narrow, accepted ways: a backslash escape resolves even inside a code span
 (Discord's client leaves it literal there), and an intraword underscore
 (`snake_case_var`) is read as italic rather than left alone. Both are pinned
-in `markdown.test.ts` rather than worked around, and reported upstream
+in `discordMarkdown.test.ts` rather than worked around, and reported upstream
 ([discomd#2](https://github.com/otnc/discomd/issues/2),
 [discomd#3](https://github.com/otnc/discomd/issues/3), both fixed by 1.0.1)
 for the two that were genuine bugs rather than accepted differences.
+
+`marked` was picked over the `remark`/`mdast` ecosystem for the same job —
+1.7MB and 45 packages for `remark` + `strip-markdown`, or 1.0MB and 28 for
+`mdast-util-from-markdown` + `mdast-util-to-string`, against `marked`'s
+468K with zero dependencies of its own. `stripMarkdown()` walks its token
+tree by hand (see `stripMfm()`'s AST walk for the established shape of that),
+rather than pulling in `unified`'s whole transform pipeline just to extract
+text.
 
 What has been turned down, and why, so it need not be re-litigated:
 
@@ -124,7 +132,8 @@ What has been turned down, and why, so it need not be re-litigated:
 | `env-paths` | Returns different paths from the ones README documents, so upgrading would orphan every existing font cache. |
 | `css-tree` / `postcss` | 1.9MB / 327K to read three fields out of one API's machine-generated `@font-face` blocks. |
 | `discord-markdown`, `simple-markdown` | Last published 2021; pull in `highlight.js` and `@types/react`. |
-| `remove-markdown` | CommonMark, not Discord's dialect: reads `__x__` as bold instead of underline, and strips the URL out of `[text](url)`, which `stripMarkdown()` deliberately leaves alone since Discord never turned it into a link to begin with. |
+| `remove-markdown` | Regex-based, not a real parser, for either use it was considered for. Against Discord's dialect it reads `__x__` as bold instead of underline and strips the URL out of `[text](url)`, which `stripDiscordMarkdown()` deliberately leaves alone. For plain CommonMark it is 9K against `marked`'s 468K, but its own README lists "make the rules more robust, support more edge cases" as a TODO — correctness `stripMarkdown()` gets from `marked` actually being a parser. |
+| `remark` + `strip-markdown`, `mdast-util-from-markdown` + `mdast-util-to-string` | Real CommonMark compliance, but 1.7MB/45 packages and 1.0MB/28 packages respectively for what `marked` does in 468K and zero dependencies. |
 
 **An ESM-only dependency must go in `deps.alwaysBundle`** in
 `tsdown.config.ts`, or the CJS build emits a `require()` of it and throws for

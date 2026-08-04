@@ -23,7 +23,7 @@ default.
 | `new MiQ()` | `new MiQ()` | `new VoidsMiQ()` |
 | `.setDisplayname(v)` | `.setDisplayName(v)` | `.setDisplayName(v)` |
 | `.setColor(true)` | `.setTheme('color')` | `.setColor(true)` |
-| `.setText(v, true)` | `.setText(stripMarkdown(v))` | same |
+| `.setText(v, true)` | `.setText(stripDiscordMarkdown(v))` | same |
 | `.generate()` | — local rendering has no URL | `.toURL()` |
 | `.generate(true)` | `.toBuffer('png')` | `.toBuffer({ hosted: true })` |
 | `.generateBeta()` | `.toBuffer('png')` | `.toBuffer()` |

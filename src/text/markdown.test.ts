@@ -15,114 +15,34 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('_italic_')).toBe('italic')
   })
 
-  it('strips bold italic', () => {
-    expect(stripMarkdown('***bold italic***')).toBe('bold italic')
-  })
-
   it('strips strikethrough', () => {
     expect(stripMarkdown('~~strike~~')).toBe('strike')
   })
 
-  it('strips underline', () => {
-    expect(stripMarkdown('__underline__')).toBe('underline')
-  })
-
-  it('strips spoilers, revealing the text', () => {
-    expect(stripMarkdown('||spoiler||')).toBe('spoiler')
-  })
-
-  it('strips inline code', () => {
+  it('strips inline code, keeping markdown-looking contents literal', () => {
     expect(stripMarkdown('`code`')).toBe('code')
-  })
-
-  describe('code spans are literal', () => {
-    // Discord renders a code span verbatim, so markdown inside one is text.
-    // Unwrapping the backticks first and letting the later passes see the
-    // contents would silently eat it.
-    it('keeps markdown inside inline code', () => {
-      expect(stripMarkdown('`**not bold**`')).toBe('**not bold**')
-      expect(stripMarkdown('`*x*`')).toBe('*x*')
-      expect(stripMarkdown('`~~x~~`')).toBe('~~x~~')
-    })
-
-    it('keeps markdown inside a fenced block', () => {
-      expect(stripMarkdown('```\n**x**\n```')).toBe('**x**')
-      expect(stripMarkdown('```js\nconst a = **b**\n```')).toBe('const a = **b**')
-    })
-
-    it('still strips real markdown either side of a code span', () => {
-      expect(stripMarkdown('a `**b**` c **d**')).toBe('a **b** c d')
-    })
-
-    it('keeps each of several code spans separate, in order', () => {
-      expect(stripMarkdown('`**a**` then `~~b~~`')).toBe('**a** then ~~b~~')
-    })
-
-    // discomd resolves `\X` escapes wherever they appear, code spans
-    // included — unlike Discord's own client, where a backslash inside code
-    // is literal. Accepted rather than worked around: an escaped-looking
-    // code sample is a narrow case, and matching Discord exactly here would
-    // mean re-introducing the stash/restore machinery this was written to
-    // retire.
-    it('resolves a backslash escape inside code too', () => {
-      expect(stripMarkdown('`\\*x\\*`')).toBe('*x*')
-    })
+    expect(stripMarkdown('`**not bold**`')).toBe('**not bold**')
   })
 
   it('strips a fenced code block, language tag included', () => {
     expect(stripMarkdown('```js\nconst a = 1\n```')).toBe('const a = 1')
   })
 
-  it('strips a single-line fenced block', () => {
-    expect(stripMarkdown('```inline block```')).toBe('inline block')
+  it('strips headers', () => {
+    expect(stripMarkdown('# Heading')).toBe('Heading')
+    expect(stripMarkdown('## Heading')).toBe('Heading')
   })
 
   it('strips a single-line block quote', () => {
     expect(stripMarkdown('> quoted')).toBe('quoted')
   })
 
-  it('strips a multi-line quote (>>>), keeping the rest of the message', () => {
-    expect(stripMarkdown('>>> all of this\nis quoted')).toBe('all of this\nis quoted')
+  it('joins a multi-paragraph block quote with a blank line, same as the source', () => {
+    expect(stripMarkdown('> para one\n>\n> para two')).toBe('para one\n\npara two')
   })
 
-  it('strips headers of every level Discord supports', () => {
-    expect(stripMarkdown('# Header')).toBe('Header')
-    expect(stripMarkdown('## Header')).toBe('Header')
-    expect(stripMarkdown('### Header')).toBe('Header')
-  })
-
-  it('strips subtext', () => {
-    expect(stripMarkdown('-# fine print')).toBe('fine print')
-  })
-
-  it('does not mistake subtext for a bulleted list item', () => {
-    // The list marker regex requires whitespace right after `-`; `-#` never
-    // has that, so it must fall to the subtext pass instead.
-    expect(stripMarkdown('-# not a list')).toBe('not a list')
-  })
-
-  describe('lists', () => {
-    it('strips an unordered list marker, either character', () => {
-      expect(stripMarkdown('- item')).toBe('item')
-      expect(stripMarkdown('* item')).toBe('item')
-    })
-
-    it('strips an ordered list marker', () => {
-      expect(stripMarkdown('1. first')).toBe('first')
-      expect(stripMarkdown('12. twelfth')).toBe('twelfth')
-    })
-
-    it('keeps indentation, so a nested item still reads as nested', () => {
-      expect(stripMarkdown('- top\n  - nested')).toBe('top\n  nested')
-    })
-
-    it('leaves a number followed by a decimal alone', () => {
-      expect(stripMarkdown('3.14 is pi')).toBe('3.14 is pi')
-    })
-
-    it('leaves italics starting a line alone — no space after the marker', () => {
-      expect(stripMarkdown('*emphasis* at line start')).toBe('emphasis at line start')
-    })
+  it('keeps a blank line between paragraphs', () => {
+    expect(stripMarkdown('para one\n\npara two')).toBe('para one\n\npara two')
   })
 
   it('nests markers of different kinds', () => {
@@ -133,28 +53,70 @@ describe('stripMarkdown', () => {
     expect(stripMarkdown('\\*not italic\\*')).toBe('*not italic*')
   })
 
-  it("leaves an escaped character's own markdown-looking neighbours alone", () => {
-    expect(stripMarkdown('\\_still not italic_')).toBe('_still not italic_')
+  describe('links and images', () => {
+    it("keeps a masked link's label, drops the url", () => {
+      expect(stripMarkdown('[a link](https://example.com "title")')).toBe('a link')
+    })
+
+    it("keeps an image's alt text, drops the url", () => {
+      expect(stripMarkdown('![alt text](https://example.com/img.png)')).toBe('alt text')
+    })
+
+    it('resolves a reference-style link to its label', () => {
+      expect(stripMarkdown('[label][ref]\n\n[ref]: https://example.com "t"')).toBe('label')
+    })
+
+    it('leaves an autolink as the bare url it already was', () => {
+      expect(stripMarkdown('see <https://example.com> here')).toBe('see https://example.com here')
+    })
   })
 
-  it('does not touch a timestamp-shaped run of colons', () => {
-    expect(stripMarkdown('12:30:45')).toBe('12:30:45')
+  describe('lists', () => {
+    it('strips unordered and ordered markers, one item per line', () => {
+      expect(stripMarkdown('- item one\n- item two')).toBe('item one\nitem two')
+      expect(stripMarkdown('1. first\n2. second')).toBe('first\nsecond')
+    })
+
+    it('keeps a loose list to one item per line, same as a tight one', () => {
+      expect(stripMarkdown('- item one\n\n- item two')).toBe('item one\nitem two')
+    })
+
+    it('breaks before a nested list, even though CommonMark has no blank line there', () => {
+      expect(stripMarkdown('- top\n  - nested')).toBe('top\nnested')
+    })
+
+    it("keeps a task list's checked state, since that is real information", () => {
+      expect(stripMarkdown('- [ ] todo\n- [x] done')).toBe('[ ] todo\n[x] done')
+    })
   })
 
-  // Accepted rather than worked around, same as the in-code escape above:
-  // discomd treats `_x_` as italic regardless of what is on either side of
-  // it, so a variable name with underscores loses them same as real italic
-  // would. Narrow enough in practice not to be worth diverging from discomd
-  // over.
-  it('treats intraword underscores as italic, same as discomd does', () => {
-    expect(stripMarkdown('snake_case_var')).toBe('snakecasevar')
+  it('renders a hard line break as one', () => {
+    expect(stripMarkdown('line one\nwith a break  \nhard break')).toBe(
+      'line one\nwith a break\nhard break',
+    )
   })
 
-  it('leaves markdown-style links alone — Discord does not render them as links', () => {
-    expect(stripMarkdown('[text](https://example.com)')).toBe('[text](https://example.com)')
+  it('drops a horizontal rule entirely', () => {
+    expect(stripMarkdown('before\n\n---\n\nafter')).toBe('before\n\nafter')
   })
 
-  it('strips emphasis inline, keeping the surrounding text', () => {
-    expect(stripMarkdown('normal *emphasis* here')).toBe('normal emphasis here')
+  it('lays out a table as tab-separated cells', () => {
+    expect(stripMarkdown('| a | b |\n| --- | --- |\n| 1 | 2 |')).toBe('a\tb\n1\t2')
+  })
+
+  describe('raw HTML', () => {
+    it('drops an inline tag, keeping the text around it', () => {
+      expect(stripMarkdown('text with <em>raw html</em> inline')).toBe('text with raw html inline')
+    })
+
+    it('drops a block of raw HTML entirely', () => {
+      expect(stripMarkdown('<div>\nraw html block\n</div>\n\nafter')).toBe('after')
+    })
+  })
+
+  it('trims a trailing blank line left by an invisible construct', () => {
+    // The gap before a link reference definition is real source, but the
+    // definition itself renders nothing — so nothing should trail after it.
+    expect(stripMarkdown('text\n\n[ref]: https://example.com')).toBe('text')
   })
 })

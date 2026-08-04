@@ -1521,7 +1521,7 @@ Error
 | `new MiQ()` | `new MiQ()` | `new VoidsMiQ()` |
 | `.setDisplayname(v)` | `.setDisplayName(v)` | `.setDisplayName(v)` |
 | `.setColor(true)` | `.setTheme('color')` | `.setColor(true)` |
-| `.setText(v, true)` | `.setText(stripMarkdown(v))` | 同左 |
+| `.setText(v, true)` | `.setText(stripDiscordMarkdown(v))` | 同左 |
 | `.generate()` | ローカル生成に URL は存在しない | `.toURL()`（`/fakequote`） |
 | `.generate(true)` | `.toBuffer('png')` | `.toBuffer({ hosted: true })`（2 往復） |
 | `.generateBeta()` | `.toBuffer('png')` | **`.toBuffer()`**（`/fakequotebeta`、1 往復） |

@@ -1,4 +1,4 @@
-import { stripMarkdown } from '../text/markdown'
+import { stripDiscordMarkdown } from '../text/discordMarkdown'
 import { ValidationError } from './errors'
 import { resolveMentions } from './mentions'
 import { emptyQuote } from './quote'
@@ -100,7 +100,7 @@ export function fromMessage(message: unknown, options: MessageSourceOptions = {}
           message,
           typeof options.resolveMentions === 'object' ? options.resolveMentions : {},
         )
-  quote.text = options.stripMarkdown ? stripMarkdown(withMentions) : withMentions
+  quote.text = options.stripDiscordMarkdown ? stripDiscordMarkdown(withMentions) : withMentions
   quote.username = formatUsername(message.author)
   quote.displayName = preferGlobalName
     ? (globalName(message) ?? guildName(message) ?? message.author.username)

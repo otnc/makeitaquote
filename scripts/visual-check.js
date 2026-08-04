@@ -62,7 +62,9 @@ if (!existsSync(distEntry)) {
   process.exit(1)
 }
 
-const { MiQ, MiQConversation, FONT_CATALOGUE } = await import(pathToFileURL(distEntry).href)
+const { MiQ, MiQConversation, FONT_CATALOGUE, stripMarkdown } = await import(
+  pathToFileURL(distEntry).href
+)
 
 const packageVersion = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).version
 
@@ -482,12 +484,12 @@ add(
       content: markdownSample,
       author: { username: 'someone' },
     }),
-  { note: 'stripMarkdown defaults to false — compare with the next card' },
+  { note: 'stripDiscordMarkdown defaults to false — compare with the next card' },
 )
-add('11-discord', 'stripMarkdown: true', () =>
+add('11-discord', 'stripDiscordMarkdown: true', () =>
   new MiQ().setFromMessage(
     { content: markdownSample, author: { username: 'someone' } },
-    { stripMarkdown: true },
+    { stripDiscordMarkdown: true },
   ),
 )
 add(
@@ -561,6 +563,26 @@ add(
       user: { username: 'someone', name: null, host: 'misskey.example', avatarUrl: null },
     }),
   { note: '@user@host, and the username stands in when there is no display name' },
+)
+
+// --- 15-markdown: stripMarkdown(), for anything that isn't Discord or Misskey
+
+const commonMarkdownSample = [
+  '# A quote from **elsewhere**',
+  '',
+  'Not Discord, not Misskey — a blog post, a GitHub comment, a Mastodon toot.',
+  '',
+  '- plain CommonMark',
+  '- [a link](https://example.com) becomes just its label',
+].join('\n')
+add(
+  '15-markdown',
+  'plain text, quoted as written',
+  () => base().setText(commonMarkdownSample).setAvatar(avatars.illustration),
+  { note: '.setText() does not strip markdown on its own — compare with the next card' },
+)
+add('15-markdown', 'stripMarkdown(text) composed with setText', () =>
+  base().setText(stripMarkdown(commonMarkdownSample)).setAvatar(avatars.illustration),
 )
 
 // --- 12-colors: the color system ----------------------------------------
