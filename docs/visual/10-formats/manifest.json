@@ -4,12 +4,12 @@
   "cases": [
     {
       "name": "png",
-      "file": "10-formats/png.webp",
+      "file": "10-formats/png.png",
       "note": null,
       "format": "png",
-      "width": 1422,
-      "height": 800,
-      "bytes": 19666,
+      "width": 1200,
+      "height": 630,
+      "bytes": 183352,
       "ok": true,
       "error": null
     },
@@ -20,7 +20,7 @@
       "format": "jpeg",
       "width": null,
       "height": null,
-      "bytes": 38127,
+      "bytes": 28822,
       "ok": true,
       "error": null
     },
@@ -31,7 +31,7 @@
       "format": "webp",
       "width": null,
       "height": null,
-      "bytes": 40904,
+      "bytes": 33174,
       "ok": true,
       "error": null
     },
@@ -42,7 +42,7 @@
       "format": "avif",
       "width": null,
       "height": null,
-      "bytes": 8530,
+      "bytes": 7163,
       "ok": true,
       "error": null
     }

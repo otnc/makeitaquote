@@ -22,7 +22,6 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { createCanvas, loadImage } from '@napi-rs/canvas'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
@@ -706,21 +705,21 @@ add(
 
 add(
   '09-sizing',
-  'default (800 tall)',
+  'default (630 tall)',
   () => base().setText(text.ja).setAvatar(avatars.illustration),
-  { expect: { height: 800 } },
+  { expect: { height: 630 } },
 )
 add(
   '09-sizing',
   'scale 0.5',
   () => base().setText(text.ja).setAvatar(avatars.illustration).setScale(0.5),
-  { expect: { height: 400 }, note: 'the same layout at half the resolution' },
+  { expect: { height: 315 }, note: 'the same layout at half the resolution' },
 )
 add(
   '09-sizing',
   'scale 2',
   () => base().setText(text.ja).setAvatar(avatars.illustration).setScale(2),
-  { expect: { height: 1600 } },
+  { expect: { height: 1260 } },
 )
 add(
   '09-sizing',
@@ -789,31 +788,6 @@ const SIGNATURES = {
     b.subarray(0, 4).toString('ascii') === 'RIFF' &&
     b.subarray(8, 12).toString('ascii') === 'WEBP',
   avif: (b) => b.length > 12 && b.subarray(4, 8).toString('ascii') === 'ftyp',
-}
-
-/** Longest edge of a published image. Enough to judge a render by eye. */
-const GALLERY_MAX_EDGE = 900
-
-/**
- * A lighter copy of a render, for committing and serving.
- *
- * The checks above run against the original bytes, so verification keeps full
- * fidelity; only what lands in the repository is reduced. Anything already
- * small enough, and anything whose format is the point of the case, is left
- * exactly as it was.
- */
-async function forPublication(buffer, format) {
-  if (format !== 'png') return { bytes: buffer, extension: null }
-
-  const image = await loadImage(buffer)
-  const scale = GALLERY_MAX_EDGE / Math.max(image.width, image.height)
-  if (scale >= 1) return { bytes: buffer, extension: null }
-
-  const canvas = createCanvas(Math.round(image.width * scale), Math.round(image.height * scale))
-  const ctx = canvas.getContext('2d')
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-
-  return { bytes: await canvas.encode('webp', 82), extension: 'webp' }
 }
 
 /** Width and height straight out of the PNG IHDR chunk. */
@@ -901,13 +875,8 @@ for (const testCase of selected) {
       }
     }
 
-    // Everything above is checked against the real render. What gets written
-    // is a lighter copy: this gallery is committed and served over Pages, and
-    // full-resolution PNGs of 77 cases come to ~19 MB.
-    const published = await forPublication(buffer, format)
-    if (published.extension) result.file = file.replace(/\.\w+$/, `.${published.extension}`)
-    result.bytes = published.bytes.length
-    await writeFile(join(outDir, result.file), published.bytes)
+    result.bytes = buffer.length
+    await writeFile(join(outDir, result.file), buffer)
   } catch (error) {
     result.error = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
     result.problems.push('threw')

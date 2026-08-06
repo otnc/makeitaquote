@@ -6,33 +6,33 @@ describe('computeLayout · side', () => {
   it('puts the avatar on the left by default', () => {
     const { avatar } = computeLayout(defineTheme('dark'))
 
-    expect(avatar).toEqual({ x: 0, y: 0, width: 711, height: 800 })
+    expect(avatar).toEqual({ x: 0, y: 0, width: 600, height: 630 })
   })
 
   it('puts the avatar on the right when asked', () => {
     const { avatar } = computeLayout(defineTheme({ avatar: { position: 'right' } }))
 
-    expect(avatar).toEqual({ x: 711, y: 0, width: 711, height: 800 })
+    expect(avatar).toEqual({ x: 600, y: 0, width: 600, height: 630 })
   })
 
   it('honours a narrower avatar', () => {
     const { avatar } = computeLayout(defineTheme({ avatar: { widthRatio: 0.35 } }))
 
-    expect(avatar.width).toBe(1422 * 0.35)
+    expect(avatar.width).toBe(1200 * 0.35)
   })
 
   it('places the text opposite a left avatar', () => {
     const { text } = computeLayout(defineTheme('dark'))
 
-    expect(text.x).toBeCloseTo(1422 * 0.54)
-    expect(text.x + text.width).toBeCloseTo(1422 * 0.96)
+    expect(text.x).toBeCloseTo(1200 * 0.54)
+    expect(text.x + text.width).toBeCloseTo(1200 * 0.96)
   })
 
   it('moves the text with the avatar when it flips', () => {
     const { text } = computeLayout(defineTheme({ avatar: { position: 'right' } }))
 
-    expect(text.x).toBeCloseTo(1422 * 0.04)
-    expect(text.x + text.width).toBeCloseTo(1422 * 0.46)
+    expect(text.x).toBeCloseTo(1200 * 0.04)
+    expect(text.x + text.width).toBeCloseTo(1200 * 0.46)
   })
 
   it('never lets the text overlap the avatar', () => {

@@ -32,14 +32,15 @@ export const palettes = {
   },
 } as const
 
-/** Height of a landscape canvas, and width of a portrait one. */
-export const DEFAULT_LONG_EDGE = 800
+/**
+ * What `api.voids.top` actually renders at, verified by calling it directly.
+ * Not 16:9 — close, but a real bot generates the images this package is
+ * named after, so its size is the one that matters here, not a round ratio.
+ */
+const LANDSCAPE = { width: 1200, height: 630 }
 
-/** 16:9, the shape the original Make it a Quote images are. */
-const LANDSCAPE = { width: Math.round((DEFAULT_LONG_EDGE * 16) / 9), height: DEFAULT_LONG_EDGE }
-
-/** 4:5 — portrait, with the long edge as the width per the same convention. */
-const PORTRAIT = { width: DEFAULT_LONG_EDGE, height: Math.round((DEFAULT_LONG_EDGE * 5) / 4) }
+/** The same bot's vertical mode. */
+const PORTRAIT = { width: 630, height: 790 }
 
 /**
  * The original Make it a Quote look: black background, desaturated avatar on
