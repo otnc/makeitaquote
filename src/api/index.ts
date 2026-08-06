@@ -3,7 +3,7 @@ export {
   MiQError,
   ValidationError,
 } from '../core/errors'
-export type { MessageLike, QuoteData, QuoteInput } from '../core/types'
+export type { MessageLike, MessageSourceOptions, QuoteData, QuoteInput } from '../core/types'
 export { MiQ, VoidsMiQ } from './client'
 export { DEFAULT_BASE_URL, endpoints } from './endpoints'
 export type { VoidsOptions, VoidsPayload, VoidsQuoteData } from './types'
