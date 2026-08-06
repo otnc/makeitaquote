@@ -397,13 +397,13 @@ Every color accepts any of these:
 0xRRGGBB  0xRRGGBBAA                         numbers
 [r, g, b]  [r, g, b, a]                      channels 0–255, alpha 0–1 or 0–255
 'transparent'  'rebeccapurple'  'red'        any CSS colour name
-'rgb(…)'  'rgba(…)'  'hsl(…)'  'hwb(…)'      CSS colour functions
+'rgb(…)'  'hsl(…)'  'hwb(…)'  'lab(…)'       CSS colour functions, and more —
+'lch(…)'  'oklab(…)'  'oklch(…)'  'color(…)'   anything culori itself parses
 ```
 
-Strings go through the [`color`](https://www.npmjs.com/package/color) package,
-which brings the 148 CSS colour names and `hsl()`/`hwb()`, converted to RGB
-for you. (`lab()` and `lch()` are not among them.) The number and array forms
-are this package's own.
+Strings go through [`culori`](https://www.npmjs.com/package/culori), which
+brings the 148 CSS colour names and the whole CSS Color 4 function set,
+converted to RGB for you. The number and array forms are this package's own.
 
 > A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so
 > write those as strings, where the length is part of the value.

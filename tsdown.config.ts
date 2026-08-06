@@ -9,10 +9,12 @@ export default defineConfig({
   target: 'node22',
   platform: 'node',
   deps: {
-    // All ESM-only ("type": "module" with no CJS entry), so inline them or
-    // the CJS build ends up with a `require()` of an ESM package, which
-    // throws ERR_REQUIRE_ESM the moment anyone calls into it.
-    alwaysBundle: ['ky', 'color', 'quick-lru', 'marked'],
+    // Every runtime dependency ships a real CJS build (a `require` export
+    // condition, not just a `"type": "module"` package `require()` would
+    // throw on) — see CONTRIBUTING.md's dependency table for why each one
+    // was picked partly for that. Nothing needs `alwaysBundle`, and
+    // `check-build.js` fails the build the day that stops being true.
+    //
     // Native bindings must stay as imports — a bundled .node file won't load.
     neverBundle: ['@napi-rs/canvas', '@twemoji/parser', 'budoux'],
   },

@@ -117,15 +117,36 @@ describe('parseColor', () => {
     })
   })
 
-  describe('the rest of CSS, via the color package', () => {
+  describe('the rest of CSS, via culori', () => {
     it('reads a colour name', () => {
       expect(parseColor('rebeccapurple')).toEqual({ r: 102, g: 51, b: 153, a: 1 })
       expect(parseColor('red')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
     })
 
-    it('reads hsl and hwb, converting to rgb', () => {
+    it('reads hsl(), converting to rgb', () => {
       expect(parseColor('hsl(0, 100%, 50%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
-      expect(parseColor('hwb(0, 0%, 0%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+    })
+
+    // hwb() was only ever defined with space-separated arguments — unlike
+    // rgb()/hsl(), it has no legacy comma form to also accept.
+    it('reads hwb(), converting to rgb', () => {
+      expect(parseColor('hwb(0 0% 0%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+    })
+
+    // culori parses the rest of CSS Color 4 too, which `color` (the package
+    // this used to run on) did not — a real capability gained by the switch,
+    // not just a like-for-like swap.
+    it('reads lab(), lch(), oklab(), oklch() and color(), converting to rgb', () => {
+      expect(parseColor('lab(50% 40 59.5)')).toEqual({ r: 191, g: 87, b: 0, a: 1 })
+      expect(parseColor('lch(50% 60 30)')).toEqual({ r: 202, g: 73, b: 72, a: 1 })
+      expect(parseColor('oklab(59% 0.1 0.1)')).toEqual({ r: 192, g: 93, b: 43, a: 1 })
+      expect(parseColor('oklch(60% 0.15 30)')).toEqual({ r: 202, g: 87, b: 71, a: 1 })
+      expect(parseColor('color(srgb 1 0 0)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+    })
+
+    it('is case-insensitive, matching CSS identifiers generally', () => {
+      expect(parseColor('RED')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
+      expect(parseColor('RGB(255, 0, 0)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
     })
 
     it('reads the space-separated form with a slash alpha', () => {

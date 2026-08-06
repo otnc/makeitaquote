@@ -1,4 +1,4 @@
-import Color from 'color'
+import { parse as parseCssColor, rgb as toRgb } from 'culori'
 import { ValidationError } from '../core/errors'
 
 /**
@@ -109,20 +109,28 @@ function fromString(input: string, field: string): RGBA {
   // JSON. Not CSS, so the library would rightly reject it.
   if (/^0x[0-9a-f]{6,8}$/i.test(value)) return fromNumber(Number(value), field)
 
-  try {
-    const [r, g, b] = Color(value).rgb().array()
-    return {
-      r: clampChannel(r as number),
-      g: clampChannel(g as number),
-      b: clampChannel(b as number),
-      a: clampAlpha(Color(value).alpha()),
-    }
-  } catch {
+  // CSS identifiers and function names are ASCII case-insensitive by spec
+  // (`RED`, `RGB(...)` are as valid as their lowercase forms), but culori's
+  // own keyword/function matching only recognises the lowercase spelling.
+  const parsed = parseCssColor(value.toLowerCase())
+  if (!parsed) {
     throw new ValidationError(
       `${field}: could not read "${input}" as a color. Use a CSS color, ` +
         '0xRRGGBBAA, or [r, g, b, a].',
       { field },
     )
+  }
+
+  // culori keeps a colour in whatever space it was written (hsl(), lab(), …)
+  // rather than normalizing on parse, so every notation is routed through
+  // the same rgb() conversion regardless of which one it started as.
+  // Channels come back 0–1, this package's own convention is 0–255.
+  const { r, g, b, alpha } = toRgb(parsed)
+  return {
+    r: clampChannel(r * 255),
+    g: clampChannel(g * 255),
+    b: clampChannel(b * 255),
+    a: clampAlpha(alpha ?? 1),
   }
 }
 

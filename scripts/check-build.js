@@ -120,31 +120,56 @@ for (const expected of [
 //    instead of the day someone remembers to add it.
 // ---------------------------------------------------------------------------
 
-/** True when a package publishes ESM only, with no CJS entry to fall back to. */
-function isEsmOnly(dependency) {
-  let manifest
-  try {
-    manifest = require(`${dependency}/package.json`)
-  } catch {
-    // Not every package exports its own package.json. Read it off disk.
-    try {
-      const path = join(root, 'node_modules', dependency, 'package.json')
-      manifest = JSON.parse(readFileSync(path, 'utf8'))
-    } catch {
-      return false
-    }
-  }
-
-  if (manifest.type !== 'module') return false
+/** True when a package.json describes ESM only, with no CJS entry to fall back to. */
+function isEsmOnly(dependencyManifest) {
+  if (dependencyManifest.type !== 'module') return false
 
   // `exports` may still offer a `require` condition, which makes it dual.
-  const exported = JSON.stringify(manifest.exports ?? '')
-  return !exported.includes('"require"') && !manifest.main?.endsWith('.cjs')
+  const exported = JSON.stringify(dependencyManifest.exports ?? '')
+  return !exported.includes('"require"') && !dependencyManifest.main?.endsWith('.cjs')
 }
 
+/** Not every package exports its own package.json, so this falls back to reading it off disk. */
+function manifestOf(dependency) {
+  try {
+    return require(`${dependency}/package.json`)
+  } catch {
+    try {
+      return JSON.parse(
+        readFileSync(join(root, 'node_modules', dependency, 'package.json'), 'utf8'),
+      )
+    } catch {
+      return null
+    }
+  }
+}
+
+// Every real dependency here is picked partly *because* it isn't ESM-only —
+// see CONTRIBUTING.md's dependency table — so nothing in `package.json` can
+// be relied on to stay a positive example forever. `isEsmOnly()` is proven
+// against synthetic manifests instead, independent of what is installed.
+check(
+  'isEsmOnly() catches an ESM-only manifest',
+  isEsmOnly({ type: 'module', exports: { '.': { default: './index.mjs' } } }),
+)
+check(
+  'isEsmOnly() clears a manifest with a require condition',
+  !isEsmOnly({
+    type: 'module',
+    exports: { '.': { require: './index.cjs', import: './index.mjs' } },
+  }),
+)
+check(
+  'isEsmOnly() clears a manifest with a .cjs main and no exports map',
+  !isEsmOnly({ main: './index.cjs' }),
+)
+check('isEsmOnly() clears a plain CJS manifest', !isEsmOnly({ main: './index.js' }))
+
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
-const esmOnly = Object.keys(manifest.dependencies ?? {}).filter(isEsmOnly)
-check('found the ESM-only dependencies to police', esmOnly.length > 0, 'expected at least ky')
+const esmOnly = Object.keys(manifest.dependencies ?? {}).filter((dependency) => {
+  const dependencyManifest = manifestOf(dependency)
+  return dependencyManifest !== null && isEsmOnly(dependencyManifest)
+})
 
 for (const file of files.filter((f) => f.endsWith('.cjs'))) {
   for (const dependency of esmOnly) {
