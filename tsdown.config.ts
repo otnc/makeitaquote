@@ -11,9 +11,9 @@ export default defineConfig({
   deps: {
     // Every runtime dependency ships a real CJS build (a `require` export
     // condition, not just a `"type": "module"` package `require()` would
-    // throw on) — see CONTRIBUTING.md's dependency table for why each one
-    // was picked partly for that. Nothing needs `alwaysBundle`, and
-    // `check-build.js` fails the build the day that stops being true.
+    // throw on) — see INFO.md for why each one was picked partly for that.
+    // Nothing needs `alwaysBundle`, and `check-build.js` fails the build the
+    // day that stops being true.
     //
     // Native bindings must stay as imports — a bundled .node file won't load.
     neverBundle: ['@napi-rs/canvas', '@twemoji/parser', 'budoux'],

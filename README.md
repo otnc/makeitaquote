@@ -243,11 +243,12 @@ rather than rendered or left as literal tag text. A list item becomes one
 line, a table becomes tab-separated cells, and a hard line break (two
 trailing spaces) becomes a real one.
 
-This is built on [`marked`](https://www.npmjs.com/package/marked) rather
-than a local approximation, the same reasoning as `stripDiscordMarkdown()`
-and `stripMfm()`: CommonMark has enough corners — reference-style
-`[label][ref]` links, loose vs. tight lists, a fenced code block's language
-tag — that matching a real implementation is worth the dependency.
+This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it)
+rather than a local approximation, the same reasoning as
+`stripDiscordMarkdown()` and `stripMfm()`: CommonMark has enough corners —
+reference-style `[label][ref]` links, loose vs. tight lists, a fenced code
+block's language tag — that matching a real implementation is worth the
+dependency.
 
 ---
 

@@ -10,10 +10,9 @@ import { ValidationError } from '../core/errors'
  * - `'transparent'`, and any CSS colour name (`'rebeccapurple'`)
  * - `rgb()` / `rgba()` / `hsl()` / `hwb()` and the rest of CSS's functions
  *
- * Strings go through the `color` package, so the whole CSS colour syntax is
- * accepted rather than the handful of shapes a local regex could keep up
- * with. Numbers and arrays are this package's own conventions and are read
- * here.
+ * Strings go through `culori`, so the whole CSS colour syntax is accepted
+ * rather than the handful of shapes a local regex could keep up with.
+ * Numbers and arrays are this package's own conventions and are read here.
  */
 export type ColorInput = string | number | readonly number[]
 

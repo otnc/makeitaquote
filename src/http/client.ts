@@ -19,7 +19,7 @@ export interface HttpClient {
   post(url: string, options?: RequestOptions): Promise<Response>
 }
 
-/** Thrown for a non-2xx response, same shape callers relied on from ky. */
+/** Thrown for a non-2xx response. */
 export class HTTPError extends Error {
   readonly response: Response
   /** The body, already read — the response above is a fresh one built from it, not the original stream. */
@@ -52,10 +52,8 @@ export function createClient(options: HttpOptions = {}): HttpClient {
     timeout: options.timeout ?? 10_000,
     retry: options.retry ?? 2,
     retryStatusCodes: [408, 413, 429, 500, 502, 503, 504],
-    // ofetch's `retryDelay` gets no attempt count to grow with (unlike ky's
-    // exponential `backoffLimit`), so this is a flat delay rather than a
-    // growing one — untested either way, and a couple of quick retries is
-    // still better than none.
+    // A flat delay, not a growing one — `ofetch` gives `retryDelay` no
+    // attempt count to grow it with.
     retryDelay: 300,
     headers: options.headers,
   })
@@ -79,7 +77,7 @@ export function createClient(options: HttpOptions = {}): HttpClient {
         responseType: 'arrayBuffer',
         // Retrying only happens on the throwing path — see the `catch`
         // below — so a caller opting out of the throw also opts out of the
-        // retry. Undocumented either way in the old ky-based behaviour.
+        // retry.
         ignoreResponseError: !throwHttpErrors,
       })
       return toResponse(raw.status, raw.statusText, raw.headers, raw._data as ArrayBuffer)
