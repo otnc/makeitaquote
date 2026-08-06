@@ -13,11 +13,11 @@ interface Call {
 let calls: Call[] = []
 
 /**
- * Stubs `fetch` rather than ky itself, so the retry, timeout and error-mapping
- * behaviour under test is the real thing.
+ * Stubs `fetch` rather than the HTTP client itself, so the retry, timeout and
+ * error-mapping behaviour under test is the real thing.
  *
- * ky calls `fetch(request)` with a `Request`, so the method and body have to be
- * read off that rather than off an init object.
+ * Handles being called as either `fetch(request)` or `fetch(url, init)`,
+ * since which form the client uses isn't this test's concern.
  */
 function stubFetch(handler: (url: string, request: Request) => Response | Promise<Response>) {
   vi.stubGlobal('fetch', async (input: string | URL | Request, init: RequestInit = {}) => {

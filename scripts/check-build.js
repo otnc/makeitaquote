@@ -145,9 +145,9 @@ function manifestOf(dependency) {
 }
 
 // Every real dependency here is picked partly *because* it isn't ESM-only —
-// see CONTRIBUTING.md's dependency table — so nothing in `package.json` can
-// be relied on to stay a positive example forever. `isEsmOnly()` is proven
-// against synthetic manifests instead, independent of what is installed.
+// see INFO.md — so nothing in `package.json` can be relied on to stay a
+// positive example forever. `isEsmOnly()` is proven against synthetic
+// manifests instead, independent of what is installed.
 check(
   'isEsmOnly() catches an ESM-only manifest',
   isEsmOnly({ type: 'module', exports: { '.': { default: './index.mjs' } } }),

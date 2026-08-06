@@ -11,7 +11,12 @@ runtime.
 | [`@napi-rs/canvas`](https://github.com/Brooooooklyn/canvas) | MIT |
 | [`@twemoji/parser`](https://github.com/jdecked/twemoji) | MIT |
 | [`budoux`](https://github.com/google/budoux) | Apache-2.0 |
-| [`ky`](https://github.com/sindresorhus/ky) | MIT |
+| [`culori`](https://github.com/Evercoder/culori) | MIT |
+| [`discomd`](https://github.com/otnc/discomd) | MIT |
+| [`markdown-it`](https://github.com/markdown-it/markdown-it) | MIT |
+| [`mfm-js`](https://github.com/misskey-dev/mfm.js) | MIT |
+| [`ofetch`](https://github.com/unjs/ofetch) | MIT |
+| [`tiny-lru`](https://github.com/avoidwork/tiny-lru) | BSD-3-Clause |
 
 Their licence texts are installed alongside them in `node_modules`, and are
 included in any bundle that redistributes them.
