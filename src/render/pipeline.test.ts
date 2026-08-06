@@ -70,8 +70,8 @@ describe('render', () => {
   it('renders at the theme size by default', async () => {
     const canvas = await quote().render()
 
-    expect(canvas.width).toBe(1422)
-    expect(canvas.height).toBe(800)
+    expect(canvas.width).toBe(1200)
+    expect(canvas.height).toBe(630)
   })
 
   it('honours setSize', async () => {
@@ -83,7 +83,7 @@ describe('render', () => {
 
   it('fills the background with the theme color', async () => {
     // Top-right: past the avatar box and the gradient, and above the text.
-    const [r, g, b, a] = await pixelAt(quote(), 1275, 5)
+    const [r, g, b, a] = await pixelAt(quote(), 1100, 5)
 
     expect([r, g, b]).toEqual([0, 0, 0])
     expect(a).toBe(255)
@@ -95,7 +95,7 @@ describe('render', () => {
     })
 
     // Top-right, same spot the plain color test reads — now the image, not #000.
-    const [r, g, b] = await pixelAt(miq, 1275, 5)
+    const [r, g, b] = await pixelAt(miq, 1100, 5)
 
     expect([r, g, b]).toEqual([255, 0, 0])
   })
@@ -105,7 +105,7 @@ describe('render', () => {
       backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 0.5 },
     })
 
-    const [r, g, b] = await pixelAt(miq, 1275, 5)
+    const [r, g, b] = await pixelAt(miq, 1100, 5)
 
     // Halfway between black background and pure red image.
     expect(r).toBeGreaterThan(100)
@@ -119,12 +119,14 @@ describe('render', () => {
       backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'contain', opacity: 1 },
     })
 
-    // The square source, scaled into 1422x800, lands at x∈[311,1111] — both
-    // points read past the avatar box (x<711) so only the image is at play.
-    const [barR, barG, barB] = await pixelAt(miq, 1275, 5) // right of the image
+    // The square source, scaled into 1200x630, lands at x∈[285,915]. The
+    // gradient covers up to x=600 though, so only a point past both that and
+    // the image's own edge reads the plain background, and only a point past
+    // the gradient but still inside the image reads the image untouched.
+    const [barR, barG, barB] = await pixelAt(miq, 1100, 5) // right of the image
     expect([barR, barG, barB]).toEqual([0, 0, 0])
 
-    const [imgR, imgG, imgB] = await pixelAt(miq, 900, 400) // inside it
+    const [imgR, imgG, imgB] = await pixelAt(miq, 750, 5) // inside it, past the gradient
     expect([imgR, imgG, imgB]).toEqual([255, 0, 0])
   })
 
@@ -133,13 +135,13 @@ describe('render', () => {
       backgroundImage: { source: 'https://invalid.test/nope.png', fit: 'cover', opacity: 1 },
     })
 
-    const [r, g, b] = await pixelAt(miq, 1275, 5)
+    const [r, g, b] = await pixelAt(miq, 1100, 5)
 
     expect([r, g, b]).toEqual([0, 0, 0])
   })
 
   it('uses white for the light theme background', async () => {
-    const [r, g, b] = await pixelAt(quote().setTheme('light'), 1275, 5)
+    const [r, g, b] = await pixelAt(quote().setTheme('light'), 1100, 5)
 
     expect([r, g, b]).toEqual([255, 255, 255])
   })
@@ -158,7 +160,7 @@ describe('render', () => {
   })
 
   it('desaturates the avatar', async () => {
-    const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()), 100, 360)
+    const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()), 100, 315)
 
     // Pure red at Rec.709 luma is a mid-dark grey; what matters is that the
     // channels now agree.
@@ -168,7 +170,7 @@ describe('render', () => {
   })
 
   it('keeps the avatar in color for the color theme', async () => {
-    const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()).setTheme('color'), 100, 360)
+    const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()).setTheme('color'), 100, 315)
 
     expect(r).toBeGreaterThan(200)
     expect(g).toBeLessThan(60)
@@ -176,7 +178,7 @@ describe('render', () => {
   })
 
   it('draws a fallback tile when the avatar cannot be loaded', async () => {
-    const [r, g, b, a] = await pixelAt(quote().setAvatar('https://invalid.test/nope.png'), 100, 360)
+    const [r, g, b, a] = await pixelAt(quote().setAvatar('https://invalid.test/nope.png'), 100, 315)
 
     // The dark theme's fallback is #1E1E1E, not the #000 background.
     expect(a).toBe(255)
@@ -184,14 +186,14 @@ describe('render', () => {
   })
 
   it('draws a fallback tile when there is no avatar at all', async () => {
-    const [r, g, b] = await pixelAt(quote(), 100, 360)
+    const [r, g, b] = await pixelAt(quote(), 100, 315)
 
     expect([r, g, b]).toEqual([30, 30, 30])
   })
 
   it('clips the avatar box to a circle', async () => {
-    // Dark theme, side layout: box is {x:0, y:0, width:711, height:800}, so
-    // its corner sits well outside the largest inscribed circle (r≈355.5).
+    // Dark theme, side layout: box is {x:0, y:0, width:600, height:630}, so
+    // its corner sits well outside the largest inscribed circle (r=300).
     const miq = quote()
       .setAvatar(redSquare())
       .setTheme({ avatar: { shape: 'circle' } })
@@ -201,7 +203,7 @@ describe('render', () => {
     const [cr, cg, cb] = await pixelAt(miq, 10, 10)
     expect([cr, cg, cb]).toEqual([0, 0, 0]) // untouched background, not the avatar
 
-    const [, cgCentre, cbCentre] = await pixelAt(miq, 355, 400)
+    const [, cgCentre, cbCentre] = await pixelAt(miq, 300, 315)
     expect(cgCentre).toBe(cbCentre) // inside the circle: desaturated red
     expect(cgCentre).toBeGreaterThan(0)
   })
@@ -213,7 +215,7 @@ describe('render', () => {
     expect([r, g, b]).toEqual([0, 0, 0]) // background, not the fallback tile's #1E1E1E
 
     // Inside the circle but away from the centred initial letter's glyph.
-    const [fr, fg, fb] = await pixelAt(miq, 50, 400)
+    const [fr, fg, fb] = await pixelAt(miq, 50, 315)
     expect([fr, fg, fb]).toEqual([30, 30, 30])
   })
 
@@ -222,11 +224,11 @@ describe('render', () => {
       .setAvatar(redSquare())
       .setTheme({ avatar: { position: 'right' } })
 
-    const [, , , leftAlpha] = await pixelAt(miq, 1180, 360)
+    const [, , , leftAlpha] = await pixelAt(miq, 1100, 315)
     expect(leftAlpha).toBe(255)
 
     const canvas = await miq.render()
-    const { data } = canvas.getContext('2d').getImageData(1180, 360, 1, 1)
+    const { data } = canvas.getContext('2d').getImageData(1100, 315, 1, 1)
     // Greyscaled red, so all three channels match and none are black.
     expect(data[0]).toBe(data[1])
     expect(data[0]).toBeGreaterThan(0)
@@ -346,8 +348,8 @@ describe('flipped layout', () => {
         .render()
       const ctx = canvas.getContext('2d')
       return {
-        left: countLit(ctx.getImageData(0, 0, 711, 800).data),
-        right: countLit(ctx.getImageData(711, 0, 711, 800).data),
+        left: countLit(ctx.getImageData(0, 0, 600, 630).data),
+        right: countLit(ctx.getImageData(600, 0, 600, 630).data),
       }
     }
 
@@ -362,7 +364,7 @@ describe('flipped layout', () => {
     const miq = quote()
       .setTheme({ avatar: { position: 'right' } })
       .setAvatar(redSquare())
-    const [r, g] = await pixelAt(miq, 1240, 360)
+    const [r, g] = await pixelAt(miq, 1100, 315)
 
     expect(r).toBe(g)
     expect(r).toBeGreaterThan(0)

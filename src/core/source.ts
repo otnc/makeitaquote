@@ -8,7 +8,7 @@ import type { MessageLike, MessageSourceOptions, QuoteData } from './types'
  * Ask discord.js for a PNG avatar at a sane size.
  *
  * The default `displayAvatarURL()` can hand back an animated WebP, and pulling
- * a 4096px source to draw it at 711 is pure waste. Some older or hand-rolled
+ * a 4096px source to draw it at 600 is pure waste. Some older or hand-rolled
  * message objects take no arguments at all, so fall back to a bare call.
  */
 function avatarURL(holder: { displayAvatarURL?: (options?: unknown) => string }): string | null {

@@ -331,8 +331,7 @@ behind each preset name, and the `dark`/`light` colour pairs those are built
 from, for a custom theme that wants to start from one rather than repeat its
 hex codes. `defineTheme(name | input)` runs the same preset-and-`extends`
 resolution `.setTheme()` does, if you want the resolved `Theme` itself rather
-than to render with it. `DEFAULT_LONG_EDGE` (`800`) is the canvas size in
-[Size](#size), also as a constant.
+than to render with it.
 
 ### Flipping sides
 
@@ -476,11 +475,11 @@ would hide the image. There's no way to have both at once.
 
 ## Size
 
-The default canvas is **800 on its long edge** — 1422×800 landscape, 800×1000
-portrait.
+The default canvas is **1200×630 landscape, 630×790 portrait** — the size the
+real Make it a Quote bot itself renders at, not a round ratio.
 
 ```ts
-.setScale(2)      // 2844×1600, the same image at twice the resolution
+.setScale(2)      // 2400×1260, the same image at twice the resolution
 .setScale(0.5)    // half
 ```
 

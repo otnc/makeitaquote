@@ -15,18 +15,18 @@ afterEach(() => {
 })
 
 describe('default size', () => {
-  it('is 800 tall in landscape', () => {
-    expect(new MiQ().getTheme().height).toBe(800)
+  it('is 630 tall in landscape', () => {
+    expect(new MiQ().getTheme().height).toBe(630)
   })
 
-  it('is 800 wide in portrait', () => {
-    expect(new MiQ({ theme: 'portrait' }).getTheme().width).toBe(800)
+  it('is 630 wide in portrait', () => {
+    expect(new MiQ({ theme: 'portrait' }).getTheme().width).toBe(630)
   })
 
-  it('keeps 16:9 in landscape', () => {
+  it('matches what api.voids.top itself renders at, not a round ratio', () => {
     const { width, height } = new MiQ().getTheme()
 
-    expect(width / height).toBeCloseTo(16 / 9, 2)
+    expect([width, height]).toEqual([1200, 630])
   })
 })
 
@@ -49,7 +49,7 @@ describe('setScale', () => {
   it('compounds', () => {
     const twice = new MiQ().setScale(2).setScale(2).getTheme()
 
-    expect(twice.height).toBe(3200)
+    expect(twice.height).toBe(2520)
   })
 
   it('emits no deprecation warning', () => {

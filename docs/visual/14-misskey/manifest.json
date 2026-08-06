@@ -4,34 +4,34 @@
   "cases": [
     {
       "name": "a note, MFM stripped (default)",
-      "file": "14-misskey/a-note-mfm-stripped-default.webp",
+      "file": "14-misskey/a-note-mfm-stripped-default.png",
       "note": "the display name goes over the @handle, exactly as Misskey writes it",
       "format": "png",
-      "width": 1422,
-      "height": 800,
-      "bytes": 17370,
+      "width": 1200,
+      "height": 630,
+      "bytes": 174935,
       "ok": true,
       "error": null
     },
     {
       "name": "stripMfm: false",
-      "file": "14-misskey/stripmfm-false.webp",
+      "file": "14-misskey/stripmfm-false.png",
       "note": null,
       "format": "png",
-      "width": 1422,
-      "height": 800,
-      "bytes": 18670,
+      "width": 1200,
+      "height": 630,
+      "bytes": 180429,
       "ok": true,
       "error": null
     },
     {
       "name": "a remote author, quoted from a note",
-      "file": "14-misskey/a-remote-author-quoted-from-a-note.webp",
+      "file": "14-misskey/a-remote-author-quoted-from-a-note.png",
       "note": "@user@host, and the username stands in when there is no display name",
       "format": "png",
-      "width": 1422,
-      "height": 800,
-      "bytes": 7366,
+      "width": 1200,
+      "height": 630,
+      "bytes": 31264,
       "ok": true,
       "error": null
     }
