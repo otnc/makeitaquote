@@ -326,6 +326,14 @@ await new MiQ()
 Sizes inside a theme are **fractions of the canvas** when between 0 and 1, and
 pixels when larger. That is what makes [scaling](#size) a true zoom.
 
+`themes` and `palettes` are exported too — the full resolved `Theme` object
+behind each preset name, and the `dark`/`light` colour pairs those are built
+from, for a custom theme that wants to start from one rather than repeat its
+hex codes. `defineTheme(name | input)` runs the same preset-and-`extends`
+resolution `.setTheme()` does, if you want the resolved `Theme` itself rather
+than to render with it. `DEFAULT_LONG_EDGE` (`800`) is the canvas size in
+[Size](#size), also as a constant.
+
 ### Flipping sides
 
 ```ts
@@ -408,6 +416,20 @@ converted to RGB for you. The number and array forms are this package's own.
 
 > A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so
 > write those as strings, where the length is part of the value.
+
+### Parsing a color yourself
+
+The same parser is exported, for anything outside a theme that needs to read
+or normalize a color:
+
+```ts
+import { isTransparent, parseColor, toCSS, toHex } from 'makeitaquote'
+
+parseColor('rebeccapurple')  // { r: 102, g: 51, b: 153, a: 1 }
+toCSS({ r: 255, g: 0, b: 0, a: 0.5 })  // 'rgba(255, 0, 0, 0.5)'
+toHex({ r: 255, g: 0, b: 0, a: 1 })    // '#FF0000FF'
+isTransparent(parseColor('transparent'))  // true
+```
 
 ### Starting from nothing
 
@@ -568,6 +590,11 @@ The cache lives at `$MIQ_FONT_CACHE_DIR`, then `$XDG_CACHE_HOME`, then
 `~/.cache/makeitaquote/fonts` (`%LOCALAPPDATA%` on Windows). Pre-populate it and
 the package works entirely offline.
 
+Everything above is also exported as its own function — `useFont`,
+`ensureDefaultFonts`, `resolveGoogleFont`, `FONT_CATALOGUE`, `isCatalogued`,
+`resolveCacheDir`, `DEFAULT_FONT_FAMILIES`, `FALLBACK_FAMILY` — for the rare
+case `fonts.*` doesn't cover; `fonts` itself is a thin wrapper over them.
+
 **Docker** — bake the fonts in so containers never fetch at runtime:
 
 ```dockerfile
@@ -634,6 +661,10 @@ an avatar is one person's current picture, not a shared asset:
 ```ts
 configureAvatarCache({ maxEntries: 128, ttlMs: 60_000 })
 ```
+
+`emojiCacheInfo()`/`avatarCacheInfo()` report what's cached (entries,
+failures, in-flight requests); `clearEmojiCache()`/`clearAvatarCache()` empty
+one without waiting out its TTL.
 
 ---
 
