@@ -74,8 +74,9 @@ describe('createAssetCache', () => {
     expect(c.isKnownFailure('x')).toBe(false)
   })
 
-  // QuickLRU rejects a maxSize of 0, so this is the case worth pinning: it has
-  // to keep meaning "remember nothing" rather than throwing.
+  // tiny-lru's own `max: 0` means unlimited, the opposite of what it means
+  // here, so this is the case worth pinning: it has to keep meaning "remember
+  // nothing" regardless of what the underlying library does with a 0.
   it('stores nothing when sized to zero, without throwing', () => {
     const c = cache()
 

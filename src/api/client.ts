@@ -1,4 +1,3 @@
-import { HTTPError, type KyInstance, TimeoutError } from 'ky'
 import { ValidationError } from '../core/errors'
 import {
   applyInput,
@@ -12,7 +11,7 @@ import {
 } from '../core/quote'
 import { fromMessage } from '../core/source'
 import type { MessageLike, MessageSourceOptions, QuoteInput } from '../core/types'
-import { captureErrorBody, createClient, type ErrorBodyCapture } from '../http/client'
+import { createClient, HTTPError, type HttpClient, TimeoutError } from '../http/client'
 import { DEFAULT_BASE_URL, type EndpointPath, endpoints } from './endpoints'
 import { VoidsApiError, type VoidsOptions, type VoidsPayload, type VoidsQuoteData } from './types'
 
@@ -34,7 +33,7 @@ function emptyVoidsQuote(): VoidsQuoteData {
  */
 export class VoidsMiQ {
   #data: VoidsQuoteData = emptyVoidsQuote()
-  #http: KyInstance
+  #http: HttpClient
   #baseUrl: string
   #signal: AbortSignal | undefined
 
@@ -154,20 +153,11 @@ export class VoidsMiQ {
 
     if (options.hosted) {
       const url = await this.toURL()
-      const capture = captureErrorBody()
       try {
-        const response = await this.#http.get(url, {
-          ...this.#requestOptions(),
-          hooks: capture.hooks,
-        })
+        const response = await this.#http.get(url, this.#requestOptions())
         return Buffer.from(await response.arrayBuffer())
       } catch (cause) {
-        throw toApiError(
-          cause,
-          endpoints.hosted.path,
-          'Failed to download the hosted image',
-          capture,
-        )
+        throw toApiError(cause, endpoints.hosted.path, 'Failed to download the hosted image')
       }
     }
 
@@ -176,15 +166,13 @@ export class VoidsMiQ {
   }
 
   async #post(path: EndpointPath): Promise<Response> {
-    const capture = captureErrorBody()
     try {
       return await this.#http.post(`${this.#baseUrl}${path}`, {
         json: toPayload(this.#data),
         ...this.#requestOptions(),
-        hooks: capture.hooks,
       })
     } catch (cause) {
-      throw toApiError(cause, path, 'Failed to generate quote', capture)
+      throw toApiError(cause, path, 'Failed to generate quote')
     }
   }
 
@@ -208,20 +196,15 @@ export function toPayload(data: VoidsQuoteData): VoidsPayload {
 }
 
 /**
- * Turns whatever ky threw into a `VoidsApiError`, keeping the response body
- * when there is one — the API puts its reason in there.
+ * Turns whatever the HTTP layer threw into a `VoidsApiError`, keeping the
+ * response body when there is one — the API puts its reason in there.
  */
-function toApiError(
-  cause: unknown,
-  endpoint: EndpointPath,
-  prefix: string,
-  capture: ErrorBodyCapture,
-): VoidsApiError {
+function toApiError(cause: unknown, endpoint: EndpointPath, prefix: string): VoidsApiError {
   if (cause instanceof HTTPError) {
     return new VoidsApiError(`${prefix}: HTTP ${cause.response.status}`, {
       endpoint,
       status: cause.response.status,
-      body: capture.body,
+      body: cause.body,
       cause,
     })
   }

@@ -1,4 +1,4 @@
-import QuickLRU from 'quick-lru'
+import { type LRU, lru } from 'tiny-lru'
 
 export interface AssetCacheOptions {
   /** `0` disables storing entirely, the same as `enabled: false`. */
@@ -41,17 +41,16 @@ export function createAssetCache<V>(defaults: Required<AssetCacheOptions>): Asse
   const inFlight = new Map<string, Promise<V | null>>()
 
   /**
-   * `QuickLRU` rejects a `maxSize` of 0, but 0 is a meaningful setting here —
-   * "remember nothing" — so it is answered with `null` and every read and
-   * write below treats that as a miss.
+   * `tiny-lru`'s own `max: 0` means unlimited, not "store nothing" — the
+   * opposite of what `maxEntries: 0` means here — so that case is answered
+   * with `null` instead, and every read and write below treats that as a
+   * miss. `ttl: 0` already means "never expires" in `tiny-lru` itself, which
+   * happens to match this cache's own convention, so `ttlMs` passes through
+   * unchanged.
    */
-  function build<T>(maxEntries: number, ttlMs: number): QuickLRU<string, T> | null {
+  function build<T>(maxEntries: number, ttlMs: number): LRU<T> | null {
     if (maxEntries <= 0) return null
-    return new QuickLRU<string, T>({
-      maxSize: maxEntries,
-      // 0 means "no expiry" here, which QuickLRU spells as Infinity.
-      maxAge: ttlMs > 0 ? ttlMs : Number.POSITIVE_INFINITY,
-    })
+    return lru<T>(maxEntries, ttlMs)
   }
 
   /** Storing is off when the cache is disabled, or sized out of existence. */
