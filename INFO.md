@@ -62,6 +62,26 @@ Switching to `culori` was a genuine capability gain, not just a
 like-for-like swap: `lab()`, `lch()`, `oklab()`, `oklch()` and `color()` all
 parse now, none of which the package this replaced supported.
 
+### X (Twitter)
+
+`setFromTweet()` takes zero dependencies, the same as `setFromMessage()`/
+`setFromNote()` — but unlike either, its adapters (`fromFxTwitterStatus()`,
+`fromTwitterApiV2Tweet()`) don't get to be the identity function, since
+neither of X's two practical APIs returns something `TweetLike` (this
+package's own shape) accepts unchanged: the official API v2 splits a tweet
+from its author entirely (`author_id`, resolved through a separate
+`includes.users` array), and FxTwitter spells the same fields differently
+(`screen_name`, `avatar_url`).
+
+`twitter-api-v2` and `fxtwitter` were each picked as *the* reference shape
+each adapter targets — actively maintained, typed, and (per this package's
+own CJS/ESM policy) real dual builds — but neither ships as an actual
+dependency, runtime or dev. Both adapters take a structural subset of the
+real response shape instead, the same reasoning `MessageLike` is
+dependency-free despite matching discord.js: an object with the right fields
+works whether or not the library that produced it is installed, and neither
+library's own code ever has to run inside this one.
+
 ### The ESM-only generation
 
 Every one of `ky`, `color`, `quick-lru` and `marked` was, at one point,

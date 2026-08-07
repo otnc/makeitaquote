@@ -54,6 +54,7 @@ Requires Node.js 22 or newer.
 
 - [Discord bots](#discord-bots) — the one thing most people are here for
 - [Misskey notes](#misskey-notes) — quoting a note, and MFM
+- [X (Twitter)](#x-twitter) — quoting a tweet, via FxTwitter or the official API
 - [Markdown](#markdown) — plain CommonMark, for anything else
 - [Conversations](#conversations) — several messages as one image
 - [Themes](#themes) — six presets, and how to change them
@@ -220,9 +221,56 @@ notes.
 
 ---
 
+## X (Twitter)
+
+`setFromTweet()` reads a tweet the way `setFromMessage()` reads a message —
+but unlike Discord or Misskey, neither of X's two practical APIs hands back
+something `TweetLike` accepts as-is, so an adapter comes with each:
+
+```ts
+import { FxTwitterV2 } from 'fxtwitter/v2'
+import { fromFxTwitterStatus } from 'makeitaquote'
+
+const { status } = await new FxTwitterV2().getStatus(tweetId)
+
+const png = await new MiQ().setFromTweet(fromFxTwitterStatus(status)).toBuffer('png')
+```
+
+[`fxtwitter`](https://www.npmjs.com/package/fxtwitter) needs no API key and
+returns the author inline, which is the easier path. For the official API,
+`fromTwitterApiV2Tweet()` combines a tweet with the separate `includes.users`
+entry [`twitter-api-v2`](https://www.npmjs.com/package/twitter-api-v2) (or
+any client with the same response shape) returns it in:
+
+```ts
+import { TwitterApi } from 'twitter-api-v2'
+import { fromTwitterApiV2Tweet } from 'makeitaquote'
+
+const { data: tweet, includes } = await client.v2.singleTweet(tweetId, {
+  expansions: ['author_id'],
+  'user.fields': ['profile_image_url'],
+})
+
+const png = await new MiQ()
+  .setFromTweet(fromTwitterApiV2Tweet(tweet, includes))
+  .toBuffer('png')
+```
+
+Neither library is a dependency of this package — both adapters take a
+structural subset of the real response shape, the same as `MessageLike`, so
+any object with those fields works, whether or not the library that produced
+it is actually installed.
+
+There is nothing here for either adapter to strip: X does not expand a
+tweet's `t.co` links or `@handle` mentions into anything else in its own
+timeline, so the text goes through exactly as written, the same way a
+Discord `@everyone` needs no resolving.
+
+---
+
 ## Markdown
 
-For a source that is neither Discord nor Misskey — a blog post, a GitHub
+For a source that is neither Discord, Misskey nor X — a blog post, a GitHub
 comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus
 the common GFM extras: strikethrough, tables, task lists). `.setText()` has
 no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it

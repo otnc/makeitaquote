@@ -564,6 +564,25 @@ add(
   { note: '@user@host, and the username stands in when there is no display name' },
 )
 
+// --- 16-twitter: setFromTweet() -------------------------------------------
+
+add(
+  '16-twitter',
+  'a tweet, quoted via setFromTweet',
+  () =>
+    new MiQ().setFromTweet({
+      text: 'just setting up my twttr',
+      author: { username: 'jack', name: 'jack', avatarUrl: required.png },
+    }),
+  { note: 'text goes through exactly as written — nothing here to strip or resolve' },
+)
+add('16-twitter', 'no display name — falls back to the handle', () =>
+  new MiQ().setFromTweet({
+    text: 'a tweet from an account with no display name set',
+    author: { username: 'someone', avatarUrl: null },
+  }),
+)
+
 // --- 15-markdown: stripMarkdown(), for anything that isn't Discord or Misskey
 
 const commonMarkdownSample = [
