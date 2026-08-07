@@ -173,6 +173,28 @@ export interface NoteSourceOptions {
   preferCw?: boolean
 }
 
+/**
+ * The shape of a tweet/post that `setFromTweet()` understands.
+ *
+ * Structural, like `MessageLike`/`NoteLike` — but unlike either, there is no
+ * dedicated adapter this package ships that a raw API response passes
+ * straight through to: the official API splits a tweet from its author
+ * (`author_id`, resolved through a separate `includes.users` array), and
+ * FxTwitter spells the fields differently (`screen_name`, `avatar_url`).
+ * `fromTwitterApiV2Tweet()` and `fromFxTwitterStatus()` adapt each into this
+ * shape.
+ */
+export interface TweetLike {
+  text: string
+  author: {
+    /** Handle, without the leading `@`. */
+    username: string
+    /** Display name. Falls back to the handle when absent. */
+    name?: string | null
+    avatarUrl?: string | null
+  }
+}
+
 /** One run of text, or one emoji to be drawn as an image. */
 export type Segment =
   | { kind: 'text'; value: string }

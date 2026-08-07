@@ -17,6 +17,7 @@ import {
   normalizeWatermark,
 } from './quote'
 import { fromMessage } from './source'
+import { fromTweet } from './tweet'
 
 /** Above this a render is more likely a mistake than an intention. */
 const MAX_SCALE = 8
@@ -32,6 +33,7 @@ import type {
   OutputFormat,
   QuoteData,
   QuoteInput,
+  TweetLike,
 } from './types'
 
 /**
@@ -95,6 +97,18 @@ export class MiQ {
    */
   setFromNote(note: NoteLike, options?: NoteSourceOptions): this {
     this.#data = fromNote(note, options)
+    return this
+  }
+
+  /**
+   * Reads a tweet/post the way `setFromMessage()` reads a Discord message.
+   *
+   * `TweetLike` has no adapter this package fetches through directly —
+   * `fromTwitterApiV2Tweet()`/`fromFxTwitterStatus()` turn a real API
+   * response into one first.
+   */
+  setFromTweet(tweet: TweetLike): this {
+    this.#data = fromTweet(tweet)
     return this
   }
 

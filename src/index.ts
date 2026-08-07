@@ -7,6 +7,8 @@ export {
 } from './core/errors'
 export { MiQ } from './core/MiQ'
 export { MiQConversation } from './core/MiQConversation'
+export type { FxTwitterStatusLike, TweetV2Like, UserV2Like } from './core/tweetAdapters'
+export { fromFxTwitterStatus, fromTwitterApiV2Tweet } from './core/tweetAdapters'
 export type {
   AutoFontOptions,
   AvatarSource,
@@ -29,6 +31,7 @@ export type {
   Theme,
   ThemeInput,
   ThemeName,
+  TweetLike,
 } from './core/types'
 export type { EmojiCacheOptions } from './emoji/cache'
 export { clearEmojiCache, configureEmojiCache, emojiCacheInfo } from './emoji/cache'

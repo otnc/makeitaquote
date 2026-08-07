@@ -1,0 +1,28 @@
+{
+  "name": "16-twitter",
+  "title": "Twitter",
+  "cases": [
+    {
+      "name": "a tweet, quoted via setFromTweet",
+      "file": "16-twitter/a-tweet-quoted-via-setfromtweet.png",
+      "note": "text goes through exactly as written — nothing here to strip or resolve",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 172644,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "no display name — falls back to the handle",
+      "file": "16-twitter/no-display-name-falls-back-to-the-handle.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 32606,
+      "ok": true,
+      "error": null
+    }
+  ]
+}
