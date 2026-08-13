@@ -6,20 +6,13 @@ runtime.
 
 ## Runtime dependencies
 
-| Package | Licence |
-| --- | --- |
-| [`@napi-rs/canvas`](https://github.com/Brooooooklyn/canvas) | MIT |
-| [`@twemoji/parser`](https://github.com/jdecked/twemoji) | MIT |
-| [`budoux`](https://github.com/google/budoux) | Apache-2.0 |
-| [`culori`](https://github.com/Evercoder/culori) | MIT |
-| [`discomd`](https://github.com/otnc/discomd) | MIT |
-| [`markdown-it`](https://github.com/markdown-it/markdown-it) | MIT |
-| [`mfm-js`](https://github.com/misskey-dev/mfm.js) | MIT |
-| [`ofetch`](https://github.com/unjs/ofetch) | MIT |
-| [`tiny-lru`](https://github.com/avoidwork/tiny-lru) | BSD-3-Clause |
+Nothing is bundled: `dist` imports every dependency by name, so npm installs
+each one with its own licence text intact in `node_modules`. `package.json` is
+the list — repeating it here only produced a table that went out of date.
 
-Their licence texts are installed alongside them in `node_modules`, and are
-included in any bundle that redistributes them.
+They are all permissive (MIT, Apache-2.0, ISC, BSD-3-Clause). Should a future
+build ever inline one through `deps.alwaysBundle` in `tsdown.config.ts`, that
+dependency's licence text has to travel with the published output instead.
 
 ## Assets fetched at runtime
 
