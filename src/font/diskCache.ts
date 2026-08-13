@@ -1,8 +1,9 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
-import { mkdir, rename, rm, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, rm } from 'node:fs/promises'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
+import writeFileAtomic from 'write-file-atomic'
 
 /**
  * Where downloaded fonts live, in order of preference.
@@ -73,9 +74,9 @@ export function isCached(dir: string, fileName: string): boolean {
 /**
  * Writes a font to the cache atomically.
  *
- * The bytes go to a PID-suffixed temporary file first, then get renamed into
- * place — so an interrupted download can never leave a half-written font that
- * the next run would happily try to register. Two processes racing both write
+ * `write-file-atomic` writes to a temporary file and renames it into place —
+ * so an interrupted download can never leave a half-written font that the
+ * next run would happily try to register. Two processes racing both write
  * the same content, so whichever rename lands last is still correct.
  */
 export async function writeCachedFont(
@@ -86,15 +87,12 @@ export async function writeCachedFont(
   await mkdir(dir, { recursive: true })
 
   const target = cachedFontPath(dir, fileName)
-  const temporary = `${target}.${process.pid}.part`
 
-  await writeFile(temporary, bytes)
   try {
-    await rename(temporary, target)
+    await writeFileAtomic(target, bytes)
   } catch (cause) {
     // On Windows a rename over a file another process just created can fail;
     // if the target is there and non-empty, that other process won the race.
-    await unlink(temporary).catch(() => {})
     if (!isCached(dir, fileName)) throw cause
   }
 
