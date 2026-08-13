@@ -17,6 +17,8 @@ export interface RequestOptions {
 export interface HttpClient {
   get(url: string, options?: RequestOptions): Promise<Response>
   post(url: string, options?: RequestOptions): Promise<Response>
+  /** GETs `url` and reads the body into a `Buffer` — the shape every asset fetcher needs. */
+  getBuffer(url: string, signal?: AbortSignal): Promise<Buffer>
 }
 
 /** Thrown for a non-2xx response. */
@@ -99,9 +101,15 @@ export function createClient(options: HttpOptions = {}): HttpClient {
     }
   }
 
+  const get = (url: string, options: RequestOptions = {}) => request('GET', url, options)
+
   return {
-    get: (url, options = {}) => request('GET', url, options),
+    get,
     post: (url, options = {}) => request('POST', url, options),
+    getBuffer: async (url, signal) => {
+      const response = await get(url, signal ? { signal } : {})
+      return Buffer.from(await response.arrayBuffer())
+    },
   }
 }
 

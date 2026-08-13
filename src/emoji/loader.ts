@@ -1,17 +1,14 @@
 import type { Segment } from '../core/types'
 import { createClient } from '../http/client'
 import { type Image, loadImage } from '../render/canvasFactory'
-import { cachedImage, coalesce, isKnownFailure, rememberFailure, rememberImage } from './cache'
+import { emojiCache } from './cache'
 
 /** Fetches the bytes for a URL. Replaceable so tests never touch the network. */
 export type ImageFetcher = (url: string, signal?: AbortSignal) => Promise<Buffer>
 
 const http = createClient({ timeout: 10_000, retry: 2 })
 
-const defaultFetcher: ImageFetcher = async (url, signal) => {
-  const response = await http.get(url, signal ? { signal } : {})
-  return Buffer.from(await response.arrayBuffer())
-}
+const defaultFetcher: ImageFetcher = (url, signal) => http.getBuffer(url, signal)
 
 export interface PrefetchOptions {
   fetcher?: ImageFetcher
@@ -86,19 +83,19 @@ function alternativesFor(segment: Extract<Segment, { kind: 'emoji' }>): readonly
  * image, not fail the whole render.
  */
 export async function loadEmoji(url: string, options: PrefetchOptions = {}): Promise<Image | null> {
-  const cached = cachedImage(url)
+  const cached = emojiCache.cached(url)
   if (cached) return cached
-  if (isKnownFailure(url)) return null
+  if (emojiCache.isKnownFailure(url)) return null
 
-  return coalesce(url, async () => {
+  return emojiCache.coalesce(url, async () => {
     try {
       const fetcher = options.fetcher ?? defaultFetcher
       const bytes = await fetcher(url, options.signal)
       const image = await loadImage(bytes)
-      rememberImage(url, image)
+      emojiCache.remember(url, image)
       return image
     } catch {
-      rememberFailure(url)
+      emojiCache.rememberFailure(url)
       return null
     }
   })

@@ -3,13 +3,7 @@ import type { AvatarSource } from '../core/types'
 import { createClient } from '../http/client'
 import { parseColor, toCSS } from '../theme/color'
 import type { AvatarTheme } from '../theme/types'
-import {
-  cachedAvatar,
-  coalesceAvatar,
-  isKnownAvatarFailure,
-  rememberAvatar,
-  rememberAvatarFailure,
-} from './avatarCache'
+import { avatarCache } from './avatarCache'
 import { createCanvas, type Image, loadImage, type SKRSContext2D } from './canvasFactory'
 
 const http = createClient({ timeout: 15_000, retry: 2 })
@@ -17,10 +11,7 @@ const http = createClient({ timeout: 15_000, retry: 2 })
 /** Fetches the bytes for a URL. Replaceable so tests never touch the network. */
 export type AvatarFetcher = (url: string, signal?: AbortSignal) => Promise<Buffer>
 
-const defaultFetcher: AvatarFetcher = async (url, signal) => {
-  const response = await http.get(url, signal ? { signal } : {})
-  return Buffer.from(await response.arrayBuffer())
-}
+const defaultFetcher: AvatarFetcher = (url, signal) => http.getBuffer(url, signal)
 
 export interface LoadAvatarOptions {
   signal?: AbortSignal
@@ -65,20 +56,20 @@ export async function loadAvatar(
 }
 
 async function loadCached(key: string, options: LoadAvatarOptions): Promise<Image | null> {
-  const cached = cachedAvatar(key)
+  const cached = avatarCache.cached(key)
   if (cached) return cached
-  if (isKnownAvatarFailure(key)) return null
+  if (avatarCache.isKnownFailure(key)) return null
 
-  return coalesceAvatar(key, async () => {
+  return avatarCache.coalesce(key, async () => {
     try {
       const bytes = /^https?:\/\//i.test(key)
         ? await (options.fetcher ?? defaultFetcher)(key, options.signal)
         : await readFile(key)
       const image = await loadImage(bytes)
-      rememberAvatar(key, image)
+      avatarCache.remember(key, image)
       return image
     } catch {
-      rememberAvatarFailure(key)
+      avatarCache.rememberFailure(key)
       return null
     }
   })
