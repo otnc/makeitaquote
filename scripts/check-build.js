@@ -51,14 +51,12 @@ function report() {
   process.exit(1)
 }
 
+/** Every file under `dir`, at any depth, as an absolute path. */
 async function walk(dir) {
-  const out = []
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const full = join(dir, entry.name)
-    if (entry.isDirectory()) out.push(...(await walk(full)))
-    else out.push(full)
-  }
-  return out
+  const entries = await readdir(dir, { recursive: true, withFileTypes: true })
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => join(entry.parentPath, entry.name))
 }
 
 /**
