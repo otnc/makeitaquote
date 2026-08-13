@@ -22,6 +22,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { parseArgs } from 'node:util'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
@@ -31,22 +32,21 @@ const assetsDir = join(root, 'assets')
 // CLI
 // ---------------------------------------------------------------------------
 
-const args = process.argv.slice(2)
+// `parseArgs` takes both `--out dir` and `--out=dir`, and reports an unknown
+// flag rather than ignoring it — a typo in `--only` used to just render
+// nothing.
+const { values } = parseArgs({
+  options: {
+    offline: { type: 'boolean', default: false },
+    out: { type: 'string', default: 'docs/visual' },
+    only: { type: 'string', default: '' },
+  },
+  allowPositionals: true,
+})
 
-function flag(name) {
-  return args.includes(`--${name}`)
-}
-
-function option(name, fallback) {
-  const index = args.indexOf(`--${name}`)
-  if (index >= 0 && args[index + 1]) return args[index + 1]
-  const inline = args.find((arg) => arg.startsWith(`--${name}=`))
-  return inline ? inline.slice(name.length + 3) : fallback
-}
-
-const offline = flag('offline')
-const outDir = join(root, option('out', 'docs/visual'))
-const only = option('only', '')
+const offline = values.offline
+const outDir = join(root, values.out)
+const only = values.only
   .split(',')
   .map((part) => part.trim().toLowerCase())
   .filter(Boolean)
