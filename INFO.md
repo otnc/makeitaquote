@@ -7,20 +7,23 @@ of date in a comment somewhere.
 
 ## Dependencies
 
-A dependency is worth it when it owns a specification this package does not,
-or when it is simply smaller than the code it deletes. `mfm-js` is Misskey's
-own MFM parser, `discomd` is Discord's own Markdown dialect, `markdown-it` is
-a CommonMark/GFM parser and `culori` is the CSS colour syntax — all four
+**The bar: every runtime dependency must ship a real CJS build** — a
+`require` export condition, not just a bare `"type": "module"` package
+`require()` would throw on. All else equal, an ESM-only package is passed
+over for one that isn't, and `check-build.js` fails the build if one slips
+in anyway (see `tsdown.config.ts`'s `deps.alwaysBundle`, which sits empty on
+purpose). That's the standing requirement; nothing else about a candidate
+disqualifies it on its own.
+
+Owning a specification this package doesn't, or being smaller than the code
+it deletes, is *why* each existing dependency in particular got added —
+not a requirement the next one has to clear too. `mfm-js` is Misskey's own
+MFM parser, `discomd` is Discord's own Markdown dialect, `markdown-it` is a
+CommonMark/GFM parser and `culori` is the CSS colour syntax — all four
 moving targets a local regex only approximates, and all four replaced code
 that had already been wrong once. `tiny-lru` replaced 89 lines outright, and
 `ofetch` owns retry/timeout/backoff for the same reason a hand-rolled version
 of that was wrong once too.
-
-**Every runtime dependency must ship a real CJS build** — a `require` export
-condition, not just a bare `"type": "module"` package `require()` would
-throw on. All else equal, an ESM-only package is passed over for one that
-isn't, and `check-build.js` fails the build if one slips in anyway (see
-`tsdown.config.ts`'s `deps.alwaysBundle`, which sits empty on purpose).
 
 ### discomd
 
@@ -55,8 +58,9 @@ Picked over `chroma-js` (both are real, actively maintained CSS Color 4
 parsers with a genuine dual build) mostly on how the API mapped onto this
 package's own `parseColor()`/`RGBA` shape; either would have worked. `colord`
 was passed over despite being smaller than both — no release since 2022,
-which reads as finished rather than actively maintained, and this package
-leans toward the latter when a dependency owns an evolving spec.
+which read as finished rather than actively maintained at the time. That was
+a judgment call for this specific pick, not a standing rule against
+unmaintained packages.
 
 Switching to `culori` was a genuine capability gain, not just a
 like-for-like swap: `lab()`, `lch()`, `oklab()`, `oklch()` and `color()` all
@@ -92,18 +96,3 @@ swapped for a library doing the same job with a real dual CJS/ESM build —
 `ofetch`, `culori`, `tiny-lru`, `markdown-it` — rather than dropped, so this
 was a like-for-like set of replacements, not a reduction in what the package
 depends on.
-
-### Turned down
-
-So it need not be re-litigated:
-
-| Candidate | Why not |
-| --- | --- |
-| `lru-cache` | 2.8MB, against `tiny-lru`'s 58K for the same job. |
-| `env-paths` | Returns different paths from the ones README documents, so upgrading would orphan every existing font cache. |
-| `css-tree` / `postcss` | 1.9MB / 327K to read three fields out of one API's machine-generated `@font-face` blocks. |
-| `discord-markdown`, `simple-markdown` | Last published 2021; pull in `highlight.js` and `@types/react`. |
-| `remove-markdown` | Regex-based, not a real parser, for either use it was considered for. Against Discord's dialect it reads `__x__` as bold instead of underline and strips the URL out of `[text](url)`, which `stripDiscordMarkdown()` deliberately leaves alone. For plain CommonMark it is 9K against `markdown-it`'s ~2MB, but its own README lists "make the rules more robust, support more edge cases" as a TODO — correctness `stripMarkdown()` gets from `markdown-it` actually being a parser. |
-| `remark` + `strip-markdown`, `mdast-util-from-markdown` + `mdast-util-to-string` | Real CommonMark compliance, but 1.7MB/45 packages and 1.0MB/28 packages respectively, and both ESM-only — `markdown-it` gets the same compliance with a real CJS build. |
-| `axios` | Dual CJS/ESM and would have solved the same problem `ofetch` does, but ruled out on request rather than technical grounds. |
-| `colord` | No release since 2022 — see the `culori` section above. |
