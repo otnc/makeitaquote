@@ -1,3 +1,5 @@
+import { distance } from 'fastest-levenshtein'
+
 /**
  * Fonts this package knows how to fetch by name.
  *
@@ -52,21 +54,59 @@ const KNOWN_UNAVAILABLE: Record<string, string> = {
   'castor titling': 'not distributed through Google Fonts',
 }
 
-/** Common typos, so a near-miss gets a useful suggestion. */
+/**
+ * Near-misses the edit distance below does not catch on its own.
+ *
+ * Mostly rewordings rather than typos — a dropped `PLUS`, a trailing
+ * `regular` — which are further from the real name than a misspelling is.
+ */
 const SUGGESTIONS: Record<string, string> = {
-  'dacing script': 'Dancing Script',
   'noto sans jp regular': 'Noto Sans JP',
-  'mplus rounded 1c': 'M PLUS Rounded 1c',
   'm+ rounded 1c': 'M PLUS Rounded 1c',
-  'dot gothic 16': 'DotGothic16',
-  'rock n roll one': 'RocknRoll One',
-  exo2: 'Exo 2',
 }
 
 export function unavailableReason(family: string): string | undefined {
   return KNOWN_UNAVAILABLE[family.trim().toLowerCase()]
 }
 
+/** Lowercased and stripped of spacing and punctuation, so only the letters compare. */
+function normalize(family: string): string {
+  return family.toLowerCase().replaceAll(/[^a-z0-9]+/g, '')
+}
+
+/**
+ * How far off a name may be and still be worth suggesting.
+ *
+ * Proportional to length, so a long family name tolerates a couple of typos
+ * while a short one does not get matched to something unrelated.
+ */
+function tolerance(query: string): number {
+  return Math.max(2, Math.floor(query.length / 3))
+}
+
+/**
+ * The catalogued family a misspelling most likely meant.
+ *
+ * The explicit table above wins; anything else is matched on edit distance,
+ * which covers ordinary typos without having to list them one by one.
+ */
 export function suggestionFor(family: string): string | undefined {
-  return SUGGESTIONS[family.trim().toLowerCase()]
+  const listed = SUGGESTIONS[family.trim().toLowerCase()]
+  if (listed) return listed
+
+  const query = normalize(family)
+  if (query.length === 0) return undefined
+
+  let best: string | undefined
+  let bestDistance = Number.POSITIVE_INFINITY
+
+  for (const candidate of FONT_CATALOGUE) {
+    const gap = distance(query, normalize(candidate))
+    if (gap < bestDistance) {
+      bestDistance = gap
+      best = candidate
+    }
+  }
+
+  return bestDistance <= tolerance(query) ? best : undefined
 }
