@@ -81,6 +81,7 @@
     "markdown-it": "^15.0.0",
     "mfm-js": "^0.26.0",
     "ofetch": "^1.5.1",
+    "plimit-lit": "^3.4.0",
     "tiny-lru": "^13.0.0",
     "write-file-atomic": "^6.0.0"
   },
