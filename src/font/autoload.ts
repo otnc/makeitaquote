@@ -1,3 +1,4 @@
+import { FontNotAvailableError } from '../core/errors'
 import type { AutoFontOptions } from '../core/types'
 import { createClient } from '../http/client'
 import { cachedFontPath, isCached, resolveCacheDir, writeCachedFont } from './diskCache'
@@ -10,10 +11,7 @@ export type FontFetcher = (url: string, signal?: AbortSignal) => Promise<Buffer>
 
 const http = createClient({ timeout: 60_000, retry: 2 })
 
-const defaultFetcher: FontFetcher = async (url, signal) => {
-  const response = await http.get(url, signal ? { signal } : {})
-  return Buffer.from(await response.arrayBuffer())
-}
+const defaultFetcher: FontFetcher = (url, signal) => http.getBuffer(url, signal)
 
 export interface EnsureOptions extends AutoFontOptions {
   fetcher?: FontFetcher
@@ -196,6 +194,35 @@ export function warnMissingFamily(request: string): void {
       'Register one with fonts.registerFromPath(path, family), or name a Google Fonts ' +
       'family and leave autoFont enabled.',
   )
+}
+
+export interface AssetErrorOptions {
+  strictFonts?: boolean
+  onAssetError?: 'ignore' | 'text' | 'throw'
+}
+
+/**
+ * Reports fonts that are still missing after autoload, following `strictFonts`
+ * and `onAssetError` the same way everywhere: `strictFonts` (or `'throw'`)
+ * raises, `'ignore'` says nothing, and the default (`'text'`) warns and lets
+ * rendering fall through to whatever font the system already has.
+ */
+export function reportMissingFonts(missing: readonly string[], options: AssetErrorOptions): void {
+  if (missing.length === 0) return
+
+  const mode = options.strictFonts ? 'throw' : (options.onAssetError ?? 'text')
+
+  if (mode === 'throw') {
+    throw new FontNotAvailableError(
+      `No font available for "${missing[0]}". Register one with fonts.registerFromPath(), ` +
+        'or name a family Google Fonts serves.',
+      { family: missing[0] as string },
+    )
+  }
+
+  if (mode === 'ignore') return
+
+  for (const request of missing) warnMissingFamily(request)
 }
 
 /** Test seam: clears the once-only log state, in-flight downloads and cache. */

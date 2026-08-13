@@ -4,7 +4,7 @@ import {
   effectiveConversationName,
   normalizeConversationMessage,
 } from '../core/conversation'
-import { FontNotAvailableError, ValidationError } from '../core/errors'
+import { ValidationError } from '../core/errors'
 import type {
   ConversationMessage,
   ConversationOptions,
@@ -12,7 +12,7 @@ import type {
   Segment,
 } from '../core/types'
 import { prefetchEmoji } from '../emoji/loader'
-import { ensureDefaultFonts, warnMissingFamily } from '../font/autoload'
+import { ensureDefaultFonts, reportMissingFonts } from '../font/autoload'
 import { resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
 import { type DrawLineOptions, drawLine } from '../text/draw'
@@ -285,17 +285,5 @@ async function prepareFonts(options: ConversationOptions): Promise<void> {
   }
 
   const missing = DEFAULT_FONT_FAMILIES.filter((family) => resolveFamily(family) === null)
-  if (missing.length === 0) return
-
-  const mode = options.strictFonts ? 'throw' : (options.onAssetError ?? 'text')
-  if (mode === 'throw') {
-    throw new FontNotAvailableError(
-      `No font available for "${missing[0]}". Register one with fonts.registerFromPath(), ` +
-        'or name a family Google Fonts serves.',
-      { family: missing[0] as string },
-    )
-  }
-  if (mode === 'ignore') return
-
-  for (const family of missing) warnMissingFamily(family)
+  reportMissingFonts(missing, options)
 }

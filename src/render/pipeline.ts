@@ -1,8 +1,7 @@
-import { FontNotAvailableError } from '../core/errors'
 import { assertRenderable, effectiveDisplayName } from '../core/quote'
 import type { MiQOptions, QuoteData, Segment } from '../core/types'
 import { type EmojiImages, prefetchEmoji } from '../emoji/loader'
-import { ensureDefaultFonts, useFont, warnMissingFamily } from '../font/autoload'
+import { ensureDefaultFonts, reportMissingFonts, useFont } from '../font/autoload'
 import { fonts, resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
 import { alignedX, type DrawLineOptions, drawLine, drawnLineWidth } from '../text/draw'
@@ -116,26 +115,7 @@ async function prepareFonts(theme: Theme, text: string, options: RenderOptions):
   }
 
   const stillMissing = requests.filter((request) => resolveFamily(request) === null)
-  if (stillMissing.length === 0) return
-
-  // `strictFonts` is the font-specific override; short of that, a missing
-  // font is just another asset that failed, so `onAssetError` decides —
-  // 'throw' behaves like strictFonts, 'ignore' skips the warning too, and
-  // 'text' (the shared default) warns and falls through, same as before this
-  // was wired up to onAssetError at all.
-  const mode = options.strictFonts ? 'throw' : (options.onAssetError ?? 'text')
-
-  if (mode === 'throw') {
-    throw new FontNotAvailableError(
-      `No font available for "${stillMissing[0]}". Register one with fonts.registerFromPath(), ` +
-        'or name a family Google Fonts serves.',
-      { family: stillMissing[0] as string },
-    )
-  }
-
-  if (mode === 'ignore') return
-
-  for (const request of stillMissing) warnMissingFamily(request)
+  reportMissingFonts(stillMissing, options)
 }
 
 /**
