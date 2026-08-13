@@ -154,8 +154,7 @@ export class VoidsMiQ {
     if (options.hosted) {
       const url = await this.toURL()
       try {
-        const response = await this.#http.get(url, this.#requestOptions())
-        return Buffer.from(await response.arrayBuffer())
+        return await this.#http.getBuffer(url, this.#signal)
       } catch (cause) {
         throw toApiError(cause, endpoints.hosted.path, 'Failed to download the hosted image')
       }
