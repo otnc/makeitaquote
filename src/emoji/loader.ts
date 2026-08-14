@@ -1,3 +1,4 @@
+import { pLimit } from 'plimit-lit'
 import type { Segment } from '../core/types'
 import { createClient } from '../http/client'
 import { type Image, loadImage } from '../render/canvasFactory'
@@ -47,26 +48,22 @@ export async function prefetchEmoji(
   const images: EmojiImages = new Map()
   if (candidates.size === 0) return images
 
-  const pending = [...candidates]
-  const limit = Math.max(1, options.concurrency ?? 8)
+  const limit = pLimit(Math.max(1, options.concurrency ?? 8))
 
-  const workers = Array.from({ length: Math.min(limit, pending.length) }, async () => {
-    for (;;) {
-      const entry = pending.pop()
-      if (entry === undefined) return
-      const [key, urls] = entry
-
-      for (const url of urls) {
-        const image = await loadEmoji(url, options)
-        if (image) {
-          images.set(key, image)
-          break
+  await Promise.all(
+    [...candidates].map(([key, urls]) =>
+      limit(async () => {
+        for (const url of urls) {
+          const image = await loadEmoji(url, options)
+          if (image) {
+            images.set(key, image)
+            break
+          }
         }
-      }
-    }
-  })
+      }),
+    ),
+  )
 
-  await Promise.all(workers)
   return images
 }
 
