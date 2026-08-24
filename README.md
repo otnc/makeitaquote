@@ -67,7 +67,7 @@ Requires Node.js 22 or newer.
 - [Offline use](#offline-use) — the `miq` command, and installing assets ahead of time
 - [Using an external API](#using-an-external-api) instead of rendering locally
 - [Errors](#errors) · [Platform support](#platform-support)
-- [Migrating from v8](#migrating-from-v8)
+- [Migrating](#migrating)
 - [Author](#author) · [Licence](#licence)
 
 ---
@@ -901,11 +901,13 @@ On a platform without a binary, use `makeitaquote/api`.
 
 ---
 
-## Migrating from v8
+## Migrating
 
-v9 is a rewrite: the API changed, and images render locally by default.
-See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9
-method table.
+v10 keeps the same API as v9, but moves the default font/Twemoji cache
+from a location shared by every project on the machine to one inside your
+own project. v9 was a rewrite: the API changed, and images render locally
+by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including
+the v8 → v9 method table.
 
 ---
 
