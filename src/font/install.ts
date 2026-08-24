@@ -93,6 +93,81 @@ export async function uninstallFonts(
   return removed
 }
 
+export interface PruneResult {
+  family: string
+  removed: number
+  bytes: number
+}
+
+/**
+ * Deletes stale-version font files, keeping only the newest per family.
+ *
+ * `installFonts`/`useFont` never delete an old version when Google ships a
+ * new one — a fresh file just lands alongside it (see `listInstalledFonts`'s
+ * `version` doc) — so this is the cleanup step for whatever `miq update`
+ * left behind, or for a cache that has simply been around a while. With no
+ * families, every family in the cache is checked.
+ */
+export async function pruneFonts(
+  families?: readonly string[],
+  dir = resolveCacheDir(),
+): Promise<PruneResult[]> {
+  let names: string[]
+  try {
+    names = readdirSync(dir)
+  } catch {
+    return []
+  }
+
+  const wanted = families ? new Set(families.map((family) => slugFor(family))) : null
+
+  interface File {
+    name: string
+    version: string
+    bytes: number
+  }
+  const byFamily = new Map<string, File[]>()
+
+  for (const name of names) {
+    const parsed = CACHED_FONT.exec(name)
+    if (!parsed) continue
+    const slug = parsed[1] as string
+    if (wanted && !wanted.has(slug)) continue
+
+    let bytes = 0
+    try {
+      bytes = statSync(join(dir, name)).size
+    } catch {
+      // Vanished between listing and stat; not worth failing over.
+    }
+    const list = byFamily.get(slug) ?? []
+    list.push({ name, version: parsed[2] as string, bytes })
+    byFamily.set(slug, list)
+  }
+
+  const results: PruneResult[] = []
+  for (const [slug, files] of byFamily) {
+    const newest = newestVersion(files.map((file) => file.version))
+    const stale = files.filter((file) => file.version !== newest)
+    if (stale.length === 0) continue
+
+    let removed = 0
+    let bytes = 0
+    for (const file of stale) {
+      try {
+        unlinkSync(join(dir, file.name))
+        removed++
+        bytes += file.bytes
+      } catch {
+        // Already gone, or locked by another process on Windows.
+      }
+    }
+    if (removed > 0) results.push({ family: slug.replaceAll('-', ' '), removed, bytes })
+  }
+
+  return results
+}
+
 /**
  * A cache file name, taken apart: `<slug>-<version>-<weight>[-italic]-<id>.ttf`.
  *

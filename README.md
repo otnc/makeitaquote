@@ -775,12 +775,29 @@ Fonts
 | `miq ls` | `list` | Lists what is installed — Twemoji included — how much it takes, and where |
 | `miq search` | `find`, `s` | Lists fonts miq knows by name; `miq search gothic` filters it |
 | `miq outdated` | | Checks miq, Twemoji and every installed font against what's currently published |
+| `miq update` | | Applies what `outdated` finds — Twemoji and fonts only, never the miq install itself |
+| `miq prune` | | Deletes stale-version font files an update left behind, keeping the newest per family |
+| `miq env` | `doctor` | Shows resolved storage paths, whether they're writable, and network reachability |
+| `miq generate` | `render` | Generates a quote image from flags and writes it to disk |
 | `miq --version` | | Prints the installed miq version |
+
+`ls`, `search`, `outdated` and `env` also take `--json`, for scripts and CI.
 
 `miq search` lists the curated names miq suggests and autocorrects typos
 against — any Google Fonts family works whether or not it's listed, since
 there is no way to enumerate Google's full ~1800-family catalogue without an
 API key, which this package deliberately doesn't ask you to configure.
+
+`miq generate` covers the common case — text, avatar, username, display name,
+watermark, a built-in theme, scale, output format/quality — as flags. For
+anything the full `Theme` system offers beyond that, use the library
+directly (see below):
+
+```console
+$ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png \
+    --username otoneko. --display-name 音猫 --theme light --out quote.png
+✓ quote.png (31 KB)
+```
 
 The command is available as both `miq` and `makeitaquote` once the package is
 installed. Everything it stores is an ordinary file in an ordinary directory —
