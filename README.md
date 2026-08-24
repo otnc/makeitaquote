@@ -2,16 +2,15 @@
 
 Turn a message into a quote image.
 
-[![npm](https://img.shields.io/npm/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote)
-[![CI](https://img.shields.io/github/actions/workflow/status/otnc/makeitaquote/ci.yml?branch=main&label=ci)](https://github.com/otnc/makeitaquote/actions)
-[![License](https://img.shields.io/github/license/otnc/makeitaquote)](LICENSE)
-[![Node](https://img.shields.io/node/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote)
+[![npm](https://img.shields.io/npm/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote) [![CI](https://img.shields.io/github/actions/workflow/status/otnc/makeitaquote/ci.yml?branch=main&label=ci)](https://github.com/otnc/makeitaquote/actions) [![License](https://img.shields.io/github/license/otnc/makeitaquote)](LICENSE) [![Node](https://img.shields.io/node/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote)
 
 **[See every option as a picture →](https://otnc.github.io/makeitaquote/)**
 
-Renders locally — no API, no browser, no headless Chrome. Japanese line
-breaking, Twemoji, Discord and Misskey custom emoji, and fonts that download
-themselves are all built in.
+Renders locally — no API, no browser, no headless Chrome. Japanese line breaking, Twemoji, Discord and Misskey custom emoji, and fonts that download themselves are all built in.
+
+| Default (`dark`) | `color` |
+| --- | --- |
+| ![Sample quote image, default dark theme](assets/readme/mono.png) | ![Sample quote image, color theme](assets/readme/color.png) |
 
 ```sh
 npm install makeitaquote
@@ -95,12 +94,9 @@ new MiQ().setFromMessage(message).toBuffer('png').then((png) => {
 })
 ```
 
-`setFromMessage()` takes the content, the name and the avatar off the message.
-It accepts anything shaped like a Discord message, so discord.js v13, v14 and
-discord.js-selfbot-v13 all work without this package depending on any of them.
+`setFromMessage()` takes the content, the name and the avatar off the message. It accepts anything shaped like a Discord message, so discord.js v13, v14 and discord.js-selfbot-v13 all work without this package depending on any of them.
 
-By default it uses what a reader of that server saw — the per-server avatar and
-nickname. Either can be switched to the account-wide version:
+By default it uses what a reader of that server saw — the per-server avatar and nickname. Either can be switched to the account-wide version:
 
 ```ts
 new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
@@ -113,13 +109,9 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | `stripDiscordMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
 | `resolveMentions` | `true` — `<@id>` becomes `@name` | `false` — quoted as the raw token |
 
-Whichever avatar or name you choose, the other is still the fallback, so a
-message with only one of them always renders.
+Whichever avatar or name you choose, the other is still the fallback, so a message with only one of them always renders.
 
-`message.content` normally comes through untouched — `**bold**` is quoted with
-its asterisks and all, since that is what was actually typed. Opt into
-plain text with `stripDiscordMarkdown: true`, or call the exported
-`stripDiscordMarkdown()` yourself on any text:
+`message.content` normally comes through untouched — `**bold**` is quoted with its asterisks and all, since that is what was actually typed. Opt into plain text with `stripDiscordMarkdown: true`, or call the exported `stripDiscordMarkdown()` yourself on any text:
 
 ```ts
 import { stripDiscordMarkdown } from 'makeitaquote'
@@ -127,50 +119,28 @@ import { stripDiscordMarkdown } from 'makeitaquote'
 stripDiscordMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, strike, code'
 ```
 
-It handles what Discord message content actually renders — bold, italic,
-underline, strikethrough, spoilers, code (inline and fenced), block quotes
-(`>` at the start of a line, same as Discord), headers, subtext (`-# `) and
-list markers (`-`, `*`, `1.`) — and honours a backslash escape. A code span
-keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks
-(a backslash escape is the one exception — `` `\*x\*` `` still resolves to
-`*x*`, since Discord's own client is the only thing that treats a code
-span's contents as fully inert).
+It handles what Discord message content actually renders — bold, italic, underline, strikethrough, spoilers, code (inline and fenced), block quotes (`>` at the start of a line, same as Discord), headers, subtext (`-# `) and list markers (`-`, `*`, `1.`) — and honours a backslash escape. A code span keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks (a backslash escape is the one exception — `` `\*x\*` `` still resolves to `*x*`, since Discord's own client is the only thing that treats a code span's contents as fully inert).
 
-`[text](url)`-style masked links are left alone: they only render as
-clickable links in embeds, webhooks and messages a bot sent, never in a
-message a person typed themselves — which is the case this function exists
-for — so stripping the brackets there would show something the reader's
-screen never did.
+`[text](url)`-style masked links are left alone: they only render as clickable links in embeds, webhooks and messages a bot sent, never in a message a person typed themselves — which is the case this function exists for — so stripping the brackets there would show something the reader's screen never did.
 
-This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's
-own dialect rather than CommonMark. A generic Markdown stripper gets real
-things wrong here, like reading `__x__` as bold instead of underline, or
-deleting the URL out of a `[text](url)` Discord never turned into a link in
-the first place.
+This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's own dialect rather than CommonMark. A generic Markdown stripper gets real things wrong here, like reading `__x__` as bold instead of underline, or deleting the URL out of a `[text](url)` Discord never turned into a link in the first place.
 
 ### Tokens
 
-Discord writes several things as markup only the client expands. All of them
-are resolved by default:
+Discord writes several things as markup only the client expands. All of them are resolved by default:
 
-| Written as | Becomes |
-| --- | --- |
-| `<@id>`, `<@!id>` | `@nickname` |
-| `<@&id>` | `@role` |
-| `<#id>` | `#channel` |
-| `</name:id>`, `</name sub:id>` | `/name sub` |
-| `<t:1618935630:F>` | `Tuesday, 20 April 2021 at 16:20` |
-| `<id:customize>` | `Channels & Roles` |
+| Written as                     | Becomes                           |
+| ------------------------------ | --------------------------------- |
+| `<@id>`, `<@!id>`              | `@nickname`                       |
+| `<@&id>`                       | `@role`                           |
+| `<#id>`                        | `#channel`                        |
+| `</name:id>`, `</name sub:id>` | `/name sub`                       |
+| `<t:1618935630:F>`             | `Tuesday, 20 April 2021 at 16:20` |
+| `<id:customize>`               | `Channels & Roles`                |
 
-Names come from `message.mentions`, which discord.js populates for you —
-nothing to configure. A mention it has no name for (someone who has since
-left) is left exactly as written rather than guessed at; the rest carry
-everything they need in the token. Set `resolveMentions: false` to quote the
-raw tokens instead.
+Names come from `message.mentions`, which discord.js populates for you — nothing to configure. A mention it has no name for (someone who has since left) is left exactly as written rather than guessed at; the rest carry everything they need in the token. Set `resolveMentions: false` to quote the raw tokens instead.
 
-A `<t:…>` timestamp is the one token whose text depends on who is looking —
-Discord renders it in the reader's own locale and zone. An image has no
-reader to ask, so it uses UTC and `en-GB`:
+A `<t:…>` timestamp is the one token whose text depends on who is looking — Discord renders it in the reader's own locale and zone. An image has no reader to ask, so it uses UTC and `en-GB`:
 
 ```ts
 new MiQ().setFromMessage(message, {
@@ -182,8 +152,7 @@ new MiQ().setFromMessage(message, {
 
 ## Misskey notes
 
-`setFromNote()` reads a note the way `setFromMessage()` reads a message. It
-takes what the API returns, unchanged:
+`setFromNote()` reads a note the way `setFromMessage()` reads a message. It takes what the API returns, unchanged:
 
 ```ts
 const note = await fetch('https://misskey.example/api/notes/show', {
@@ -197,36 +166,24 @@ const png = await new MiQ({ misskey: 'https://misskey.example' })
   .toBuffer('png')
 ```
 
-The display name goes over the handle, which is written `@user` locally and
-`@user@host` for a remote author — exactly as Misskey writes it.
+The display name goes over the handle, which is written `@user` locally and `@user@host` for a remote author — exactly as Misskey writes it.
 
-| Option | Default |
-| --- | --- |
-| `stripMfm` | `true` — `$[jelly x]` becomes `x` |
+| Option     | Default                                            |
+| ---------- | -------------------------------------------------- |
+| `stripMfm` | `true` — `$[jelly x]` becomes `x`                  |
 | `preferCw` | `false` — quotes the note, not the content warning |
 
-MFM is stripped by default, unlike Discord's markdown, because the markup
-differs: `**bold**` still reads as its own text with the asterisks left in,
-while `$[jelly ぷりん]` does not — the function name and brackets are
-scaffolding that was never meant to be read.
+MFM is stripped by default, unlike Discord's markdown, because the markup differs: `**bold**` still reads as its own text with the asterisks left in, while `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read.
 
-`stripMfm()` is exported on its own too, and handles decoration functions
-(including nested ones), `<b>`/`<i>`/`<s>`/`<small>`, `<center>`, quotes,
-code, maths and links. Custom emoji, mentions and hashtags are deliberately
-left alone — the emoji layer draws the first, and unlike Discord, a Misskey
-mention is written `@user@host` in the note already, so there is no id to
-resolve.
+`stripMfm()` is exported on its own too, and handles decoration functions (including nested ones), `<b>`/`<i>`/`<s>`/`<small>`, `<center>`, quotes, code, maths and links. Custom emoji, mentions and hashtags are deliberately left alone — the emoji layer draws the first, and unlike Discord, a Misskey mention is written `@user@host` in the note already, so there is no id to resolve.
 
-`MiQConversation` has `setFromNotes()` for the same thing across several
-notes.
+`MiQConversation` has `setFromNotes()` for the same thing across several notes.
 
 ---
 
 ## X (Twitter)
 
-`setFromTweet()` reads a tweet the way `setFromMessage()` reads a message —
-but unlike Discord or Misskey, neither of X's two practical APIs hands back
-something `TweetLike` accepts as-is, so an adapter comes with each:
+`setFromTweet()` reads a tweet the way `setFromMessage()` reads a message — but unlike Discord or Misskey, neither of X's two practical APIs hands back something `TweetLike` accepts as-is, so an adapter comes with each:
 
 ```ts
 import { FxTwitterV2 } from 'fxtwitter/v2'
@@ -237,11 +194,7 @@ const { status } = await new FxTwitterV2().getStatus(tweetId)
 const png = await new MiQ().setFromTweet(fromFxTwitterStatus(status)).toBuffer('png')
 ```
 
-[`fxtwitter`](https://www.npmjs.com/package/fxtwitter) needs no API key and
-returns the author inline, which is the easier path. For the official API,
-`fromTwitterApiV2Tweet()` combines a tweet with the separate `includes.users`
-entry [`twitter-api-v2`](https://www.npmjs.com/package/twitter-api-v2) (or
-any client with the same response shape) returns it in:
+[`fxtwitter`](https://www.npmjs.com/package/fxtwitter) needs no API key and returns the author inline, which is the easier path. For the official API, `fromTwitterApiV2Tweet()` combines a tweet with the separate `includes.users` entry [`twitter-api-v2`](https://www.npmjs.com/package/twitter-api-v2) (or any client with the same response shape) returns it in:
 
 ```ts
 import { TwitterApi } from 'twitter-api-v2'
@@ -257,25 +210,15 @@ const png = await new MiQ()
   .toBuffer('png')
 ```
 
-Neither library is a dependency of this package — both adapters take a
-structural subset of the real response shape, the same as `MessageLike`, so
-any object with those fields works, whether or not the library that produced
-it is actually installed.
+Neither library is a dependency of this package — both adapters take a structural subset of the real response shape, the same as `MessageLike`, so any object with those fields works, whether or not the library that produced it is actually installed.
 
-There is nothing here for either adapter to strip: X does not expand a
-tweet's `t.co` links or `@handle` mentions into anything else in its own
-timeline, so the text goes through exactly as written, the same way a
-Discord `@everyone` needs no resolving.
+There is nothing here for either adapter to strip: X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline, so the text goes through exactly as written, the same way a Discord `@everyone` needs no resolving.
 
 ---
 
 ## Markdown
 
-For a source that is neither Discord, Misskey nor X — a blog post, a GitHub
-comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus
-the common GFM extras: strikethrough, tables, task lists). `.setText()` has
-no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it
-takes a bare string with no source to opt out of stripping *from*:
+For a source that is neither Discord, Misskey nor X — a blog post, a GitHub comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus the common GFM extras: strikethrough, tables, task lists). `.setText()` has no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it takes a bare string with no source to opt out of stripping _from_:
 
 ```ts
 import { stripMarkdown } from 'makeitaquote'
@@ -286,25 +229,15 @@ stripMarkdown('**bold**, *italic*, ~~strike~~, [a link](url)')
 // → 'bold, italic, strike, a link'
 ```
 
-A link or image keeps its label/alt text and drops the URL — that is what a
-reader saw, not the address behind it — and raw inline/block HTML is dropped
-rather than rendered or left as literal tag text. A list item becomes one
-line, a table becomes tab-separated cells, and a hard line break (two
-trailing spaces) becomes a real one.
+A link or image keeps its label/alt text and drops the URL — that is what a reader saw, not the address behind it — and raw inline/block HTML is dropped rather than rendered or left as literal tag text. A list item becomes one line, a table becomes tab-separated cells, and a hard line break (two trailing spaces) becomes a real one.
 
-This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it)
-rather than a local approximation, the same reasoning as
-`stripDiscordMarkdown()` and `stripMfm()`: CommonMark has enough corners —
-reference-style `[label][ref]` links, loose vs. tight lists, a fenced code
-block's language tag — that matching a real implementation is worth the
-dependency.
+This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it) rather than a local approximation, the same reasoning as `stripDiscordMarkdown()` and `stripMfm()`: CommonMark has enough corners — reference-style `[label][ref]` links, loose vs. tight lists, a fenced code block's language tag — that matching a real implementation is worth the dependency.
 
 ---
 
 ## Conversations
 
-`MiQ` quotes one message. `MiQConversation` renders several as one image — a
-message log, not a quote — each with its own avatar, name and wrapped text:
+`MiQ` quotes one message. `MiQConversation` renders several as one image — a message log, not a quote — each with its own avatar, name and wrapped text:
 
 ```ts
 const png = await new MiQConversation()
@@ -314,44 +247,39 @@ const png = await new MiQConversation()
   .toBuffer('png')
 ```
 
-Consecutive messages from the same `username` collapse onto one avatar and
-name, the same way Discord's own client groups them.
+Consecutive messages from the same `username` collapse onto one avatar and name, the same way Discord's own client groups them.
 
-Straight from real messages, the same way `MiQ#setFromMessage()` reads one —
-content, name, avatar, and the same `avatar` / `name` / `stripDiscordMarkdown`
-/ `resolveMentions` options:
+Straight from real messages, the same way `MiQ#setFromMessage()` reads one — content, name, avatar, and the same `avatar` / `name` / `stripDiscordMarkdown` / `resolveMentions` options:
 
 ```ts
 new MiQConversation().setFromMessages(messages) // messages: an array, oldest first
 ```
 
-A separate class rather than an array mode on `MiQ`, because it has none of a
-quote's per-field theming — two built-in looks, not the full `Theme` system:
+A separate class rather than an array mode on `MiQ`, because it has none of a quote's per-field theming — two built-in looks, not the full `Theme` system:
 
 ```ts
 new MiQConversation({ theme: 'light', width: 500 })
 ```
 
-| Option | Default |
-| --- | --- |
-| `theme` | `'dark'` — `'light'` is the other |
+| Option  | Default                            |
+| ------- | ---------------------------------- |
+| `theme` | `'dark'` — `'light'` is the other  |
 | `width` | `600` — height follows the content |
 
-Custom emoji, Twemoji and Misskey emoji all work inside a message the same
-way they do in `MiQ`, through the same `misskey` option.
+Custom emoji, Twemoji and Misskey emoji all work inside a message the same way they do in `MiQ`, through the same `misskey` option.
 
 ---
 
 ## Themes
 
-| Preset | | |
+| Preset |  |  |
 | --- | --- | --- |
 | `dark` | default | Black, avatar left, quote right — the original look |
-| `light` | | The same on white |
-| `color` | | `dark`, but the avatar keeps its color |
-| `portrait` | | Avatar fills the canvas and fades down, quote over the bottom |
-| `portrait-light` | | The same on white |
-| `custom` | | Everything transparent, for you to color in |
+| `light` |  | The same on white |
+| `color` |  | `dark`, but the avatar keeps its color |
+| `portrait` |  | Avatar fills the canvas and fades down, quote over the bottom |
+| `portrait-light` |  | The same on white |
+| `custom` |  | Everything transparent, for you to color in |
 
 ```ts
 new MiQ({ theme: 'portrait' })      // at construction
@@ -372,15 +300,9 @@ await new MiQ()
   .toBuffer('webp', { quality: 90 })
 ```
 
-Sizes inside a theme are **fractions of the canvas** when between 0 and 1, and
-pixels when larger. That is what makes [scaling](#size) a true zoom.
+Sizes inside a theme are **fractions of the canvas** when between 0 and 1, and pixels when larger. That is what makes [scaling](#size) a true zoom.
 
-`themes` and `palettes` are exported too — the full resolved `Theme` object
-behind each preset name, and the `dark`/`light` colour pairs those are built
-from, for a custom theme that wants to start from one rather than repeat its
-hex codes. `defineTheme(name | input)` runs the same preset-and-`extends`
-resolution `.setTheme()` does, if you want the resolved `Theme` itself rather
-than to render with it.
+`themes` and `palettes` are exported too — the full resolved `Theme` object behind each preset name, and the `dark`/`light` colour pairs those are built from, for a custom theme that wants to start from one rather than repeat its hex codes. `defineTheme(name | input)` runs the same preset-and-`extends` resolution `.setTheme()` does, if you want the resolved `Theme` itself rather than to render with it.
 
 ### Flipping sides
 
@@ -388,10 +310,7 @@ than to render with it.
 .setTheme({ avatar: { position: 'right' } })
 ```
 
-The quote area, the gradient and the watermark all mirror automatically —
-`text.area` and `watermark.position` default to `'auto'`, which derives them
-from where the avatar is. Only set `text.area` yourself if you want to place
-the quote by hand.
+The quote area, the gradient and the watermark all mirror automatically — `text.area` and `watermark.position` default to `'auto'`, which derives them from where the avatar is. Only set `text.area` yourself if you want to place the quote by hand.
 
 ### Avatar shape
 
@@ -399,10 +318,7 @@ the quote by hand.
 .setTheme({ avatar: { shape: 'circle' } })
 ```
 
-Clips the avatar, and its fallback tile, to the largest circle that fits the
-box — the default `'rectangle'` uses the whole box instead. On a wide or tall
-box that leaves background showing at the sides or top and bottom, the same as
-a round profile picture would anywhere else.
+Clips the avatar, and its fallback tile, to the largest circle that fits the box — the default `'rectangle'` uses the whole box instead. On a wide or tall box that leaves background showing at the sides or top and bottom, the same as a round profile picture would anywhere else.
 
 ### Portrait
 
@@ -414,10 +330,7 @@ await new MiQ({ theme: 'portrait' })
   .toBuffer('png')
 ```
 
-The `stacked` layout draws the avatar full-bleed, fades it downwards, and puts
-large quote marks, the quote, a rule and the attribution over the bottom. It is
-not limited to tall canvases — `{ extends: 'portrait', width: 1280, height: 720 }`
-works too.
+The `stacked` layout draws the avatar full-bleed, fades it downwards, and puts large quote marks, the quote, a rule and the attribution over the bottom. It is not limited to tall canvases — `{ extends: 'portrait', width: 1280, height: 720 }` works too.
 
 ### Bold
 
@@ -427,10 +340,7 @@ works too.
 
 Every text element takes a `weight`: `'normal'`, `'bold'`, or 100–900.
 
-> Fonts registered at runtime often expose only their regular face, so `bold`
-> would otherwise do nothing at all. Bold is detected per family and emulated by
-> stroking the glyphs when there is no real bold face — so it works whatever
-> font you use. Ask for a real one with `fonts.use(family, { weights: [400, 700] })`.
+> Fonts registered at runtime often expose only their regular face, so `bold` would otherwise do nothing at all. Bold is detected per family and emulated by stroking the glyphs when there is no real bold face — so it works whatever font you use. Ask for a real one with `fonts.use(family, { weights: [400, 700] })`.
 
 ### Quote marks and rules
 
@@ -458,17 +368,13 @@ Every color accepts any of these:
 'lch(…)'  'oklab(…)'  'oklch(…)'  'color(…)'   anything culori itself parses
 ```
 
-Strings go through [`culori`](https://www.npmjs.com/package/culori), which
-brings the 148 CSS colour names and the whole CSS Color 4 function set,
-converted to RGB for you. The number and array forms are this package's own.
+Strings go through [`culori`](https://www.npmjs.com/package/culori), which brings the 148 CSS colour names and the whole CSS Color 4 function set, converted to RGB for you. The number and array forms are this package's own.
 
-> A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so
-> write those as strings, where the length is part of the value.
+> A number cannot carry a leading zero byte — `0x00FF0000` _is_ `0xFF0000` — so write those as strings, where the length is part of the value.
 
 ### Parsing a color yourself
 
-The same parser is exported, for anything outside a theme that needs to read
-or normalize a color:
+The same parser is exported, for anything outside a theme that needs to read or normalize a color:
 
 ```ts
 import { isTransparent, parseColor, toCSS, toHex } from 'makeitaquote'
@@ -481,8 +387,7 @@ isTransparent(parseColor('transparent'))  // true
 
 ### Starting from nothing
 
-The `custom` preset begins fully transparent, so the only colors in the image
-are the ones you name:
+The `custom` preset begins fully transparent, so the only colors in the image are the ones you name:
 
 ```ts
 await new MiQ()
@@ -499,8 +404,7 @@ await new MiQ()
   .toBuffer('png')
 ```
 
-Leave `background` alone and you get a PNG with a transparent background, ready
-to composite. Anything left transparent is not drawn at all.
+Leave `background` alone and you get a PNG with a transparent background, ready to composite. Anything left transparent is not drawn at all.
 
 ### Background image
 
@@ -510,30 +414,22 @@ to composite. Anything left transparent is not drawn at all.
 })
 ```
 
-Drawn over `background` and behind everything else — `source` takes the same
-things `setAvatar()` does (a URL, a local path, a `Buffer`). `fit` is `'cover'`
-(crops to fill) or `'contain'` (fits whole, letterboxed in `background`).
-`null` (the default on every preset) means no image.
+Drawn over `background` and behind everything else — `source` takes the same things `setAvatar()` does (a URL, a local path, a `Buffer`). `fit` is `'cover'` (crops to fill) or `'contain'` (fits whole, letterboxed in `background`). `null` (the default on every preset) means no image.
 
-The avatar-fade gradient is skipped automatically once a background image is
-set — it fades the avatar into a *flat* background color, which a canvas
-gradient does by painting an opaque wash over most of the canvas, and that
-would hide the image. There's no way to have both at once.
+The avatar-fade gradient is skipped automatically once a background image is set — it fades the avatar into a _flat_ background color, which a canvas gradient does by painting an opaque wash over most of the canvas, and that would hide the image. There's no way to have both at once.
 
 ---
 
 ## Size
 
-The default canvas is **1200×630 landscape, 630×790 portrait** — the size the
-real Make it a Quote bot itself renders at, not a round ratio.
+The default canvas is **1200×630 landscape, 630×790 portrait** — the size the real Make it a Quote bot itself renders at, not a round ratio.
 
 ```ts
 .setScale(2)      // 2400×1260, the same image at twice the resolution
 .setScale(0.5)    // half
 ```
 
-`setScale()` is a genuine zoom: because theme sizes are fractions, nothing is
-re-composed, only re-rendered.
+`setScale()` is a genuine zoom: because theme sizes are fractions, nothing is re-composed, only re-rendered.
 
 To keep the avatar at its native resolution and let the canvas follow:
 
@@ -547,18 +443,13 @@ For a different shape, set it on the theme:
 .setTheme({ width: 1280, height: 720 })
 ```
 
-> `setSize(width, height)` still works but is deprecated: it changes the aspect
-> ratio without moving anything else, so the avatar, gradient and text drift out
-> of proportion. It emits a Node deprecation warning, silenced by
-> `--no-deprecation` like any other.
+> `setSize(width, height)` still works but is deprecated: it changes the aspect ratio without moving anything else, so the avatar, gradient and text drift out of proportion. It emits a Node deprecation warning, silenced by `--no-deprecation` like any other.
 
 ---
 
 ## Fonts
 
-**Nothing to configure.** If the system has no font for the text, the first
-render fetches one, caches it, and never fetches it again. The default is
-M PLUS Rounded 1c, with Noto Sans JP behind it for anything it doesn't cover.
+**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it for anything it doesn't cover.
 
 Name any font and it is fetched on demand:
 
@@ -566,14 +457,11 @@ Name any font and it is fetched on demand:
 .setTheme({ text: { font: 'Dela Gothic One, Noto Sans JP, sans-serif' } })
 ```
 
-Fonts are resolved through the Google Fonts API on each cold start, so you get
-the current release rather than a version frozen into this package.
+Fonts are resolved through the Google Fonts API on each cold start, so you get the current release rather than a version frozen into this package.
 
 ### Mixing scripts
 
-A Latin-only display font no longer turns Japanese into boxes. The chosen font
-is used for everything it covers, and the rest falls through to a font that has
-the glyphs:
+A Latin-only display font no longer turns Japanese into boxes. The chosen font is used for everything it covers, and the rest falls through to a font that has the glyphs:
 
 ```ts
 .setTheme({ text: { font: 'Vina Sans' } })
@@ -584,20 +472,16 @@ the glyphs:
 
 Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 
-| | |
+|  |  |
 | --- | --- |
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script |
 
 ### Licensing
 
-**Fonts are only ever fetched from Google Fonts**, which distributes exclusively
-under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — all of
-which allow rendering text into images freely.
+**Fonts are only ever fetched from Google Fonts**, which distributes exclusively under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — all of which allow rendering text into images freely.
 
-That is also the licence check. A paid font, or one with unclear terms, is not
-on Google Fonts, so it cannot be fetched by name and this package will not look
-elsewhere for it:
+That is also the licence check. A paid font, or one with unclear terms, is not on Google Fonts, so it cannot be fetched by name and this package will not look elsewhere for it:
 
 ```
 "Jiyu no Tsubasa" is not distributed through Google Fonts; its licence is
@@ -611,10 +495,7 @@ fonts.registerFromPath('./fonts/Licensed.otf', 'Licensed Font')
 await fonts.registerFromURL('https://example.com/font.ttf', 'Remote Font')
 ```
 
-Rendering text produces an image, not a copy of the font, and every licence
-above permits that. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md),
-including the **Twemoji attribution requirement** if you publish what you
-generate.
+Rendering text produces an image, not a copy of the font, and every licence above permits that. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md), including the **Twemoji attribution requirement** if you publish what you generate.
 
 ### Controlling it
 
@@ -634,14 +515,9 @@ new MiQ({ autoFont: false, onAssetError: 'throw' })   // same, via the shared op
 new MiQ({ autoFont: false, onAssetError: 'ignore' })  // fall back with no warning
 ```
 
-The cache lives at `$MIQ_FONT_CACHE_DIR`, then `$XDG_CACHE_HOME`, then
-`~/.cache/makeitaquote/fonts` (`%LOCALAPPDATA%` on Windows). Pre-populate it and
-the package works entirely offline.
+The cache lives at `$MIQ_FONT_CACHE_DIR`, then `$XDG_CACHE_HOME`, then `~/.cache/makeitaquote/fonts` (`%LOCALAPPDATA%` on Windows). Pre-populate it and the package works entirely offline.
 
-Everything above is also exported as its own function — `useFont`,
-`ensureDefaultFonts`, `resolveGoogleFont`, `FONT_CATALOGUE`, `isCatalogued`,
-`resolveCacheDir`, `DEFAULT_FONT_FAMILIES`, `FALLBACK_FAMILY` — for the rare
-case `fonts.*` doesn't cover; `fonts` itself is a thin wrapper over them.
+Everything above is also exported as its own function — `useFont`, `ensureDefaultFonts`, `resolveGoogleFont`, `FONT_CATALOGUE`, `isCatalogued`, `resolveCacheDir`, `DEFAULT_FONT_FAMILIES`, `FALLBACK_FAMILY` — for the rare case `fonts.*` doesn't cover; `fonts` itself is a thin wrapper over them.
 
 **Docker** — bake the fonts in so containers never fetch at runtime:
 
@@ -654,33 +530,27 @@ RUN node -e "import('makeitaquote').then(m => m.fonts.ensureDefaults())"
 
 ## Emoji
 
-| Source | Written as | Needs setup |
-| --- | --- | --- |
-| Twemoji | any Unicode emoji | no |
-| Discord | `<:name:id>`, `<a:name:id>` | no |
-| Misskey | `:name@host:` | no |
-| Misskey | `:name:` | an instance to resolve against |
+| Source  | Written as                  | Needs setup                    |
+| ------- | --------------------------- | ------------------------------ |
+| Twemoji | any Unicode emoji           | no                             |
+| Discord | `<:name:id>`, `<a:name:id>` | no                             |
+| Misskey | `:name@host:`               | no                             |
+| Misskey | `:name:`                    | an instance to resolve against |
 
-Images are cached in memory, concurrent requests for the same emoji are shared,
-and a failed fetch draws the source text instead of failing the render.
-Animated emoji are drawn as their first frame.
+Images are cached in memory, concurrent requests for the same emoji are shared, and a failed fetch draws the source text instead of failing the render. Animated emoji are drawn as their first frame.
 
 ### Misskey
 
-`:name@host:` carries its own host and works out of the box. A bare `:name:`
-needs somewhere to point:
+`:name@host:` carries its own host and works out of the box. A bare `:name:` needs somewhere to point:
 
 ```ts
 new MiQ({ misskey: 'https://misskey.example' })
 new MiQ({ misskey: ['https://one.example', 'https://two.example'] })
 ```
 
-With several instances, each is tried in turn and the first that actually
-serves the emoji wins — useful for a bot spanning more than one.
+With several instances, each is tried in turn and the first that actually serves the emoji wins — useful for a bot spanning more than one.
 
-**Anything that doesn't resolve is drawn exactly as written**, so ordinary text
-is never mangled. A shortcode only counts as emoji when it doesn't follow an
-ASCII alphanumeric and its name isn't purely numeric:
+**Anything that doesn't resolve is drawn exactly as written**, so ordinary text is never mangled. A shortcode only counts as emoji when it doesn't follow an ASCII alphanumeric and its name isn't purely numeric:
 
 ```
 12:30:45          the inner :30: follows a digit
@@ -702,25 +572,19 @@ new MiQ({ misskey: { instance: 'https://misskey.example', remote: false } })
 configureEmojiCache({ maxEntries: 512, ttlMs: 7_200_000 })
 ```
 
-Avatars get their own, separate cache — handy when the same user is quoted
-several times in a row. Its default TTL is much shorter (five minutes) since
-an avatar is one person's current picture, not a shared asset:
+Avatars get their own, separate cache — handy when the same user is quoted several times in a row. Its default TTL is much shorter (five minutes) since an avatar is one person's current picture, not a shared asset:
 
 ```ts
 configureAvatarCache({ maxEntries: 128, ttlMs: 60_000 })
 ```
 
-`emojiCacheInfo()`/`avatarCacheInfo()` report what's cached (entries,
-failures, in-flight requests); `clearEmojiCache()`/`clearAvatarCache()` empty
-one without waiting out its TTL.
+`emojiCacheInfo()`/`avatarCacheInfo()` report what's cached (entries, failures, in-flight requests); `clearEmojiCache()`/`clearAvatarCache()` empty one without waiting out its TTL.
 
 ---
 
 ## Text
 
-Japanese wraps at phrase boundaries using
-[BudouX](https://github.com/google/budoux), with kinsoku rules applied, and the
-font size shrinks until the quote fits its box.
+Japanese wraps at phrase boundaries using [BudouX](https://github.com/google/budoux), with kinsoku rules applied, and the font size shrinks until the quote fits its box.
 
 ```ts
 .setTheme({ text: { phraseBreak: false } })   // break per character instead
@@ -728,8 +592,7 @@ font size shrinks until the quote fits its box.
 .setTheme({ text: { overflow: 'error' } })    // throw instead
 ```
 
-`overflow` defaults to `'ellipsis'`. Long unbreakable runs — URLs, for
-instance — are split at grapheme boundaries rather than allowed to overflow.
+`overflow` defaults to `'ellipsis'`. Long unbreakable runs — URLs, for instance — are split at grapheme boundaries rather than allowed to overflow.
 
 ---
 
@@ -748,9 +611,7 @@ await miq.render()                           // the Canvas, to draw on yourself
 
 ## Offline use
 
-Fonts and Twemoji are normally fetched the first time they are needed and
-cached on disk after that. The CLI downloads them ahead of time instead, so
-renders never touch the network at all:
+Fonts and Twemoji are normally fetched the first time they are needed and cached on disk after that. The CLI downloads them ahead of time instead, so renders never touch the network at all:
 
 ```console
 $ npx miq install
@@ -765,33 +626,27 @@ Fonts
 | Command | Aliases | What it does |
 | --- | --- | --- |
 | `miq install` | `add`, `i` | Everything: every Twemoji image and the default fonts |
-| `miq install twemoji` | | Every Twemoji image (~4000 files, ~4 MB) — the full current release, not a subset |
-| `miq install fonts` | | The default font families, weights 400 and 700 |
-| `miq install fonts "Dela Gothic One"` | | Specific families, by their Google Fonts name |
-| `miq install "Dela Gothic One"` | | The same, without the keyword |
+| `miq install twemoji` |  | Every Twemoji image (~4000 files, ~4 MB) — the full current release, not a subset |
+| `miq install fonts` |  | The default font families, weights 400 and 700 |
+| `miq install fonts "Dela Gothic One"` |  | Specific families, by their Google Fonts name |
+| `miq install "Dela Gothic One"` |  | The same, without the keyword |
 | `miq uninstall` | `remove`, `rm`, `un` | Removes everything the commands above put on disk |
-| `miq uninstall twemoji` · `miq uninstall fonts` | | Removes one kind |
-| `miq uninstall fonts "Dela Gothic One"` | | Removes specific families |
+| `miq uninstall twemoji` · `miq uninstall fonts` |  | Removes one kind |
+| `miq uninstall fonts "Dela Gothic One"` |  | Removes specific families |
 | `miq ls` | `list` | Lists what is installed — Twemoji included — how much it takes, and where |
 | `miq search` | `find`, `s` | Lists fonts miq knows by name; `miq search gothic` filters it |
-| `miq outdated` | | Checks miq, Twemoji and every installed font against what's currently published |
-| `miq update` | | Applies what `outdated` finds — Twemoji and fonts only, never the miq install itself |
-| `miq prune` | | Deletes stale-version font files an update left behind, keeping the newest per family |
+| `miq outdated` |  | Checks miq, Twemoji and every installed font against what's currently published |
+| `miq update` |  | Applies what `outdated` finds — Twemoji and fonts only, never the miq install itself |
+| `miq prune` |  | Deletes stale-version font files an update left behind, keeping the newest per family |
 | `miq env` | `doctor` | Shows resolved storage paths, whether they're writable, and network reachability |
 | `miq generate` | `render` | Generates a quote image from flags and writes it to disk |
-| `miq --version` | | Prints the installed miq version |
+| `miq --version` |  | Prints the installed miq version |
 
 `ls`, `search`, `outdated` and `env` also take `--json`, for scripts and CI.
 
-`miq search` lists the curated names miq suggests and autocorrects typos
-against — any Google Fonts family works whether or not it's listed, since
-there is no way to enumerate Google's full ~1800-family catalogue without an
-API key, which this package deliberately doesn't ask you to configure.
+`miq search` lists the curated names miq suggests and autocorrects typos against — any Google Fonts family works whether or not it's listed, since there is no way to enumerate Google's full ~1800-family catalogue without an API key, which this package deliberately doesn't ask you to configure.
 
-`miq generate` covers the common case — text, avatar, username, display name,
-watermark, a built-in theme, scale, output format/quality — as flags. For
-anything the full `Theme` system offers beyond that, use the library
-directly (see below):
+`miq generate` covers the common case — text, avatar, username, display name, watermark, a built-in theme, scale, output format/quality — as flags. For anything the full `Theme` system offers beyond that, use the library directly (see below):
 
 ```console
 $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png \
@@ -799,27 +654,18 @@ $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png
 ✓ quote.png (31 KB)
 ```
 
-The command is available as both `miq` and `makeitaquote` once the package is
-installed. Everything it stores is an ordinary file in an ordinary directory —
-deleting the directory uninstalls just as well.
+The command is available as both `miq` and `makeitaquote` once the package is installed. Everything it stores is an ordinary file in an ordinary directory — deleting the directory uninstalls just as well.
 
-Storage is project-local by default: the nearest ancestor directory of `cwd`
-with a `package.json` (falling back to `cwd` itself if none is found), not a
-location shared by every project on the machine — so one project's
-`uninstall` never reaches into another's cache, and two projects on
-different `makeitaquote` versions never fight over the same files:
+Storage is project-local by default: the nearest ancestor directory of `cwd` with a `package.json` (falling back to `cwd` itself if none is found), not a location shared by every project on the machine — so one project's `uninstall` never reaches into another's cache, and two projects on different `makeitaquote` versions never fight over the same files:
 
-| | Default location | Override |
-| --- | --- | --- |
-| Fonts | `<project root>/.makeitaquote/fonts` | `MIQ_FONT_CACHE_DIR` |
+|         | Default location                       | Override                |
+| ------- | -------------------------------------- | ----------------------- |
+| Fonts   | `<project root>/.makeitaquote/fonts`   | `MIQ_FONT_CACHE_DIR`    |
 | Twemoji | `<project root>/.makeitaquote/twemoji` | `MIQ_TWEMOJI_CACHE_DIR` |
 
 Add `.makeitaquote/` to `.gitignore`.
 
-After installing, renders work with the network down. Fonts already on disk
-are registered without asking Google first, and a Twemoji image is read from
-the local store instead of the CDN. Nothing changes until then — an
-uninstalled machine keeps fetching on first use exactly as before.
+After installing, renders work with the network down. Fonts already on disk are registered without asking Google first, and a Twemoji image is read from the local store instead of the CDN. Nothing changes until then — an uninstalled machine keeps fetching on first use exactly as before.
 
 The same operations are available programmatically:
 
@@ -847,21 +693,18 @@ const png = await new VoidsMiQ().setText('Hello World!').toBuffer()
 
 The two endpoints do different things, so the method picks one:
 
-| | `toURL()` | `toBuffer()` |
-| --- | --- | --- |
-| Endpoint | `/fakequote` | `/fakequotebeta` |
-| Returns | a hosted image URL | the image bytes |
-| Round trips | 1 | 1 |
-| Stored on their server | **yes** | no |
+|                        | `toURL()`          | `toBuffer()`     |
+| ---------------------- | ------------------ | ---------------- |
+| Endpoint               | `/fakequote`       | `/fakequotebeta` |
+| Returns                | a hosted image URL | the image bytes  |
+| Round trips            | 1                  | 1                |
+| Stored on their server | **yes**            | no               |
 
-`toBuffer({ hosted: true })` uploads and then downloads it back — two round
-trips, only useful if you specifically want the bytes of the hosted image.
+`toBuffer({ hosted: true })` uploads and then downloads it back — two round trips, only useful if you specifically want the bytes of the hosted image.
 
-Importing `makeitaquote/api` does not load the rendering stack, so it also
-works on platforms `@napi-rs/canvas` has no binary for.
+Importing `makeitaquote/api` does not load the rendering stack, so it also works on platforms `@napi-rs/canvas` has no binary for.
 
-> The Voids API is not operated by this package's developer. Please don't open
-> issues here about it being down.
+> The Voids API is not operated by this package's developer. Please don't open issues here about it being down.
 
 ---
 
@@ -878,24 +721,15 @@ MiQError
 └─ VoidsApiError            the API refused or failed (.status, .body, .endpoint)
 ```
 
-A missing emoji, avatar or font never throws by default — the image degrades
-instead. All three follow `onAssetError`; `strictFonts` is a font-specific
-override for it.
+A missing emoji, avatar or font never throws by default — the image degrades instead. All three follow `onAssetError`; `strictFonts` is a font-specific override for it.
 
 ---
 
 ## Platform support
 
-`@napi-rs/canvas` ships prebuilt binaries for macOS (x64/arm64), Linux
-(x64/arm64/arm, glibc **and musl**), Windows (x64/arm64) and Android arm64.
-Nothing to compile, Alpine included.
+`@napi-rs/canvas` ships prebuilt binaries for macOS (x64/arm64), Linux (x64/arm64/arm, glibc **and musl**), Windows (x64/arm64) and Android arm64. Nothing to compile, Alpine included.
 
-**Node.js** is the tested runtime (22+). **Bun** loads the native binding fine
-and both entry points (ESM and CJS) render correctly — it isn't part of CI,
-so treat it as working rather than officially supported. **Deno** hasn't been
-verified: its Node-API compatibility for native addons like this one is still
-maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font
-files besides.
+**Node.js** is the tested runtime (22+). **Bun** loads the native binding fine and both entry points (ESM and CJS) render correctly — it isn't part of CI, so treat it as working rather than officially supported. **Deno** hasn't been verified: its Node-API compatibility for native addons like this one is still maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font files besides.
 
 On a platform without a binary, use `makeitaquote/api`.
 
@@ -903,11 +737,7 @@ On a platform without a binary, use `makeitaquote/api`.
 
 ## Migrating
 
-v10 keeps the same API as v9, but moves the default font/Twemoji cache
-from a location shared by every project on the machine to one inside your
-own project. v9 was a rewrite: the API changed, and images render locally
-by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including
-the v8 → v9 method table.
+v10 keeps the same API as v9, but moves the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
 
 ---
 
@@ -921,9 +751,7 @@ otoneko. https://github.com/otnc
 
 MIT — see [LICENSE](LICENSE).
 
-Third-party assets are fetched at runtime: fonts from Google Fonts (OFL /
-Apache 2.0 / UFL) and emoji from Twemoji, which is **CC-BY 4.0 and requires
-attribution** if you publish the images:
+Third-party assets are fetched at runtime: fonts from Google Fonts (OFL / Apache 2.0 / UFL) and emoji from Twemoji, which is **CC-BY 4.0 and requires attribution** if you publish the images:
 
 > Emoji graphics by [Twemoji](https://github.com/jdecked/twemoji) (CC-BY 4.0).
 

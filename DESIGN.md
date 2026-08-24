@@ -1,9 +1,6 @@
 # makeitaquote v9 詳細設計書
 
-作成日: 2026-07-31
-対象バージョン: `makeitaquote@9.0.0`（v8 系との後方互換性は**持たない**）
-リポジトリ: https://github.com/otnc/makeitaquote
-リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
+作成日: 2026-07-31対象バージョン: `makeitaquote@9.0.0`（v8 系との後方互換性は**持たない**）リポジトリ: https://github.com/otnc/makeitaquote リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
 
 ---
 
@@ -60,7 +57,7 @@ const response = (await axios.post(BETA_API_URL, this.format, { responseType: 'a
 return Buffer.from(response)                    // ← 画像バイナリを直接返す
 ```
 
-| | `/fakequote` | `/fakequotebeta` |
+|  | `/fakequote` | `/fakequotebeta` |
 | --- | --- | --- |
 | レスポンス | `application/json` — `{ url: "..." }` | 画像バイナリ |
 | 画像の所在 | **Voids 側にアップロードされ、ホスト URL が発行される** | どこにも保存されない。都度生成して返すだけ |
@@ -121,6 +118,7 @@ return Buffer.from(response)                    // ← 画像バイナリを直�
   ```
 
   特に **musl（Alpine）バイナリがある**点が node-canvas との決定的な差。Discord Bot は `node:*-alpine` で動かされることが多く、node-canvas だと Cairo・Pango・libjpeg 等を `apk add` する必要がある。
+
 - Canvas 2D API 準拠なので、グラデーション・クリップ・フィルタ・行送りを自前で細かく組める。
 - 活発にメンテナンスされている（v1.0.3 が 2026-07-28 リリース）。
 
@@ -199,6 +197,7 @@ return Buffer.from(response)                    // ← 画像バイナリを直�
    ```
 
    `loadDefaultJapaneseParser()` ではなく `Parser` + `jaModel` を直接使うことで、`HTMLProcessor` を含まない最小構成になる。
+
 3. **日本語モデルのみを import できる**ため、実際にバンドルされるのは数十 KB。
 4. 中国語（簡体・繁体）・タイ語のモデルも同梱されており、将来の多言語対応の余地がある。
 5. 2026-05 更新と現役。
@@ -443,10 +442,7 @@ makeitaquote/
 }
 ```
 
-> **2026-08-01 での訂正**: `"license"` はその後 **ISC → MIT** に変更された。姉妹パッケージの
-> ライセンス方針に合わせたもので、v9 系がこの変更の起点。上のスナップショットは設計時点の
-> 記録としてそのまま残すが、現在の `package.json` / `LICENSE` / README / THIRD-PARTY-NOTICES.md
-> はすべて MIT を指している。
+> **2026-08-01 での訂正**: `"license"` はその後 **ISC → MIT** に変更された。姉妹パッケージのライセンス方針に合わせたもので、v9 系がこの変更の起点。上のスナップショットは設計時点の記録としてそのまま残すが、現在の `package.json` / `LICENSE` / README / THIRD-PARTY-NOTICES.md はすべて MIT を指している。
 
 - テンプレートの `setup` スクリプトと `scripts/setup.js` は**採用しない**。既存リポジトリでありプレースホルダの置換が不要なため。
 - `check:build` を追加（§5.8）。
@@ -554,8 +550,7 @@ trim_trailing_whitespace = true
 trim_trailing_whitespace = false
 ```
 
-> 本リポジトリは Windows で開発されているため、`.gitattributes` 導入時に一度だけ既存ファイルの正規化が必要。
-> `git add --renormalize . && git commit -m "Normalize line endings to LF"`
+> 本リポジトリは Windows で開発されているため、`.gitattributes` 導入時に一度だけ既存ファイルの正規化が必要。 `git add --renormalize . && git commit -m "Normalize line endings to LF"`
 
 ### 5.5 `.gitignore`
 
@@ -597,9 +592,7 @@ export default defineConfig({
 })
 ```
 
-> **実装時の訂正**: tsdown の移行ガイドには `deps: { external, noExternal }` とあるが、
-> 0.22.14 の実際の `DepsConfig` は **`neverBundle` / `alwaysBundle`** に改名されている。
-> 旧名を書くと型エラーになる。
+> **実装時の訂正**: tsdown の移行ガイドには `deps: { external, noExternal }` とあるが、0.22.14 の実際の `DepsConfig` は **`neverBundle` / `alwaysBundle`** に改名されている。旧名を書くと型エラーになる。
 
 `src/api/index.ts` をエントリに追加すると、`dist/api/index.{mjs,cjs,d.mts,d.cts}` が出力され、§5.1 の `exports` と対応する。
 
@@ -1111,9 +1104,7 @@ type Segment =
 
 1. `@twemoji/parser` の `parse(text, { assetType: 'png' })` で標準絵文字の `indices` と `url` を得る。
 2. 絵文字区間で分割し、間のテキストを `{ kind: 'text' }` として積む。
-3. 各テキスト片に `/<(a)?:(\w{2,32}):(\d{17,20})>/g` を適用してさらに分割する。
-   URL は `https://cdn.discordapp.com/emojis/{id}.{ext}?size=64`（`animated` なら `.gif`）。
-   GIF は 1 フレーム目のみ描画される。これは仕様として README に明記する。
+3. 各テキスト片に `/<(a)?:(\w{2,32}):(\d{17,20})>/g` を適用してさらに分割する。URL は `https://cdn.discordapp.com/emojis/{id}.{ext}?size=64`（`animated` なら `.gif`）。GIF は 1 フレーム目のみ描画される。これは仕様として README に明記する。
 4. 空文字セグメントを除去する。
 
 **幅計測**（`text/measure.ts`）
@@ -1124,9 +1115,7 @@ width(segment) =
   kind === 'emoji' → fontSize + emojiSideMargin * 2      (既定 margin = fontSize * 0.08)
 ```
 
-絵文字はベースライン基準で
-`drawImage(img, x + sideMargin, y - fontSize + topMargin - baseline, fontSize, fontSize)`
-に配置する（`topMargin = fontSize * 0.10`）。
+絵文字はベースライン基準で `drawImage(img, x + sideMargin, y - fontSize + topMargin - baseline, fontSize, fontSize)` に配置する（`topMargin = fontSize * 0.10`）。
 
 **改行候補位置の決定**（`text/breakpoint.ts`）
 
@@ -1570,21 +1559,19 @@ v8 の README にある「API issue で `.generate()` が使えないときは `
 
 `Theme.layout: 'side' | 'stacked'` を導入し、レイアウト計算を `src/render/layout.ts` に集約した。
 
-| | `side` | `stacked` |
-| --- | --- | --- |
-| アバター | 幅 `widthRatio`、左右どちらか | キャンバス全面 |
-| グラデーション | 水平（右配置時は自動ミラー） | 垂直（上→下） |
-| 引用符 | インライン | ブロック（大きく上部に） |
-| 区切り線 | 無効 | 有効 |
-| 既定サイズ | 1280×720 | 800×1000 |
+|                | `side`                        | `stacked`                |
+| -------------- | ----------------------------- | ------------------------ |
+| アバター       | 幅 `widthRatio`、左右どちらか | キャンバス全面           |
+| グラデーション | 水平（右配置時は自動ミラー）  | 垂直（上→下）            |
+| 引用符         | インライン                    | ブロック（大きく上部に） |
+| 区切り線       | 無効                          | 有効                     |
+| 既定サイズ     | 1280×720                      | 800×1000                 |
 
-プリセットに `portrait` / `portrait-light` を追加（計 5 種）。
-`stacked` は縦長専用ではなく、横長キャンバスにも適用できる。
+プリセットに `portrait` / `portrait-light` を追加（計 5 種）。 `stacked` は縦長専用ではなく、横長キャンバスにも適用できる。
 
 ### 14.2 `text.area: 'auto'` — 反転対応の要
 
-反転（テキスト左・アバター右）を `avatar.position` の指定だけで成立させるため、
-`text.area` の既定値を `'auto'` とし、レイアウトと `position` から導出するようにした。
+反転（テキスト左・アバター右）を `avatar.position` の指定だけで成立させるため、 `text.area` の既定値を `'auto'` とし、レイアウトと `position` から導出するようにした。
 
 ```
 side:    width = 1 - widthRatio - gap * 2
@@ -1592,12 +1579,9 @@ side:    width = 1 - widthRatio - gap * 2
 stacked: { x: 0.08, y: 0.56, width: 0.84, height: 0.18 }
 ```
 
-既定値（`widthRatio 0.5`, `gap 0.04`）は従来ハードコードしていた値（`x 0.54` / `width 0.42`）と
-一致するため、既存テーマの見た目は変わらない。`widthRatio` を変えたときにテキストが
-追随するようになった、という副次効果もある。
+既定値（`widthRatio 0.5`, `gap 0.04`）は従来ハードコードしていた値（`x 0.54` / `width 0.42`）と一致するため、既存テーマの見た目は変わらない。`widthRatio` を変えたときにテキストが追随するようになった、という副次効果もある。
 
-`watermark.position` にも `'auto'` を追加し、これを既定とした。`side` ではアバターの反対側に置く。
-反転時にウォーターマークがアバターに埋もれる問題への対処。
+`watermark.position` にも `'auto'` を追加し、これを既定とした。`side` ではアバターの反対側に置く。反転時にウォーターマークがアバターに埋もれる問題への対処。
 
 ### 14.3 太字 — 可変フォントの制約と合成太字
 
@@ -1610,38 +1594,28 @@ bold     bold 40px Noto Sans JP   width=120.36
 300      300 40px Noto Sans JP    width=120.36
 ```
 
-原因は、`GlobalFonts` に登録した**可変フォント（`NotoSansJP[wght].ttf`）の既定インスタンス
-（wght=400）しか Skia に見えていない**こと。google/fonts に静的インスタンスは存在しない
-（404 を確認済み、§8.2）。つまり自動取得フォントを使う限り、weight 指定は常に無視される。
+原因は、`GlobalFonts` に登録した**可変フォント（`NotoSansJP[wght].ttf`）の既定インスタンス（wght=400）しか Skia に見えていない**こと。google/fonts に静的インスタンスは存在しない（404 を確認済み、§8.2）。つまり自動取得フォントを使う限り、weight 指定は常に無視される。
 
 **対処: 合成太字（`src/render/textStyle.ts`）**
 
-1. ファミリごとに 1 回だけ、`100px` と `bold 100px` の `measureText` を比較して
-   「本物の bold face があるか」を検出し、結果をキャッシュする。
+1. ファミリごとに 1 回だけ、`100px` と `bold 100px` の `measureText` を比較して「本物の bold face があるか」を検出し、結果をキャッシュする。
 2. 本物があれば `ctx.font` の weight がそのまま効くので、何もしない。
-3. なければ `strokeText` を fill と同色・`fontSize * 0.045 * heaviness` の線幅で重ねてから
-   `fillText` し、グリフを太らせる。
+3. なければ `strokeText` を fill と同色・`fontSize * 0.045 * heaviness` の線幅で重ねてから `fillText` し、グリフを太らせる。
 
-数値 weight は `(weight - 500) / 400` で線幅にマッピングするため、600 と 900 で太さが変わる。
-利用者がシステムに本物の Bold を持つフォントを登録した場合は、そちらが優先される。
+数値 weight は `(weight - 500) / 400` で線幅にマッピングするため、600 と 900 で太さが変わる。利用者がシステムに本物の Bold を持つフォントを登録した場合は、そちらが優先される。
 
-> `ctx.save()` / `ctx.restore()` が `strokeStyle` を復元しないことも実測で判明したため、
-> `fillText` では明示的に退避・復元している。
+> `ctx.save()` / `ctx.restore()` が `strokeStyle` を復元しないことも実測で判明したため、 `fillText` では明示的に退避・復元している。
 
 ### 14.4 その他の変更
 
-- `text.quotes` を廃止し、`quoteMark: { display, chars, size, color, weight, gap }` に統合。
-  `display: 'block'` が縦長レイアウトの大きな引用符にあたる。
+- `text.quotes` を廃止し、`quoteMark: { display, chars, size, color, weight, gap }` に統合。 `display: 'block'` が縦長レイアウトの大きな引用符にあたる。
 - `divider: { enabled, widthRatio, thickness, color, gap }` を追加（引用文と署名の間の罫線）。
 - すべてのテキスト要素に `weight` を追加。
-- **テストが実際に Twemoji / Discord CDN へアクセスしていたのを修正**。`pipeline.test.ts` で
-  `fetch` をスタブ化した。ネットワーク遅延で 5 秒タイムアウトする不安定なテストであり、
-  §10.1 に書いた「テストはネットワークに触れない」方針にも反していた。
+- **テストが実際に Twemoji / Discord CDN へアクセスしていたのを修正**。`pipeline.test.ts` で `fetch` をスタブ化した。ネットワーク遅延で 5 秒タイムアウトする不安定なテストであり、§10.1 に書いた「テストはネットワークに触れない」方針にも反していた。
 
 ### 14.5 縦長レイアウトの制約（解消済み）
 
-§13 に「グラデーションが水平固定なので縦長レイアウトが破綻する」と記録していたが、
-`gradient.direction` の追加により解消した。
+§13 に「グラデーションが水平固定なので縦長レイアウトが破綻する」と記録していたが、 `gradient.direction` の追加により解消した。
 
 ---
 
@@ -1649,8 +1623,7 @@ bold     bold 40px Noto Sans JP   width=120.36
 
 ### 15.1 フォント: Google Fonts CSS API 経由の名前解決
 
-**§8.2 の「jsDelivr の可変フォント URL をハードコード」方式を廃止し、
-Google Fonts CSS API で毎回解決する方式に変更した。**
+**§8.2 の「jsDelivr の可変フォント URL をハードコード」方式を廃止し、Google Fonts CSS API で毎回解決する方式に変更した。**
 
 ```
 GET https://fonts.googleapis.com/css2?family=Dela+Gothic+One
@@ -1659,18 +1632,14 @@ GET https://fonts.googleapis.com/css2?family=Dela+Gothic+One
 
 得られた利点:
 
-| | 旧（jsDelivr 固定 URL） | 新（CSS API） |
+|  | 旧（jsDelivr 固定 URL） | 新（CSS API） |
 | --- | --- | --- |
 | Noto Sans JP のサイズ | 9.6 MB（可変フォント全ウェイト） | **2.94 MB**（静的 Regular） |
 | バージョン | `@main` 固定、更新に追随しない | URL に `v56` 等が入り**常に最新** |
 | 対応フォント | 2 種をハードコード | **Google Fonts 全ファミリ** |
 | 太字 | 可変フォントの制約で不可（§14.3） | `weights: [400, 700]` で**本物の Bold** |
 
-**ライセンス方針**: Google Fonts は SIL OFL / Apache 2.0 / UFL のみを配布しているため、
-**「CSS API で解決できる = 自由ライセンス」**が成り立つ。有償・ライセンス不明のフォントは
-API が 400 を返すので、名前指定では取得できない。他の配布元へフォールバックする実装は
-意図的に**持たない**。利用者が自分でライセンスを得たフォントは
-`registerFromPath()` / `registerFromURL()` で明示的に読み込める。
+**ライセンス方針**: Google Fonts は SIL OFL / Apache 2.0 / UFL のみを配布しているため、 **「CSS API で解決できる = 自由ライセンス」**が成り立つ。有償・ライセンス不明のフォントは API が 400 を返すので、名前指定では取得できない。他の配布元へフォールバックする実装は意図的に**持たない**。利用者が自分でライセンスを得たフォントは `registerFromPath()` / `registerFromURL()` で明示的に読み込める。
 
 指定された 19 種のうち **17 種が利用可能**、2 種が不可（実測）:
 
@@ -1678,50 +1647,40 @@ API が 400 を返すので、名前指定では取得できない。他の配�
 - `Castor Titling` — Google Fonts になし
 - `Dacing Script` は `Dancing Script` のタイポ（`SUGGESTIONS` で誘導）
 
-`catalogue.ts` に既知の不可フォントと typo を持たせ、400 のときに
-「なぜ取れないか」「代わりに何をすべきか」を含むメッセージを出す。
+`catalogue.ts` に既知の不可フォントと typo を持たせ、400 のときに「なぜ取れないか」「代わりに何をすべきか」を含むメッセージを出す。
 
-**`online: false`**: `AutoFontOptions.online`（`enabled` も別名として維持）で
-ネットワークアクセスを完全に無効化できる。ディスクキャッシュとシステムフォントのみを使う。
+**`online: false`**: `AutoFontOptions.online`（`enabled` も別名として維持）でネットワークアクセスを完全に無効化できる。ディスクキャッシュとシステムフォントのみを使う。
 
 ### 15.2 フォントスタックのバグ（実装中に発見・修正）
 
-`text.font` が `'Dela Gothic One, Noto Sans JP, sans-serif'` のとき、
-**先頭のフォントがダウンロードされない**バグがあった。
+`text.font` が `'Dela Gothic One, Noto Sans JP, sans-serif'` のとき、 **先頭のフォントがダウンロードされない**バグがあった。
 
-原因: `prepareFonts` が `resolveFamily(request) === null` で「解決可能か」を判定していたため、
-スタック後方の `Noto Sans JP` が既に登録済みだと「解決できた」と見なして早期 return していた。
+原因: `prepareFonts` が `resolveFamily(request) === null` で「解決可能か」を判定していたため、スタック後方の `Noto Sans JP` が既に登録済みだと「解決できた」と見なして早期 return していた。
 
-修正: `ensureStack()` を追加し、**スタックを先頭から辿って最初に使えるものが見つかるまで**
-取得を試みる。先頭が取れれば後続は取得しない（無駄なダウンロードを避ける）。
+修正: `ensureStack()` を追加し、**スタックを先頭から辿って最初に使えるものが見つかるまで** 取得を試みる。先頭が取れれば後続は取得しない（無駄なダウンロードを避ける）。
 
 ### 15.3 Misskey カスタム絵文字
 
 `:name:` / `:name@host:` / `:name@.:` を `https://{host}/emoji/{name}.webp` に解決する。
 
-**オプトイン必須**とした。`:name:` は通常テキストで頻出し、特に `12:30:45` の `:30:` が
-誤爆する。`MiQOptions.misskey` にインスタンスが設定されたときだけ解釈する。
+**オプトイン必須**とした。`:name:` は通常テキストで頻出し、特に `12:30:45` の `:30:` が誤爆する。`MiQOptions.misskey` にインスタンスが設定されたときだけ解釈する。
 
-加えて正規表現に `(?<![A-Za-z0-9_])` の後読みを入れ、ASCII 英数字直後のコロンを除外する。
-これで `12:30:45` や `http://` が弾かれ、`テキスト:emoji:`（日本語直後）は通る。
+加えて正規表現に `(?<![A-Za-z0-9_])` の後読みを入れ、ASCII 英数字直後のコロンを除外する。これで `12:30:45` や `http://` が弾かれ、`テキスト:emoji:`（日本語直後）は通る。
 
-| 記法 | 解決先 |
-| --- | --- |
-| `:name:` | 設定されたインスタンス |
-| `:name@host:` | `host`（`remote: false` で無効化可） |
-| `:name@.:` | 設定されたインスタンス（Misskey の連合表記） |
+| 記法          | 解決先                                       |
+| ------------- | -------------------------------------------- |
+| `:name:`      | 設定されたインスタンス                       |
+| `:name@host:` | `host`（`remote: false` で無効化可）         |
+| `:name@.:`    | 設定されたインスタンス（Misskey の連合表記） |
 
 ### 15.4 既定の変更・機能削除
 
-- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。
-  `portrait` プリセットのみ `'block'`。
-- **`avatar.shape`（`circle` / `rounded`）を削除**。不要との判断。
-  `clipToShape()` とその呼び出しも削除した。
+- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。 `portrait` プリセットのみ `'block'`。
+- **`avatar.shape`（`circle` / `rounded`）を削除**。不要との判断。 `clipToShape()` とその呼び出しも削除した。
 
 ### 15.5 visual-check の再編
 
-105 ケースは多すぎて差分が読み取れなかったため、**71 ケース・11 グループ**に整理し、
-グループごとのフォルダに出力するようにした。
+105 ケースは多すぎて差分が読み取れなかったため、**71 ケース・11 グループ**に整理し、グループごとのフォルダに出力するようにした。
 
 ```
 .visual/
@@ -1732,12 +1691,9 @@ API が 400 を返すので、名前指定では取得できない。他の配�
 └── index.html
 ```
 
-選定基準は「同じグループ内の他ケースと**見た目が明確に違う**こと」。
-ほぼ同じ絵になるバリエーション（weight 300/600、避けたフォーマット差など）は
-ユニットテスト側に任せて除外した。`06-fonts` はカタログ 17 種を自動展開する。
+選定基準は「同じグループ内の他ケースと**見た目が明確に違う**こと」。ほぼ同じ絵になるバリエーション（weight 300/600、避けたフォーマット差など）はユニットテスト側に任せて除外した。`06-fonts` はカタログ 17 種を自動展開する。
 
-絵文字グループは `assets/discordemoji.json` と `assets/misskeycustomemoji.json` の
-**実データ**を使うため、3 種の絵文字が実際に CDN から取得できることを目視確認できる。
+絵文字グループは `assets/discordemoji.json` と `assets/misskeycustomemoji.json` の **実データ**を使うため、3 種の絵文字が実際に CDN から取得できることを目視確認できる。
 
 ---
 
@@ -1747,59 +1703,39 @@ API が 400 を返すので、名前指定では取得できない。他の配�
 
 **取得に失敗した絵文字で最終行がキャンバス外にはみ出す**バグがあった。
 
-原因: レイアウトは絵文字を `fontSize` の正方形として測るが、描画時は画像が無いと
-`onAssetError: 'text'` によりソース文字列にフォールバックする。
-`<:nope:123456789012345678>` は 26 文字あり、正方形 1 個分とは幅が桁違いに違う。
+原因: レイアウトは絵文字を `fontSize` の正方形として測るが、描画時は画像が無いと `onAssetError: 'text'` によりソース文字列にフォールバックする。 `<:nope:123456789012345678>` は 26 文字あり、正方形 1 個分とは幅が桁違いに違う。
 
-対処: `resolveEmojiSegments()` を追加し、**レイアウト前に**取得失敗した絵文字を
-テキストセグメントへ変換する。これで測定と描画が同じ対象を見るようになり、
-さらに副次効果として、長すぎるフォールバック文字列が通常のテキストと同様に
-折り返せるようになった（絵文字トークンは分割不能なので、以前は測定を直しても
-はみ出したままだった）。
+対処: `resolveEmojiSegments()` を追加し、**レイアウト前に**取得失敗した絵文字をテキストセグメントへ変換する。これで測定と描画が同じ対象を見るようになり、さらに副次効果として、長すぎるフォールバック文字列が通常のテキストと同様に折り返せるようになった（絵文字トークンは分割不能なので、以前は測定を直してもはみ出したままだった）。
 
 ### 16.2 色システム
 
 `src/theme/color.ts` を追加。全ての色フィールドが `ColorInput` を受ける。
 
-| 記法 | 例 |
-| --- | --- |
-| 16進 | `#RGB` `#RGBA` `#RRGGBB` `#RRGGBBAA` |
-| 数値 | `0xRRGGBB` `0xRRGGBBAA` |
-| 配列 | `[r, g, b]` `[r, g, b, a]`（alpha は 0–1 / 0–255 両対応） |
-| キーワード | `'transparent'` |
-| CSS 関数 | `rgb()` `rgba()`（`50%` 形式の alpha も可） |
+| 記法       | 例                                                        |
+| ---------- | --------------------------------------------------------- |
+| 16進       | `#RGB` `#RGBA` `#RRGGBB` `#RRGGBBAA`                      |
+| 数値       | `0xRRGGBB` `0xRRGGBBAA`                                   |
+| 配列       | `[r, g, b]` `[r, g, b, a]`（alpha は 0–1 / 0–255 両対応） |
+| キーワード | `'transparent'`                                           |
+| CSS 関数   | `rgb()` `rgba()`（`50%` 形式の alpha も可）               |
 
-**数値表記の原理的制約**: `0x00FF0000` は数値として `0xFF0000` と完全に同一であり、
-先頭ゼロバイトを持つ色は数値では表現できない。判定は大小で行い（`> 0xFFFFFF` なら
-alpha バイト付き）、`0xFF0000` は「不透明な赤」と解釈する。長さが値の一部となる
-文字列表記を使えば曖昧さはない。この制約は型の doc とテストに明記した。
+**数値表記の原理的制約**: `0x00FF0000` は数値として `0xFF0000` と完全に同一であり、先頭ゼロバイトを持つ色は数値では表現できない。判定は大小で行い（`> 0xFFFFFF` なら alpha バイト付き）、`0xFF0000` は「不透明な赤」と解釈する。長さが値の一部となる文字列表記を使えば曖昧さはない。この制約は型の doc とテストに明記した。
 
-**`custom` プリセット**: 背景・本文・署名・ウォーターマークをすべて `transparent`
-にしたテーマ。完全透明の要素は**描画自体をスキップ**するので、`extends: 'custom'`
-の上に置いた色だけが画像に現れる。背景を指定しなければ透過 PNG が得られる。
+**`custom` プリセット**: 背景・本文・署名・ウォーターマークをすべて `transparent` にしたテーマ。完全透明の要素は**描画自体をスキップ**するので、`extends: 'custom'` の上に置いた色だけが画像に現れる。背景を指定しなければ透過 PNG が得られる。
 
 ### 16.3 サイズ
 
 - **既定サイズを長辺 800 に**（横長 1422×800 / 縦長 800×1000）。
-- **`setScale(factor)` を追加**。テーマ内の寸法はすべてキャンバスに対する比率なので、
-  これは真のズームになる（レイアウトは一切変わらず解像度だけ変わる）。上限 8。
-- **`setSize()` を非推奨化**。アスペクト比だけを変えて他を動かさないため、
-  アバター・グラデーション・テキストの比率が崩れる。discord.js に倣い
-  `process.emitWarning(..., { type: 'DeprecationWarning', code })` で 1 回だけ警告する
-  （`--no-deprecation` で抑制でき、`console.warn` と違い標準的な制御が効く）。
-  形状を変えたい場合は `setTheme({ width, height })` が正しい入口。
-- **`sizeToAvatar: 'width' | 'height'`** を追加。アバターが原寸で描かれるように
-  キャンバス全体を 1 つの係数でスケールする。アスペクト比は保たれるので歪まない。
+- **`setScale(factor)` を追加**。テーマ内の寸法はすべてキャンバスに対する比率なので、これは真のズームになる（レイアウトは一切変わらず解像度だけ変わる）。上限 8。
+- **`setSize()` を非推奨化**。アスペクト比だけを変えて他を動かさないため、アバター・グラデーション・テキストの比率が崩れる。discord.js に倣い `process.emitWarning(..., { type: 'DeprecationWarning', code })` で 1 回だけ警告する（`--no-deprecation` で抑制でき、`console.warn` と違い標準的な制御が効く）。形状を変えたい場合は `setTheme({ width, height })` が正しい入口。
+- **`sizeToAvatar: 'width' | 'height'`** を追加。アバターが原寸で描かれるようにキャンバス全体を 1 つの係数でスケールする。アスペクト比は保たれるので歪まない。
 - `avatar.fit: 'cover' | 'contain'` を追加。
 
 ### 16.4 TOFU 対策（字形フォールバック）
 
 ラテン専用フォントを指定すると日本語が豆腐になる問題。
 
-**最初の実装は誤りだった。** 「プライマリが当該字形を持つか」を `measureText` の
-幅比較で判定しようとしたが、**字形を持たないフォントの実測幅は tofu と一致しない**
-（Vina Sans で `猫` を測ると monospace とは違う値が返り、実際には無関係な字形が
-描かれる）。プローブは常に「カバーしている」と誤答した。
+**最初の実装は誤りだった。** 「プライマリが当該字形を持つか」を `measureText` の幅比較で判定しようとしたが、**字形を持たないフォントの実測幅は tofu と一致しない** （Vina Sans で `猫` を測ると monospace とは違う値が返り、実際には無関係な字形が描かれる）。プローブは常に「カバーしている」と誤答した。
 
 実測で分かった正しい事実:
 
@@ -1809,50 +1745,30 @@ Vina Sans, Noto Sans JP    猫=100.0  A=41.0   ← Noto の幅 / Vina の幅
 Noto Sans JP               猫=100.0  A=57.4
 ```
 
-**Skia はフォントスタックを字形単位で解決する。** つまりスタックを宣言するだけで
-正しく動く。判定は不要かつ有害だったので撤廃し、`needsGlyphFallback(text)` が
-非ラテン文字の存在だけを見て、フォールバックを**無条件に連結**する方式にした。
-不要なときのコストはゼロで、必要なときは確実に効く。
+**Skia はフォントスタックを字形単位で解決する。** つまりスタックを宣言するだけで正しく動く。判定は不要かつ有害だったので撤廃し、`needsGlyphFallback(text)` が非ラテン文字の存在だけを見て、フォールバックを**無条件に連結**する方式にした。不要なときのコストはゼロで、必要なときは確実に効く。
 
 ### 16.5 Discord / Misskey の入力オプション
 
-- `setFromMessage(message, { avatar, name })`。既定は両方サーバー側
-  （`'guild'` / `'nickname'`）で、その方が「そのサーバーの読み手が見たもの」に一致する。
-  `'global'` でアカウント側に切り替わる。どちらを選んでも他方がフォールバックになる。
-- discord.js の `member.displayName` は「ニックネーム、無ければグローバル名」なので、
-  ニックネーム判定では `member.nickname` を先に見る（そうしないと `'global'` 指定時に
-  グローバル名が自分自身に隠される）。
-- `misskey` が文字列・**配列**・オプションオブジェクトを受ける。複数インスタンス指定時、
-  素の `:name:` はどれに属するか分からないため、セグメントに `alternativeUrls` を持たせ、
-  ローダーが順に試して最初に成功したものを使う。
+- `setFromMessage(message, { avatar, name })`。既定は両方サーバー側（`'guild'` / `'nickname'`）で、その方が「そのサーバーの読み手が見たもの」に一致する。 `'global'` でアカウント側に切り替わる。どちらを選んでも他方がフォールバックになる。
+- discord.js の `member.displayName` は「ニックネーム、無ければグローバル名」なので、ニックネーム判定では `member.nickname` を先に見る（そうしないと `'global'` 指定時にグローバル名が自分自身に隠される）。
+- `misskey` が文字列・**配列**・オプションオブジェクトを受ける。複数インスタンス指定時、素の `:name:` はどれに属するか分からないため、セグメントに `alternativeUrls` を持たせ、ローダーが順に試して最初に成功したものを使う。
 
 ### 16.6 既定フォントの変更
 
-既定を **M PLUS Rounded 1c**、その背後に **Noto Sans JP** とした。前者はこの用途に
-合う丸ゴシックでラテンもカバーし、後者はカバレッジが広いので取りこぼしの受け皿になる。
-§16.4 の通りスタックは字形単位で解決されるため、この 2 段構えは実際に機能する。
+既定を **M PLUS Rounded 1c**、その背後に **Noto Sans JP** とした。前者はこの用途に合う丸ゴシックでラテンもカバーし、後者はカバレッジが広いので取りこぼしの受け皿になる。§16.4 の通りスタックは字形単位で解決されるため、この 2 段構えは実際に機能する。
 
 ### 16.7 公開ギャラリー
 
-`.visual/`（gitignore）を **`docs/visual/`（コミット対象）** に移し、
-`DESIGN.md` はリポジトリルートへ移動した。
+`.visual/`（gitignore）を **`docs/visual/`（コミット対象）** に移し、 `DESIGN.md` はリポジトリルートへ移動した。
 
 - `scripts/visual-check.js` は画像と `manifest.json`（ファイル名リストとメタ情報）を出力する
-- `docs/` は素の HTML / CSS / JS 1 ファイルの静的サイトで、manifest を読んで一覧を組む。
-  ビルド不要で、描画側に触れずに見せ方だけ変更できる
-- GitHub Pages のソースは **`main` ブランチの `/docs`**。Actions でのデプロイは採らなかった:
-  `docs/` を Pages 対象にするという要件にはブランチ配信が素直に対応し、
-  `environment` / `pages: write` / OIDC が一切不要になる
-- リリースワークフローは**独立したジョブ**でギャラリーを再生成し `main` にコミットする。
-  フォント・絵文字 CDN を使うため、その不調が publish を止めないよう release の後段に置いた
+- `docs/` は素の HTML / CSS / JS 1 ファイルの静的サイトで、manifest を読んで一覧を組む。ビルド不要で、描画側に触れずに見せ方だけ変更できる
+- GitHub Pages のソースは **`main` ブランチの `/docs`**。Actions でのデプロイは採らなかった: `docs/` を Pages 対象にするという要件にはブランチ配信が素直に対応し、 `environment` / `pages: write` / OIDC が一切不要になる
+- リリースワークフローは**独立したジョブ**でギャラリーを再生成し `main` にコミットする。フォント・絵文字 CDN を使うため、その不調が publish を止めないよう release の後段に置いた
 
-**画像サイズ**: 全 77 ケースをフル解像度 PNG で出すと 19MB になり、コミットする成果物として
-過大だった。**検証はフル解像度の生バイトに対して行い**、書き出す方だけ長辺 900px の
-WebP に縮小している（1.9MB）。検証の厳密さは落とさずリポジトリだけ軽くなる。
+**画像サイズ**: 全 77 ケースをフル解像度 PNG で出すと 19MB になり、コミットする成果物として過大だった。**検証はフル解像度の生バイトに対して行い**、書き出す方だけ長辺 900px の WebP に縮小している（1.9MB）。検証の厳密さは落とさずリポジトリだけ軽くなる。
 
-**文言**: 公開物なので、切り取られて単体で目にされても問題ない文章のみを使う。
-パブリックドメイン（夏目漱石『吾輩は猫である』）とライブラリ自体についての中立的な記述で、
-実在の人物の発言と読めるものは置かない。
+**文言**: 公開物なので、切り取られて単体で目にされても問題ない文章のみを使う。パブリックドメイン（夏目漱石『吾輩は猫である』）とライブラリ自体についての中立的な記述で、実在の人物の発言と読めるものは置かない。
 
 ---
 
