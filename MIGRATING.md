@@ -28,7 +28,7 @@ See the [Offline use](README.md#offline-use) section of the README for the full 
 
 ### New exports
 
-`installTwemoji`, `uninstallTwemoji`, `twemojiInfo`, `resolveTwemojiDir`, `installFont`, `installFonts`, `listInstalledFonts` and `uninstallFonts` are now exported from the package root, alongside the existing `resolveCacheDir`. `listInstalledFonts()`'s return type also gained a `version` field (the cached Google Fonts asset tag) — only relevant if you construct an `InstalledFont` object yourself rather than reading one back.
+`installTwemoji`, `uninstallTwemoji`, `twemojiInfo`, `resolveTwemojiDir`, `installFont`, `installFonts`, `listInstalledFonts` and `uninstallFonts` are all new, exported from the package root alongside the existing `resolveCacheDir`. `listInstalledFonts()` returns an `InstalledFont` per cached family, including a `version` field — the cached Google Fonts asset tag.
 
 ## From v8
 
