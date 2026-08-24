@@ -1,6 +1,6 @@
 import { jaModel, Parser, zhHansModel, zhHantModel } from 'budoux'
-import type { PhraseLocale } from '../theme/types'
 import { lru } from 'tiny-lru'
+import type { PhraseLocale } from '../theme/types'
 import { graphemeBoundaries } from '../util/grapheme'
 
 /**
