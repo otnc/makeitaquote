@@ -15,6 +15,22 @@ const retainedBuffers = new Set<Buffer>()
 /** Families registered through this package, in registration order. */
 const registered: string[] = []
 
+/** Cached set of lowercase family names for fast `has()` lookups. */
+let familySetCache: Set<string> | null = null
+
+function invalidateFamilyCache(): void {
+  familySetCache = null
+}
+
+function getFamilySet(): Set<string> {
+  if (familySetCache) return familySetCache
+  const set = new Set<string>()
+  for (const name of registered) set.add(name.toLowerCase())
+  for (const entry of GlobalFonts.families) set.add(entry.family.toLowerCase())
+  familySetCache = set
+  return set
+}
+
 function remember(family: string): void {
   if (!registered.includes(family)) registered.push(family)
 }
@@ -28,6 +44,7 @@ export const fonts = {
     // Skia answers with a font key, or null when the file could not be read.
     const ok = Boolean(result)
     if (ok && alias) remember(alias)
+    if (ok) invalidateFamilyCache()
     return ok
   },
 
@@ -42,6 +59,7 @@ export const fonts = {
     if (ok) {
       retainedBuffers.add(data)
       remember(alias)
+      invalidateFamilyCache()
     }
     return ok
   },
@@ -64,7 +82,10 @@ export const fonts = {
         continue
       }
       if (!FONT_EXTENSIONS.has(extname(entry).toLowerCase())) continue
-      if (GlobalFonts.registerFromPath(path)) count++
+      if (GlobalFonts.registerFromPath(path)) {
+        count++
+        invalidateFamilyCache()
+      }
     }
 
     return count
@@ -79,8 +100,7 @@ export const fonts = {
   has(family: string): boolean {
     const wanted = family.trim().toLowerCase()
     if (wanted.length === 0) return false
-    if (registered.some((name) => name.toLowerCase() === wanted)) return true
-    return GlobalFonts.families.some((entry) => entry.family.toLowerCase() === wanted)
+    return getFamilySet().has(wanted)
   },
 
   /** Families registered through this package, in the order they were added. */
@@ -109,4 +129,5 @@ export function resolveFamily(request: string): string | null {
 export function resetRegistryForTests(): void {
   registered.length = 0
   retainedBuffers.clear()
+  invalidateFamilyCache()
 }

@@ -1,4 +1,5 @@
 import { jaModel, Parser, zhHansModel, zhHantModel } from 'budoux'
+import { lru } from 'tiny-lru'
 import type { PhraseLocale } from '../theme/types'
 import { graphemeBoundaries } from '../util/grapheme'
 
@@ -84,11 +85,19 @@ export interface BreakpointOptions {
  * are never candidates. Positions that would split a grapheme cluster are left
  * at `none`, as are ones forbidden by kinsoku rules.
  */
+const breakpointCache = lru<BreakPriority[]>(512, 5 * 60_000)
+
 export function findBreakpoints(text: string, options: BreakpointOptions = {}): BreakPriority[] {
+  const locale = options.locale ?? 'ja'
+  const phraseBreak = options.phraseBreak !== false
+  const key = `${text}\0${locale}\0${phraseBreak}`
+
+  const cached = breakpointCache.get(key)
+  if (cached) return cached
+
   const priorities: BreakPriority[] = new Array(text.length + 1).fill(BreakPriority.none)
   if (text.length === 0) return priorities
 
-  const locale = options.locale ?? 'ja'
   const legal = new Set(graphemeBoundaries(text, locale === 'none' ? 'ja' : locale))
 
   const mark = (index: number, priority: BreakPriority) => {
@@ -120,7 +129,7 @@ export function findBreakpoints(text: string, options: BreakpointOptions = {}): 
   }
 
   // BudouX promotes the boundaries that actually read well.
-  if (options.phraseBreak !== false && locale !== 'none') {
+  if (phraseBreak && locale !== 'none') {
     let offset = 0
     for (const chunk of parserFor(locale).parse(text)) {
       offset += chunk.length
@@ -130,6 +139,7 @@ export function findBreakpoints(text: string, options: BreakpointOptions = {}): 
 
   applyKinsoku(text, priorities)
 
+  breakpointCache.set(key, priorities)
   return priorities
 }
 

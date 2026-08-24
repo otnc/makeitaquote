@@ -108,31 +108,39 @@ function truncate(lines: Line[], fontSize: number, options: FitOptions): Line[] 
   if (!last) return kept
 
   const measurer = options.measurerFor(fontSize)
+  const emojiSize = options.metricsFor(fontSize).fontSize
   const ellipsis = '…'
   const ellipsisWidth = measurer.measureText(ellipsis).width
 
-  // Drop whole segments from the end until the ellipsis has room.
+  // Track width incrementally to avoid re-measuring all segments each iteration.
   const trimmed = [...last]
+  const widths: number[] = []
+  let width = 0
+  for (const segment of trimmed) {
+    const w = segment.kind === 'text' ? measurer.measureText(segment.value).width : emojiSize
+    widths.push(w)
+    width += w
+  }
+
   while (trimmed.length > 0) {
-    const width = trimmed.reduce(
-      (sum, segment) =>
-        sum +
-        (segment.kind === 'text'
-          ? measurer.measureText(segment.value).width
-          : options.metricsFor(fontSize).fontSize),
-      0,
-    )
     if (width + ellipsisWidth <= options.maxWidth) break
 
     const tail = trimmed[trimmed.length - 1]
     if (tail?.kind === 'text') {
       const clusters = graphemes(tail.value, options.locale === 'none' ? 'ja' : options.locale)
-      clusters.pop()
-      if (clusters.length > 0) {
-        trimmed[trimmed.length - 1] = { kind: 'text', value: clusters.join('') }
+      if (clusters.length > 1) {
+        clusters.pop()
+        const newValue = clusters.join('')
+        const newWidth = measurer.measureText(newValue).width
+        width += newWidth - widths[widths.length - 1]
+        widths[widths.length - 1] = newWidth
+        trimmed[trimmed.length - 1] = { kind: 'text', value: newValue }
         continue
       }
     }
+
+    const removed = widths.pop()
+    if (removed !== undefined) width -= removed
     trimmed.pop()
   }
 
