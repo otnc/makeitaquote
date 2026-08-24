@@ -35,13 +35,26 @@ export type {
 } from './core/types'
 export type { EmojiCacheOptions } from './emoji/cache'
 export { clearEmojiCache, configureEmojiCache, emojiCacheInfo } from './emoji/cache'
-export { ensureDefaultFonts, useFont } from './font/autoload'
+export type {
+  InstallTwemojiOptions,
+  TwemojiInfo,
+  TwemojiInstallResult,
+} from './emoji/twemojiStore'
+export {
+  installTwemoji,
+  resolveTwemojiDir,
+  twemojiInfo,
+  uninstallTwemoji,
+} from './emoji/twemojiStore'
+export { ensureDefaultFonts, installFont, useFont } from './font/autoload'
 export type { CataloguedFont } from './font/catalogue'
 export { FONT_CATALOGUE, isCatalogued } from './font/catalogue'
 export { resolveCacheDir } from './font/diskCache'
 export type { FontFace } from './font/googleFonts'
 export { resolveGoogleFont } from './font/googleFonts'
 export { fonts } from './font/index'
+export type { FontInstallResult, InstalledFont } from './font/install'
+export { installFonts, listInstalledFonts, uninstallFonts } from './font/install'
 export { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from './font/sources'
 export type { AvatarCacheOptions } from './render/avatarCache'
 export { avatarCacheInfo, clearAvatarCache, configureAvatarCache } from './render/avatarCache'

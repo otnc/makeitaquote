@@ -64,6 +64,7 @@ Requires Node.js 22 or newer.
 - [Emoji](#emoji) — Twemoji, Discord, Misskey
 - [Text](#text) — wrapping, kinsoku, overflow
 - [Output](#output) — formats and streams
+- [Offline use](#offline-use) — the `miq` command, and installing assets ahead of time
 - [Using an external API](#using-an-external-api) instead of rendering locally
 - [Errors](#errors) · [Platform support](#platform-support)
 - [Migrating from v8](#migrating-from-v8)
@@ -741,6 +742,77 @@ await miq.toBuffer('jpg')                    // 'jpg' is an alias for 'jpeg'
 await miq.toStream('png')                    // Readable
 await miq.toDataURL('png')                   // data:image/png;base64,…
 await miq.render()                           // the Canvas, to draw on yourself
+```
+
+---
+
+## Offline use
+
+Fonts and Twemoji are normally fetched the first time they are needed and
+cached on disk after that. The CLI downloads them ahead of time instead, so
+renders never touch the network at all:
+
+```console
+$ npx miq install
+Twemoji
+  ████████████████████████ 4009/4009
+  ✓ Twemoji 17.0.3 — installed 4009 images
+Fonts
+  ✓ M PLUS Rounded 1c
+  ✓ Noto Sans JP
+```
+
+| Command | Aliases | What it does |
+| --- | --- | --- |
+| `miq install` | `add`, `i` | Everything: every Twemoji image and the default fonts |
+| `miq install twemoji` | | Every Twemoji image (~4000 files, ~4 MB) — the full current release, not a subset |
+| `miq install fonts` | | The default font families, weights 400 and 700 |
+| `miq install fonts "Dela Gothic One"` | | Specific families, by their Google Fonts name |
+| `miq install "Dela Gothic One"` | | The same, without the keyword |
+| `miq uninstall` | `remove`, `rm`, `un` | Removes everything the commands above put on disk |
+| `miq uninstall twemoji` · `miq uninstall fonts` | | Removes one kind |
+| `miq uninstall fonts "Dela Gothic One"` | | Removes specific families |
+| `miq ls` | `list` | Lists what is installed — Twemoji included — how much it takes, and where |
+| `miq search` | `find`, `s` | Lists fonts miq knows by name; `miq search gothic` filters it |
+| `miq outdated` | | Checks miq, Twemoji and every installed font against what's currently published |
+| `miq --version` | | Prints the installed miq version |
+
+`miq search` lists the curated names miq suggests and autocorrects typos
+against — any Google Fonts family works whether or not it's listed, since
+there is no way to enumerate Google's full ~1800-family catalogue without an
+API key, which this package deliberately doesn't ask you to configure.
+
+The command is available as both `miq` and `makeitaquote` once the package is
+installed. Everything it stores is an ordinary file in an ordinary directory —
+deleting the directory uninstalls just as well.
+
+Storage is project-local by default: the nearest ancestor directory of `cwd`
+with a `package.json` (falling back to `cwd` itself if none is found), not a
+location shared by every project on the machine — so one project's
+`uninstall` never reaches into another's cache, and two projects on
+different `makeitaquote` versions never fight over the same files:
+
+| | Default location | Override |
+| --- | --- | --- |
+| Fonts | `<project root>/.makeitaquote/fonts` | `MIQ_FONT_CACHE_DIR` |
+| Twemoji | `<project root>/.makeitaquote/twemoji` | `MIQ_TWEMOJI_CACHE_DIR` |
+
+Add `.makeitaquote/` to `.gitignore`.
+
+After installing, renders work with the network down. Fonts already on disk
+are registered without asking Google first, and a Twemoji image is read from
+the local store instead of the CDN. Nothing changes until then — an
+uninstalled machine keeps fetching on first use exactly as before.
+
+The same operations are available programmatically:
+
+```ts
+import { installFonts, installTwemoji, listInstalledFonts, twemojiInfo } from 'makeitaquote'
+
+await installTwemoji() // → { version, total, downloaded, skipped }
+await installFonts(['Dela Gothic One'])
+listInstalledFonts() // → [{ family, files, bytes, weights, italic, version }]
+await twemojiInfo() // → { images, bytes, version }
 ```
 
 ---

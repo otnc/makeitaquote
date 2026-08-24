@@ -1,15 +1,38 @@
+import { readFile } from 'node:fs/promises'
 import { pLimit } from 'plimit-lit'
 import type { Segment } from '../core/types'
 import { createClient } from '../http/client'
 import { type Image, loadImage } from '../render/canvasFactory'
 import { emojiCache } from './cache'
+import { localTwemojiFile } from './twemojiStore'
 
 /** Fetches the bytes for a URL. Replaceable so tests never touch the network. */
 export type ImageFetcher = (url: string, signal?: AbortSignal) => Promise<Buffer>
 
 const http = createClient({ timeout: 10_000, retry: 2 })
 
-const defaultFetcher: ImageFetcher = (url, signal) => http.getBuffer(url, signal)
+/**
+ * The production fetcher: a locally installed Twemoji first, the CDN second.
+ *
+ * A file put on disk by `miq install twemoji` is the whole point of that
+ * command — it makes rendering work with no network — so it wins over the
+ * CDN whenever one exists. An unreadable local file falls through to the
+ * network rather than failing, since a corrupt file is not the CDN's fault.
+ *
+ * The disk check lives here rather than in `loadEmoji` on purpose: tests
+ * inject their own fetcher, and must never see the machine's install state.
+ */
+const defaultFetcher: ImageFetcher = async (url, signal) => {
+  const local = localTwemojiFile(url)
+  if (local) {
+    try {
+      return await readFile(local)
+    } catch {
+      // Fall through to the CDN.
+    }
+  }
+  return http.getBuffer(url, signal)
+}
 
 export interface PrefetchOptions {
   fetcher?: ImageFetcher

@@ -149,12 +149,21 @@ function parseCss(css: string, requested: string): FontFace[] {
   return faces
 }
 
+/** The cache-file name prefix for a family — see `fileNameFor`. */
+export function slugFor(family: string): string {
+  return family.trim().replaceAll(/[^\w]+/g, '-')
+}
+
 /** A stable file name for a resolved face, used inside the on-disk cache. */
 export function fileNameFor(face: FontFace): string {
-  const slug = face.family.trim().replaceAll(/[^\w]+/g, '-')
+  const slug = slugFor(face.family)
   const id = /\/s\/[^/]+\/(?:v\d+\/)?([^/?]+?)\.(?:ttf|otf)$/.exec(face.url)?.[1]
-  const version = /\/(v\d+)\//.exec(face.url)?.[1] ?? 'v0'
   const suffix = face.style === 'italic' ? '-italic' : ''
   // The hashed id keeps a stale file from being reused after Google updates.
-  return `${slug}-${version}-${face.weight}${suffix}-${id ?? 'font'}.ttf`
+  return `${slug}-${versionFor(face)}-${face.weight}${suffix}-${id ?? 'font'}.ttf`
+}
+
+/** The Google Fonts asset version a face was served at, e.g. `v30`. */
+export function versionFor(face: FontFace): string {
+  return /\/(v\d+)\//.exec(face.url)?.[1] ?? 'v0'
 }
