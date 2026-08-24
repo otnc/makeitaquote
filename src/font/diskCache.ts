@@ -1,12 +1,20 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
-import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
 import writeFileAtomic from 'write-file-atomic'
+import { findProjectRoot } from '../util/projectRoot'
 
 /**
  * Where downloaded fonts live, in order of preference.
+ *
+ * Project-local by default — the nearest ancestor `package.json` to the
+ * current working directory, not a directory shared by every project on the
+ * machine. Sharing one cache across unrelated projects means one project's
+ * `uninstall` can remove files another still expects, and different
+ * `makeitaquote` versions on the same machine would fight over the same
+ * files. `MIQ_FONT_CACHE_DIR` opts back into sharing a location explicitly,
+ * cache or otherwise.
  *
  * A cache that survives restarts is what keeps the "downloads a font on first
  * use" behaviour from meaning "downloads a font on every boot".
@@ -17,18 +25,7 @@ export function resolveCacheDir(override?: string): string {
   const fromEnv = process.env.MIQ_FONT_CACHE_DIR
   if (fromEnv) return fromEnv
 
-  const xdg = process.env.XDG_CACHE_HOME
-  if (xdg) return join(xdg, 'makeitaquote', 'fonts')
-
-  if (process.platform === 'win32') {
-    const local = process.env.LOCALAPPDATA
-    if (local) return join(local, 'makeitaquote', 'fonts')
-  }
-
-  const home = homedir()
-  if (home) return join(home, '.cache', 'makeitaquote', 'fonts')
-
-  return join(tmpdir(), 'makeitaquote-fonts')
+  return join(findProjectRoot(), '.makeitaquote', 'fonts')
 }
 
 export function cachedFontPath(dir: string, fileName: string): string {

@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Segment } from '../core/types'
 import { segmentText } from '../text/segment'
@@ -23,6 +26,32 @@ function countingFetcher(): ImageFetcher & { calls: string[] } {
 afterEach(() => {
   configureEmojiCache({})
   clearEmojiCache()
+})
+
+describe('the local Twemoji store', () => {
+  it('serves an installed image without touching the network', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'miq-twemoji-loader-'))
+    // A codepoint the CDN does not have, so only the local file can answer.
+    await writeFile(join(dir, 'fffef.png'), pixel)
+    vi.stubEnv('MIQ_TWEMOJI_CACHE_DIR', dir)
+    // If the wiring broke, the fetch stub turns the CDN attempt into a
+    // failure rather than real network traffic.
+    vi.stubGlobal('fetch', async () => {
+      throw new Error('should not be called')
+    })
+
+    try {
+      const image = await loadEmoji(
+        'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/72x72/fffef.png',
+      )
+
+      expect(image?.width).toBe(1)
+    } finally {
+      vi.unstubAllEnvs()
+      vi.unstubAllGlobals()
+      await rm(dir, { recursive: true, force: true })
+    }
+  })
 })
 
 describe('loadEmoji', () => {

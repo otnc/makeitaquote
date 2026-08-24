@@ -244,18 +244,25 @@ for (const entry of ['api/index.cjs', 'api/index.mjs']) {
 
 // ---------------------------------------------------------------------------
 // 6. The native binding must stay external — a bundled .node file won't load.
+//
+//    With several entry points, rolldown may move the import into a shared
+//    chunk rather than the entry file itself, so the check follows relative
+//    imports (same walk as check 5) and accepts the statement wherever the
+//    entry can reach it.
 // ---------------------------------------------------------------------------
 
-const rootCjs = await readFile(join(dist, 'index.cjs'), 'utf8')
-const rootMjs = await readFile(join(dist, 'index.mjs'), 'utf8')
-check(
-  'dist/index.cjs keeps @napi-rs/canvas external',
-  /require\(\s*['"]@napi-rs\/canvas['"]\s*\)/.test(rootCjs),
-)
-check(
-  'dist/index.mjs keeps @napi-rs/canvas external',
-  /from\s*['"]@napi-rs\/canvas['"]/.test(rootMjs),
-)
+for (const entry of ['index.cjs', 'index.mjs', 'cli/main.cjs', 'cli/main.mjs']) {
+  const reachable = await reachableFrom(join(dist, entry))
+  const pattern = entry.endsWith('.cjs')
+    ? /require\(\s*['"]@napi-rs\/canvas['"]\s*\)/
+    : /from\s*['"]@napi-rs\/canvas['"]/
+  const sources = await Promise.all([...reachable].map((file) => readFile(file, 'utf8')))
+  check(
+    `dist/${entry} keeps @napi-rs/canvas external`,
+    sources.some((source) => pattern.test(source)),
+    'No reachable chunk imports @napi-rs/canvas — it may have been bundled.',
+  )
+}
 
 // ---------------------------------------------------------------------------
 // 7. Line endings stay LF, matching .gitattributes and Biome.

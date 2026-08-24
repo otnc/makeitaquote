@@ -52,6 +52,35 @@ between blocks comes from each token's own source line range (`.map`) rather
 than a dedicated separator token, since `markdown-it` doesn't hand back one
 the way the library used here previously did.
 
+### cleye
+
+Drives `miq`'s argument parsing, subcommand dispatch, aliases and help/usage
+text (`src/cli/index.ts`), replacing a hand-rolled `if (command === '…')`
+chain and hand-formatted help string — the kind of thing this package would
+otherwise be maintaining its own half-spec of forever. `command()`'s `alias`
+and `help.examples`/`help.description` are structured fields cleye renders
+itself (including a dedicated "Aliases:" section listing every one of
+them, not just the first), so the CLI's own help text is assembled from
+those instead of a hand-written footer string.
+
+Tried commander first, which fits this package's usual dependency bar in
+every other way, but its help only ever names the *first* alias — `install`
+registered with `add`/`i` shows as `install|add`, `i` nowhere. cleye lists
+all of them. The tradeoff: cleye's `--help`/`--version`/argument-error paths
+write straight to `console.log`/`console.error` and call `process.exit()`,
+with no override hook the way commander's `exitOverride()` gives you —
+fine for the real binary, but it means those three paths aren't routed
+through the CLI's own `io` seam and so aren't part of `src/cli/commands.ts`'s
+otherwise fully dependency-injected, disk/network/process-free test surface
+(`src/cli/cli.test.ts` covers them separately, by spying on `console`/
+`process.exit` rather than `io`).
+
+`^2.6.0` ships a real dual CJS/ESM build at its current major (an `exports`
+map with distinct `require`/`import` conditions, not just a bundler-only
+`module` field) — no need to pin below a later major the way commander is
+pinned below 15 (see [above](#the-esm-only-generation)). Its two
+dependencies, `type-flag` and `terminal-columns`, are dual builds too.
+
 ### culori
 
 Picked over `chroma-js` (both are real, actively maintained CSS Color 4
@@ -96,3 +125,16 @@ swapped for a library doing the same job with a real dual CJS/ESM build —
 `ofetch`, `culori`, `tiny-lru`, `markdown-it` — rather than dropped, so this
 was a like-for-like set of replacements, not a reduction in what the package
 depends on.
+
+## Storage
+
+Downloaded fonts and Twemoji images default to `<project root>/.makeitaquote`
+(`src/util/projectRoot.ts`'s `findProjectRoot()`, walking up from `cwd` for
+the nearest `package.json`), not a directory shared by every project on the
+machine. A shared cache sounds efficient but means one project's
+`uninstall` deletes files another still expects, and two projects pinned to
+different `makeitaquote` versions fight over the same file names. Each
+project keeping its own copy costs some duplicated bandwidth and disk, which
+is the trade being made here — `MIQ_FONT_CACHE_DIR`/`MIQ_TWEMOJI_CACHE_DIR`
+opt back into a single shared location for anyone who wants that trade the
+other way.
