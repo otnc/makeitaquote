@@ -38,12 +38,13 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
     ...(options.misskey ? { misskey: options.misskey } : {}),
   })
 
-  const [images, backgroundImage] = await Promise.all([
+  const [images, backgroundImage, , avatar] = await Promise.all([
     prefetchEmoji(segments, {
       ...(options.signal ? { signal: options.signal } : {}),
     }),
     loadBackgroundImage(requested, options.signal ? { signal: options.signal } : {}),
     prepareFonts(requested, data.text, options),
+    loadAvatar(data.avatar, options.signal ? { signal: options.signal } : {}),
   ])
 
   // Emoji that could not be fetched become plain text now, so layout and
@@ -53,8 +54,6 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
     (url) => images.get(url) !== undefined,
     options.onAssetError ?? 'text',
   )
-
-  const avatar = await loadAvatar(data.avatar, options.signal ? { signal: options.signal } : {})
 
   // Reshaping happens after the avatar is known, since its native size is the
   // whole input to the decision.
