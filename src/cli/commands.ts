@@ -72,6 +72,8 @@ export const defaultIo: CliIo = {
 
 /** What a command line's targets add up to. */
 interface Targets {
+  /** The `all` keyword — the same as passing no target at all. */
+  all: boolean
   twemoji: boolean
   families: string[]
   /** The `fonts` keyword with no family names after it. */
@@ -81,16 +83,18 @@ interface Targets {
 /**
  * Reads target words off a command line.
  *
- * `twemoji`/`emoji` and `fonts`/`font` are keywords; everything else is a
- * family name, so `miq install fonts "Dela Gothic One"` installs one family
- * and `miq install "Dela Gothic One"` does exactly the same.
+ * `all`, `twemoji`/`emoji` and `fonts`/`font` are keywords; everything else
+ * is a family name, so `miq install fonts "Dela Gothic One"` installs one
+ * family and `miq install "Dela Gothic One"` does exactly the same. `all`
+ * means the same as no target: everything.
  */
 export function parseTargets(args: readonly string[]): Targets {
-  const targets: Targets = { twemoji: false, families: [], defaultFonts: false }
+  const targets: Targets = { all: false, twemoji: false, families: [], defaultFonts: false }
   let sawFontsKeyword = false
 
   for (const arg of args) {
-    if (arg === 'twemoji' || arg === 'emoji') targets.twemoji = true
+    if (arg === 'all') targets.all = true
+    else if (arg === 'twemoji' || arg === 'emoji') targets.twemoji = true
     else if (arg === 'fonts' || arg === 'font') sawFontsKeyword = true
     else targets.families.push(arg)
   }
@@ -105,15 +109,21 @@ export async function installCommand(
   io: CliIo,
 ): Promise<number> {
   const targets = parseTargets(args)
-  const everything = args.length === 0
+  const bare = args.length === 0
   let failed = false
 
-  if (everything || targets.twemoji) {
+  if (bare || targets.all || targets.twemoji) {
     const ok = await installTwemojiStep(deps, io)
     failed ||= !ok
   }
 
-  const families = everything || targets.defaultFonts ? DEFAULT_FONT_FAMILIES : targets.families
+  // `all` means every catalogued font, not just the smaller default set —
+  // otherwise it would just be another way to spell "no target".
+  const families = targets.all
+    ? [...FONT_CATALOGUE]
+    : bare || targets.defaultFonts
+      ? DEFAULT_FONT_FAMILIES
+      : targets.families
   if (families.length > 0) {
     const ok = await installFontsStep(families, deps, io)
     failed ||= !ok
@@ -128,27 +138,38 @@ export async function uninstallCommand(
   io: CliIo,
 ): Promise<number> {
   const targets = parseTargets(args)
-  const everything = args.length === 0
+  const everything = args.length === 0 || targets.all
+  let failed = false
 
   if (everything || targets.twemoji) {
-    const info = await (deps.twemojiInfo ?? twemojiInfo)()
-    await (deps.uninstallTwemoji ?? uninstallTwemoji)()
-    io.line(
-      info.images > 0 ? `Removed Twemoji (${info.images} images)` : 'Twemoji was not installed',
-    )
+    try {
+      const info = await (deps.twemojiInfo ?? twemojiInfo)()
+      await (deps.uninstallTwemoji ?? uninstallTwemoji)()
+      io.line(
+        info.images > 0 ? `Removed Twemoji (${info.images} images)` : 'Twemoji was not installed',
+      )
+    } catch (cause) {
+      io.line(`✗ Twemoji — ${cause instanceof Error ? cause.message : String(cause)}`)
+      failed = true
+    }
   }
 
   if (everything || targets.defaultFonts || targets.families.length > 0) {
     const families = everything || targets.defaultFonts ? undefined : targets.families
-    const removed = await (deps.uninstallFonts ?? uninstallFonts)(families)
-    io.line(
-      removed > 0
-        ? `Removed ${removed} font file${removed === 1 ? '' : 's'}`
-        : 'No fonts to remove',
-    )
+    try {
+      const removed = await (deps.uninstallFonts ?? uninstallFonts)(families)
+      io.line(
+        removed > 0
+          ? `Removed ${removed} font file${removed === 1 ? '' : 's'}`
+          : 'No fonts to remove',
+      )
+    } catch (cause) {
+      io.line(`✗ Fonts — ${cause instanceof Error ? cause.message : String(cause)}`)
+      failed = true
+    }
   }
 
-  return 0
+  return failed ? 1 : 0
 }
 
 export async function listCommand(

@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -126,6 +126,14 @@ describe('uninstallFonts', () => {
   it('is a no-op when nothing matches', async () => {
     await expect(uninstallFonts(['Nope'], dir)).resolves.toBe(0)
     await expect(uninstallFonts(undefined, dir)).resolves.toBe(0)
+  })
+
+  it('rethrows a real deletion failure instead of swallowing it', async () => {
+    // A directory where a cache file is expected: unlink fails with EISDIR/EPERM,
+    // never ENOENT, so this must propagate rather than being counted as "already gone".
+    await mkdir(join(dir, M_PLUS_400), { recursive: true })
+
+    await expect(uninstallFonts(['M PLUS Rounded 1c'], dir)).rejects.toThrow()
   })
 })
 

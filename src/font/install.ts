@@ -85,8 +85,10 @@ export async function uninstallFonts(
       try {
         unlinkSync(join(dir, name))
         removed++
-      } catch {
-        // Already gone, or locked by another process on Windows.
+      } catch (cause) {
+        // Already gone — someone else's race, not a failure of this one.
+        if ((cause as NodeJS.ErrnoException).code === 'ENOENT') continue
+        throw cause
       }
     }
   }

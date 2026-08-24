@@ -53,11 +53,15 @@ export async function run(
       parameters: ['[targets...]'],
       help: {
         description:
-          'Download assets so rendering works offline. With no target, installs ' +
-          'everything: Twemoji and the default fonts.',
+          'Download assets so rendering works offline. With no target, installs Twemoji ' +
+          'and the default fonts; "all" installs Twemoji and every catalogued font ' +
+          '(`miq search`) instead. Other targets: "twemoji"/"emoji" for just Twemoji, ' +
+          '"fonts"/"font" for just the default families, or a specific family name.',
         examples: [
           'miq install',
+          'miq install all',
           'miq install twemoji',
+          'miq install emoji',
           'miq install fonts',
           'miq install fonts "Dela Gothic One"',
           'miq install "Dela Gothic One"',
@@ -72,13 +76,18 @@ export async function run(
   const uninstall = command(
     {
       name: 'uninstall',
-      alias: ['remove', 'rm', 'un'],
+      alias: ['remove', 'rm', 'r', 'un', 'unlink'],
       parameters: ['[targets...]'],
       help: {
-        description: 'Delete downloaded assets. With no target, removes everything.',
+        description:
+          'Delete downloaded assets. "all" and no target both mean everything — unlike ' +
+          'install, removing does not care which fonts are catalogued. Other targets: ' +
+          '"twemoji"/"emoji", "fonts"/"font", or a specific family name.',
         examples: [
           'miq uninstall',
+          'miq uninstall all',
           'miq uninstall twemoji',
+          'miq uninstall emoji',
           'miq uninstall fonts',
           'miq uninstall fonts "Dela Gothic One"',
         ],
