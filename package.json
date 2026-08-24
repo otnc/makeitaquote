@@ -70,7 +70,8 @@
     "check:build": "node scripts/check-build.js",
     "visual": "node scripts/visual-check.js",
     "prepublishOnly": "npm run build",
-    "checkupdates": "ncu -u -t minor"
+    "checkupdates": "ncu -u -t minor",
+    "migrate": "biome migrate --write"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.7",
