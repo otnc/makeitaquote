@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TwemojiInfo, TwemojiInstallResult } from '../emoji/twemojiStore'
-import type { FontInstallResult, InstalledFont } from '../font/install'
+import type { FontInstallResult, InstalledFont, PruneResult } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
 import type { FontUpdateStatus } from '../font/updates'
+import type { EnvReport } from './env'
 import { type CliIo, run } from './index'
 import { currentVersion } from './packageVersion'
+import type { RenderInput } from './render'
 import type { PackageUpdateStatus } from './updateCheck'
 
 const VERSION = currentVersion()
@@ -65,6 +67,29 @@ function deps() {
       async (current: string): Promise<PackageUpdateStatus> => ({ current, latest: current }),
     ),
     latestTwemojiVersion: vi.fn(async (): Promise<string | null> => '17.0.3'),
+    pruneFonts: vi.fn(async (_families?: readonly string[]): Promise<PruneResult[]> => []),
+    checkEnv: vi.fn(
+      async (): Promise<EnvReport> => ({
+        storage: {
+          projectRoot: '/project',
+          fontsDir: '/project/.makeitaquote/fonts',
+          fontsWritable: true,
+          twemojiDir: '/project/.makeitaquote/twemoji',
+          twemojiWritable: true,
+          fontCacheDirEnv: null,
+          twemojiCacheDirEnv: null,
+        },
+        network: [
+          { host: 'fonts.googleapis.com', reachable: true },
+          { host: 'cdn.jsdelivr.net', reachable: true },
+          { host: 'data.jsdelivr.com', reachable: true },
+          { host: 'registry.npmjs.org', reachable: true },
+        ],
+      }),
+    ),
+    render: vi.fn(async (_input: RenderInput): Promise<Buffer> => Buffer.from('image-bytes')),
+    resolveAvatar: vi.fn(async (value: string): Promise<string> => value),
+    writeFile: vi.fn(async (_path: string, _bytes: Buffer): Promise<void> => {}),
   }
 }
 
@@ -303,6 +328,17 @@ describe('ls', () => {
 
     expect(spy.lines[0]).toContain('Nothing installed yet')
   })
+
+  it('prints JSON with --json', async () => {
+    const spy = io()
+
+    await expect(run(['ls', '--json'], deps(), spy)).resolves.toBe(0)
+
+    expect(spy.lines).toHaveLength(1)
+    const parsed = JSON.parse(spy.lines[0] as string)
+    expect(parsed.twemoji).toMatchObject({ version: '17.0.3' })
+    expect(parsed.fonts).toMatchObject([{ family: 'M PLUS Rounded 1c' }])
+  })
 })
 
 describe('aliases', () => {
@@ -328,6 +364,14 @@ describe('aliases', () => {
       await run([command], deps(), spy)
       expect(spy.lines[0]).toContain('Fonts miq knows by name')
     }
+  })
+
+  it('accepts doctor for env', async () => {
+    const d = deps()
+
+    await run(['doctor'], d, io())
+
+    expect(d.checkEnv).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -360,6 +404,16 @@ describe('search', () => {
     const out = spy.lines.join('\n')
     expect(out).toContain('No catalogued font matches')
     expect(out).toContain('Did you mean "Noto Sans JP"?')
+  })
+
+  it('prints JSON with --json', async () => {
+    const spy = io()
+
+    await run(['search', 'gothic', '--json'], deps(), spy)
+
+    const parsed = JSON.parse(spy.lines[0] as string)
+    expect(parsed.query).toBe('gothic')
+    expect(parsed.matches).toContain('Dela Gothic One')
   })
 })
 
@@ -421,6 +475,269 @@ describe('outdated', () => {
     await expect(run(['outdated'], d, spy)).resolves.toBe(0)
 
     expect(spy.lines.join('\n')).toContain('could not reach the npm registry')
+  })
+
+  it('prints JSON with --json', async () => {
+    const d = deps()
+    d.checkPackageUpdate = vi.fn(async (current: string) => ({ current, latest: '99.0.0' }))
+    const spy = io()
+
+    await expect(run(['outdated', '--json'], d, spy)).resolves.toBe(1)
+
+    expect(spy.lines).toHaveLength(1)
+    const parsed = JSON.parse(spy.lines[0] as string)
+    expect(parsed.package).toEqual({ current: VERSION, latest: '99.0.0' })
+    expect(parsed.twemoji).toEqual({ installed: '17.0.3', latest: '17.0.3' })
+    expect(parsed.fonts).toMatchObject([{ family: 'M PLUS Rounded 1c', outdated: false }])
+  })
+})
+
+describe('update', () => {
+  it('does nothing when everything is up to date', async () => {
+    const spy = io()
+
+    await expect(run(['update'], deps(), spy)).resolves.toBe(0)
+
+    expect(spy.lines.join('\n')).toContain('Nothing to update')
+  })
+
+  it('never touches the miq install itself, only prints a hint', async () => {
+    const d = deps()
+    d.checkPackageUpdate = vi.fn(async (current: string) => ({ current, latest: '99.0.0' }))
+    const spy = io()
+
+    await run(['update'], d, spy)
+
+    expect(spy.lines.join('\n')).toContain('npm install -g makeitaquote@latest')
+  })
+
+  it('reinstalls twemoji clean when it is outdated', async () => {
+    const d = deps()
+    d.latestTwemojiVersion = vi.fn(async () => '99.0.0')
+    const spy = io()
+
+    await expect(run(['update'], d, spy)).resolves.toBe(0)
+
+    expect(d.uninstallTwemoji).toHaveBeenCalledTimes(1)
+    expect(d.installTwemoji).toHaveBeenCalledTimes(1)
+    expect(spy.lines.join('\n')).toContain('updated to 17.0.3')
+  })
+
+  it('reinstalls and prunes an outdated font family', async () => {
+    const d = deps()
+    d.checkFontUpdates = vi.fn(async (installed) =>
+      installed.map((font) => ({
+        family: font.family,
+        installedVersion: font.version,
+        latestVersion: 'v99',
+        outdated: true,
+      })),
+    )
+    const spy = io()
+
+    await run(['update'], d, spy)
+
+    expect(d.installFonts).toHaveBeenCalledWith(['M PLUS Rounded 1c'])
+    expect(d.pruneFonts).toHaveBeenCalledWith(['M PLUS Rounded 1c'])
+  })
+
+  it('fails when an outdated font cannot be reinstalled', async () => {
+    const d = deps()
+    d.checkFontUpdates = vi.fn(async (installed) =>
+      installed.map((font) => ({
+        family: font.family,
+        installedVersion: font.version,
+        latestVersion: 'v99',
+        outdated: true,
+      })),
+    )
+    d.installFonts = vi.fn(async (families: readonly string[]) =>
+      families.map((family) => ({ family, ok: false })),
+    )
+    const spy = io()
+
+    await expect(run(['update'], d, spy)).resolves.toBe(1)
+  })
+})
+
+describe('prune', () => {
+  it('reports when there is nothing to prune', async () => {
+    const spy = io()
+
+    await expect(run(['prune'], deps(), spy)).resolves.toBe(0)
+
+    expect(spy.lines[0]).toContain('Nothing to prune')
+  })
+
+  it('reports what was removed', async () => {
+    const d = deps()
+    d.pruneFonts = vi.fn(async () => [{ family: 'M PLUS Rounded 1c', removed: 2, bytes: 2048 }])
+    const spy = io()
+
+    await run(['prune'], d, spy)
+
+    expect(spy.lines[0]).toContain('M PLUS Rounded 1c')
+    expect(spy.lines[0]).toContain('2')
+  })
+
+  it('limits itself to the named families', async () => {
+    const d = deps()
+
+    await run(['prune', 'Dela Gothic One'], d, io())
+
+    expect(d.pruneFonts).toHaveBeenCalledWith(['Dela Gothic One'])
+  })
+
+  it('passes undefined for no families', async () => {
+    const d = deps()
+
+    await run(['prune'], d, io())
+
+    expect(d.pruneFonts).toHaveBeenCalledWith(undefined)
+  })
+})
+
+describe('env', () => {
+  it('reports storage and network status', async () => {
+    const spy = io()
+
+    await expect(run(['env'], deps(), spy)).resolves.toBe(0)
+
+    const out = spy.lines.join('\n')
+    expect(out).toContain('/project/.makeitaquote/fonts')
+    expect(out).toContain('fonts.googleapis.com')
+    expect(out).toContain('reachable')
+  })
+
+  it('fails when a storage directory is not writable', async () => {
+    const d = deps()
+    d.checkEnv = vi.fn(async () => ({
+      storage: {
+        projectRoot: '/project',
+        fontsDir: '/project/.makeitaquote/fonts',
+        fontsWritable: false,
+        twemojiDir: '/project/.makeitaquote/twemoji',
+        twemojiWritable: true,
+        fontCacheDirEnv: null,
+        twemojiCacheDirEnv: null,
+      },
+      network: [],
+    }))
+    const spy = io()
+
+    await expect(run(['env'], d, spy)).resolves.toBe(1)
+
+    expect(spy.lines.join('\n')).toContain('NOT writable')
+  })
+
+  it('prints JSON with --json', async () => {
+    const spy = io()
+
+    await expect(run(['env', '--json'], deps(), spy)).resolves.toBe(0)
+
+    expect(spy.lines).toHaveLength(1)
+    const parsed = JSON.parse(spy.lines[0] as string)
+    expect(parsed.storage.projectRoot).toBe('/project')
+  })
+})
+
+describe('generate', () => {
+  it('renders and writes the file', async () => {
+    const d = deps()
+    const spy = io()
+
+    await expect(run(['generate', '--text', 'Hello'], d, spy)).resolves.toBe(0)
+
+    expect(d.render).toHaveBeenCalledWith(expect.objectContaining({ text: 'Hello', format: 'png' }))
+    expect(d.writeFile).toHaveBeenCalledWith('quote.png', Buffer.from('image-bytes'))
+    expect(spy.lines[0]).toContain('quote.png')
+  })
+
+  it('requires --text', async () => {
+    const spy = io()
+
+    await expect(run(['generate'], deps(), spy)).resolves.toBe(1)
+
+    expect(spy.lines[0]).toContain('--text is required')
+  })
+
+  it('resolves --avatar and passes every flag through', async () => {
+    const d = deps()
+
+    await run(
+      [
+        'generate',
+        '--text',
+        'Hi',
+        '--avatar',
+        'https://example.com/a.png',
+        '--username',
+        'otoneko.',
+        '--display-name',
+        '音猫',
+        '--watermark',
+        'MiQ',
+        '--color',
+        '--theme',
+        'light',
+        '--scale',
+        '1.5',
+        '--format',
+        'webp',
+        '--quality',
+        '80',
+        '--out',
+        'out.webp',
+        '--offline',
+      ],
+      d,
+      io(),
+    )
+
+    expect(d.resolveAvatar).toHaveBeenCalledWith('https://example.com/a.png')
+    expect(d.render).toHaveBeenCalledWith({
+      text: 'Hi',
+      avatar: 'https://example.com/a.png',
+      username: 'otoneko.',
+      displayName: '音猫',
+      watermark: 'MiQ',
+      color: true,
+      theme: 'light',
+      scale: 1.5,
+      quality: 80,
+      format: 'webp',
+      offline: true,
+    })
+    expect(d.writeFile).toHaveBeenCalledWith('out.webp', Buffer.from('image-bytes'))
+  })
+
+  it('defaults --out to quote.<format>', async () => {
+    const d = deps()
+
+    await run(['generate', '--text', 'Hi', '--format', 'jpeg'], d, io())
+
+    expect(d.writeFile).toHaveBeenCalledWith('quote.jpeg', expect.any(Buffer))
+  })
+
+  it('reports a render failure without writing a file', async () => {
+    const d = deps()
+    d.render = vi.fn(async () => {
+      throw new Error('font unavailable')
+    })
+    const spy = io()
+
+    await expect(run(['generate', '--text', 'Hi'], d, spy)).resolves.toBe(1)
+
+    expect(d.writeFile).not.toHaveBeenCalled()
+    expect(spy.lines[0]).toContain('font unavailable')
+  })
+
+  it('accepts render as an alias', async () => {
+    const d = deps()
+
+    await run(['render', '--text', 'Hi'], d, io())
+
+    expect(d.render).toHaveBeenCalledTimes(1)
   })
 })
 

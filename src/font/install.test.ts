@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resetAutoloadForTests } from './autoload'
-import { installFonts, listInstalledFonts, uninstallFonts } from './install'
+import { installFonts, listInstalledFonts, pruneFonts, uninstallFonts } from './install'
 
 let dir = ''
 
@@ -47,6 +47,8 @@ function fontFetcher(): { fetcher: (url: string) => Promise<Buffer>; calls: stri
 /** Cache file names as `fileNameFor` would write them. */
 const M_PLUS_400 = 'M-PLUS-Rounded-1c-v15-400-abc123.ttf'
 const M_PLUS_700 = 'M-PLUS-Rounded-1c-v15-700-def456.ttf'
+const M_PLUS_400_OLD = 'M-PLUS-Rounded-1c-v14-400-stale1.ttf'
+const M_PLUS_700_OLD = 'M-PLUS-Rounded-1c-v14-700-stale2.ttf'
 const NOTO_400 = 'Noto-Sans-JP-v53-400-ghi789.ttf'
 
 beforeEach(async () => {
@@ -159,5 +161,44 @@ describe('listInstalledFonts', () => {
 
   it('returns nothing for a missing directory', () => {
     expect(listInstalledFonts(join(dir, 'nope'))).toEqual([])
+  })
+})
+
+describe('pruneFonts', () => {
+  it('removes stale-version files, keeping the newest', async () => {
+    await writeFile(join(dir, M_PLUS_400), 'aa')
+    await writeFile(join(dir, M_PLUS_700), 'aa')
+    await writeFile(join(dir, M_PLUS_400_OLD), 'a')
+    await writeFile(join(dir, M_PLUS_700_OLD), 'a')
+    await writeFile(join(dir, NOTO_400), 'aaa')
+
+    const results = await pruneFonts(undefined, dir)
+
+    expect(results).toEqual([{ family: 'M PLUS Rounded 1c', removed: 2, bytes: 2 }])
+    expect((await readdir(dir)).sort()).toEqual([M_PLUS_400, M_PLUS_700, NOTO_400].sort())
+  })
+
+  it('does nothing when every family has one version', async () => {
+    await writeFile(join(dir, M_PLUS_400), 'a')
+    await writeFile(join(dir, NOTO_400), 'a')
+
+    expect(await pruneFonts(undefined, dir)).toEqual([])
+  })
+
+  it('limits itself to the named families', async () => {
+    await writeFile(join(dir, M_PLUS_400), 'a')
+    await writeFile(join(dir, M_PLUS_400_OLD), 'a')
+    await writeFile(join(dir, NOTO_400), 'a')
+    const noto400Old = 'Noto-Sans-JP-v52-400-stale.ttf'
+    await writeFile(join(dir, noto400Old), 'a')
+
+    const results = await pruneFonts(['M PLUS Rounded 1c'], dir)
+
+    expect(results).toEqual([{ family: 'M PLUS Rounded 1c', removed: 1, bytes: 1 }])
+    expect((await readdir(dir)).sort()).toEqual([M_PLUS_400, NOTO_400, noto400Old].sort())
+  })
+
+  it('returns nothing for a missing directory', async () => {
+    expect(await pruneFonts(undefined, join(dir, 'nope'))).toEqual([])
   })
 })

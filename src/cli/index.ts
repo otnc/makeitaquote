@@ -1,13 +1,18 @@
 import { cli, command } from 'cleye'
+import { oneOf } from 'cleye/formats'
 import {
   type CliDeps,
   type CliIo,
   defaultIo,
+  envCommand,
   installCommand,
   listCommand,
   outdatedCommand,
+  pruneCommand,
+  renderCommand,
   searchCommand,
   uninstallCommand,
+  updateCommand,
 } from './commands'
 import { currentVersion } from './packageVersion'
 
@@ -17,6 +22,11 @@ const DESCRIPTION =
   'Manage the assets makeitaquote keeps on disk, for offline use. Storage ' +
   'defaults to <project root>/.makeitaquote — override with MIQ_FONT_CACHE_DIR ' +
   'and MIQ_TWEMOJI_CACHE_DIR. Also available as `makeitaquote <command>`.'
+
+/** Shared by every read-only reporting command. */
+const JSON_FLAG = {
+  json: { type: Boolean, description: 'Print machine-readable JSON instead' },
+}
 
 /**
  * Runs one command line, returning the process exit code.
@@ -83,12 +93,13 @@ export async function run(
     {
       name: 'ls',
       alias: 'list',
+      flags: JSON_FLAG,
       help: {
         description: 'List what is installed — Twemoji included — how much it takes, and where.',
       },
     },
-    async () => {
-      exitCode = await listCommand(deps, io)
+    async (parsed) => {
+      exitCode = await listCommand(deps, io, { json: parsed.flags.json })
     },
   )
 
@@ -97,6 +108,7 @@ export async function run(
       name: 'search',
       alias: ['find', 's'],
       parameters: ['[query]'],
+      flags: JSON_FLAG,
       help: {
         description:
           'List fonts miq knows how to install by name. Any Google Fonts family also ' +
@@ -105,21 +117,111 @@ export async function run(
       },
     },
     (parsed) => {
-      exitCode = searchCommand(parsed._.query, io)
+      exitCode = searchCommand(parsed._.query, io, { json: parsed.flags.json })
     },
   )
 
   const outdated = command(
     {
       name: 'outdated',
+      flags: JSON_FLAG,
       help: {
         description:
           'Check miq, Twemoji, and every installed font against what is currently published.',
         examples: ['miq outdated'],
       },
     },
+    async (parsed) => {
+      exitCode = await outdatedCommand(deps, io, { json: parsed.flags.json })
+    },
+  )
+
+  const update = command(
+    {
+      name: 'update',
+      help: {
+        description:
+          'Apply what `outdated` finds: update Twemoji and any outdated font, in place. ' +
+          'Never touches the miq install itself — that always prints a command to run yourself.',
+        examples: ['miq update'],
+      },
+    },
     async () => {
-      exitCode = await outdatedCommand(deps, io)
+      exitCode = await updateCommand(deps, io)
+    },
+  )
+
+  const prune = command(
+    {
+      name: 'prune',
+      parameters: ['[families...]'],
+      help: {
+        description:
+          'Delete stale-version font files, keeping the newest per family. With no target, ' +
+          'checks every installed family.',
+        examples: ['miq prune', 'miq prune "Dela Gothic One"'],
+      },
+    },
+    async (parsed) => {
+      exitCode = await pruneCommand(parsed._.families, deps, io)
+    },
+  )
+
+  const env = command(
+    {
+      name: 'env',
+      alias: 'doctor',
+      flags: JSON_FLAG,
+      help: {
+        description:
+          'Show where fonts/Twemoji are stored, whether that location is writable, and ' +
+          'whether the hosts miq talks to are reachable.',
+        examples: ['miq env'],
+      },
+    },
+    async (parsed) => {
+      exitCode = await envCommand(deps, io, { json: parsed.flags.json })
+    },
+  )
+
+  const render = command(
+    {
+      name: 'generate',
+      alias: 'render',
+      flags: {
+        text: { type: String, description: 'The quoted text (required)' },
+        avatar: { type: String, description: 'An avatar URL, or a local image file' },
+        username: { type: String, description: '@handle line' },
+        displayName: { type: String, description: 'Display/nickname line' },
+        watermark: { type: String, description: 'Small corner text' },
+        color: {
+          type: Boolean,
+          description: 'Keep the avatar in color (shortcut for --theme color)',
+        },
+        theme: {
+          type: oneOf('dark', 'light', 'color', 'portrait', 'portrait-light', 'custom'),
+          description: 'A built-in theme preset (default: dark)',
+        },
+        scale: { type: Number, description: 'Resize the whole image, keeping its layout (max 8)' },
+        format: {
+          type: oneOf('png', 'jpeg', 'jpg', 'webp', 'avif'),
+          default: 'png',
+          description: 'Output image format',
+        },
+        quality: { type: Number, description: '1-100, ignored for png (default 92)' },
+        out: { type: String, description: 'Where to write the image (default: quote.<format>)' },
+        offline: { type: Boolean, description: 'Never fetch a font — use what is already on disk' },
+      },
+      help: {
+        description: 'Generate a quote image and write it to disk.',
+        examples: [
+          'miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png --out quote.png',
+          'miq generate --text "Hello" --theme light --format webp',
+        ],
+      },
+    },
+    async (parsed) => {
+      exitCode = await renderCommand(parsed.flags, deps, io)
     },
   )
 
@@ -128,7 +230,7 @@ export async function run(
       name: 'miq',
       version: currentVersion(),
       help: { description: DESCRIPTION },
-      commands: [install, uninstall, ls, search, outdated],
+      commands: [install, uninstall, ls, search, outdated, update, prune, env, render],
     },
     (root) => {
       // Only reached when no command matched: nothing was typed, the first

@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises'
 import {
   installTwemoji,
   latestTwemojiVersion,
@@ -13,12 +14,16 @@ import {
   type InstalledFont,
   installFonts,
   listInstalledFonts,
+  type PruneResult,
+  pruneFonts,
   uninstallFonts,
 } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
-import { checkFontUpdates } from '../font/updates'
+import { checkFontUpdates, type FontUpdateStatus } from '../font/updates'
 import { isNewerVersion } from '../util/version'
+import { checkEnv, type EnvReport } from './env'
 import { currentVersion } from './packageVersion'
+import { type RenderInput, renderToBuffer, resolveAvatar } from './render'
 import { checkPackageUpdate, type PackageUpdateStatus } from './updateCheck'
 
 /**
@@ -39,8 +44,13 @@ export interface CliDeps {
   installFonts?: (families: readonly string[]) => Promise<FontInstallResult[]>
   uninstallFonts?: (families?: readonly string[]) => Promise<number>
   listInstalledFonts?: () => InstalledFont[]
+  pruneFonts?: (families?: readonly string[]) => Promise<PruneResult[]>
   checkFontUpdates?: typeof checkFontUpdates
   checkPackageUpdate?: (current: string) => Promise<PackageUpdateStatus>
+  checkEnv?: () => Promise<EnvReport>
+  render?: (input: RenderInput) => Promise<Buffer>
+  resolveAvatar?: (value: string) => ReturnType<typeof resolveAvatar>
+  writeFile?: (path: string, bytes: Buffer) => Promise<void>
 }
 
 export interface CliIo {
@@ -48,6 +58,12 @@ export interface CliIo {
   line(text: string): void
   /** In-place progress, when the output supports it. */
   progress?: (text: string) => void
+}
+
+/** Shared by every read-only reporting command (`ls`, `search`, `outdated`, `env`). */
+export interface OutputOptions {
+  /** Print machine-readable JSON instead of the human-readable report. */
+  json?: boolean
 }
 
 export const defaultIo: CliIo = {
@@ -135,9 +151,18 @@ export async function uninstallCommand(
   return 0
 }
 
-export async function listCommand(deps: CliDeps, io: CliIo): Promise<number> {
+export async function listCommand(
+  deps: CliDeps,
+  io: CliIo,
+  options: OutputOptions = {},
+): Promise<number> {
   const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
   const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
+
+  if (options.json) {
+    io.line(JSON.stringify({ twemoji, fontsDir: resolveCacheDir(), fonts }, null, 2))
+    return 0
+  }
 
   if (twemoji.images === 0 && fonts.length === 0) {
     io.line('Nothing installed yet.')
@@ -172,11 +197,21 @@ export async function listCommand(deps: CliDeps, io: CliIo): Promise<number> {
 }
 
 /** Lists fonts miq knows how to install by name — the catalogue, not the full Google Fonts library. */
-export function searchCommand(query: string | undefined, io: CliIo): number {
+export function searchCommand(
+  query: string | undefined,
+  io: CliIo,
+  options: OutputOptions = {},
+): number {
   const trimmed = query?.trim()
   const matches = trimmed
     ? FONT_CATALOGUE.filter((family) => family.toLowerCase().includes(trimmed.toLowerCase()))
     : FONT_CATALOGUE
+
+  if (options.json) {
+    const suggestion = matches.length === 0 && trimmed ? (suggestionFor(trimmed) ?? null) : null
+    io.line(JSON.stringify({ query: trimmed ?? null, matches, suggestion }, null, 2))
+    return 0
+  }
 
   if (matches.length > 0) {
     io.line(trimmed ? `Fonts miq knows by name matching "${trimmed}":` : 'Fonts miq knows by name:')
@@ -197,17 +232,50 @@ export function searchCommand(query: string | undefined, io: CliIo): number {
   return 0
 }
 
-export async function outdatedCommand(deps: CliDeps, io: CliIo): Promise<number> {
+export async function outdatedCommand(
+  deps: CliDeps,
+  io: CliIo,
+  options: OutputOptions = {},
+): Promise<number> {
   const packageStatus = await (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion())
   const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
+  const twemojiLatest =
+    twemoji.version === null ? null : await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
   const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
+  const fontStatuses =
+    fonts.length > 0 ? await (deps.checkFontUpdates ?? checkFontUpdates)(fonts) : []
 
-  let outdated = reportPackageUpdate(packageStatus, io)
-  outdated = (await reportTwemojiUpdate(twemoji, deps, io)) || outdated
+  const packageOutdated =
+    packageStatus.latest !== null && isNewerVersion(packageStatus.current, packageStatus.latest)
+  const twemojiOutdated =
+    twemoji.version !== null &&
+    twemojiLatest !== null &&
+    isNewerVersion(twemoji.version, twemojiLatest)
+  const fontsOutdated = fontStatuses.some((status) => status.outdated)
+  const outdated = packageOutdated || twemojiOutdated || fontsOutdated
+
+  if (options.json) {
+    io.line(
+      JSON.stringify(
+        {
+          package: packageStatus,
+          twemoji:
+            twemoji.version === null ? null : { installed: twemoji.version, latest: twemojiLatest },
+          fonts: fontStatuses,
+        },
+        null,
+        2,
+      ),
+    )
+    return outdated ? 1 : 0
+  }
+
+  formatPackageUpdate(packageStatus, io)
+  formatTwemojiUpdate(twemoji, twemojiLatest, io)
 
   if (fonts.length > 0) {
     io.line('Fonts')
-    outdated = (await reportFontUpdates(fonts, deps, io)) || outdated
+    formatFontUpdates(fontStatuses, io)
   }
 
   if (!outdated) {
@@ -218,53 +286,221 @@ export async function outdatedCommand(deps: CliDeps, io: CliIo): Promise<number>
   return outdated ? 1 : 0
 }
 
-function reportPackageUpdate(status: PackageUpdateStatus, io: CliIo): boolean {
+/**
+ * Applies what `outdated` only reports.
+ *
+ * Never touches the miq install itself — a newer miq is a hint to run
+ * `npm install` yourself, not something this process should do to its own
+ * package manager. Twemoji and fonts are miq's own managed files, so those
+ * it updates directly: an outdated Twemoji release is uninstalled and
+ * reinstalled clean (a plain re-run only adds new files, see
+ * `installTwemoji`'s doc comment), and an outdated font family is
+ * re-installed and then pruned so the stale version doesn't linger.
+ */
+export async function updateCommand(deps: CliDeps, io: CliIo): Promise<number> {
+  let failed = false
+  let didAnything = false
+
+  const packageStatus = await (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion())
+  if (
+    packageStatus.latest !== null &&
+    isNewerVersion(packageStatus.current, packageStatus.latest)
+  ) {
+    io.line(
+      `makeitaquote ${packageStatus.current} → ${packageStatus.latest} available — ` +
+        'run `npm install -g makeitaquote@latest` yourself (miq never updates its own install)',
+    )
+  }
+
+  const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
+  if (twemoji.version !== null) {
+    const latest = await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
+    if (latest !== null && isNewerVersion(twemoji.version, latest)) {
+      didAnything = true
+      io.line('Twemoji')
+      try {
+        await (deps.uninstallTwemoji ?? uninstallTwemoji)()
+        const result = await (deps.installTwemoji ?? installTwemoji)()
+        io.line(`  ✓ updated to ${result.version}`)
+      } catch (cause) {
+        io.line(`  ✗ Twemoji — ${cause instanceof Error ? cause.message : String(cause)}`)
+        failed = true
+      }
+    }
+  }
+
+  const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
+  if (fonts.length > 0) {
+    const statuses = await (deps.checkFontUpdates ?? checkFontUpdates)(fonts)
+    const outdatedFamilies = statuses
+      .filter((status) => status.outdated)
+      .map((status) => status.family)
+
+    if (outdatedFamilies.length > 0) {
+      didAnything = true
+      io.line('Fonts')
+      const results = await (deps.installFonts ?? installFonts)(outdatedFamilies)
+      for (const result of results) {
+        if (result.ok) io.line(`  ✓ ${result.family}`)
+        else {
+          io.line(`  ✗ ${result.family} — not available (see the warning above)`)
+          failed = true
+        }
+      }
+      await (deps.pruneFonts ?? pruneFonts)(outdatedFamilies)
+    }
+  }
+
+  if (!didAnything) io.line('Nothing to update.')
+
+  return failed ? 1 : 0
+}
+
+/** Deletes stale-version font files, keeping only the newest per family. */
+export async function pruneCommand(
+  families: readonly string[],
+  deps: CliDeps,
+  io: CliIo,
+): Promise<number> {
+  const results = await (deps.pruneFonts ?? pruneFonts)(families.length > 0 ? families : undefined)
+
+  if (results.length === 0) {
+    io.line('Nothing to prune.')
+    return 0
+  }
+
+  for (const result of results) {
+    io.line(
+      `  ✓ ${result.family} — removed ${result.removed} stale file${result.removed === 1 ? '' : 's'}, ${formatBytes(result.bytes)}`,
+    )
+  }
+  return 0
+}
+
+/** Where things are, whether they're writable, and what's reachable — for debugging storage/network setup. */
+export async function envCommand(
+  deps: CliDeps,
+  io: CliIo,
+  options: OutputOptions = {},
+): Promise<number> {
+  const report = await (deps.checkEnv ?? checkEnv)()
+
+  if (options.json) {
+    io.line(JSON.stringify(report, null, 2))
+    return report.storage.fontsWritable && report.storage.twemojiWritable ? 0 : 1
+  }
+
+  io.line('Storage')
+  io.line(`  Project root           ${report.storage.projectRoot}`)
+  io.line(
+    `  Fonts                  ${report.storage.fontsDir} ` +
+      (report.storage.fontsWritable ? '(writable)' : '(NOT writable)'),
+  )
+  io.line(
+    `  Twemoji                ${report.storage.twemojiDir} ` +
+      (report.storage.twemojiWritable ? '(writable)' : '(NOT writable)'),
+  )
+  io.line(`  MIQ_FONT_CACHE_DIR     ${report.storage.fontCacheDirEnv ?? '(not set)'}`)
+  io.line(`  MIQ_TWEMOJI_CACHE_DIR  ${report.storage.twemojiCacheDirEnv ?? '(not set)'}`)
+  io.line('')
+  io.line('Network')
+  for (const { host, reachable } of report.network) {
+    io.line(`  ${host.padEnd(24)} ${reachable ? 'reachable' : 'unreachable'}`)
+  }
+
+  return report.storage.fontsWritable && report.storage.twemojiWritable ? 0 : 1
+}
+
+/** Raw `miq render` flag values, before `--avatar` is resolved to bytes. */
+export interface RenderOptions {
+  text?: string
+  avatar?: string
+  username?: string
+  displayName?: string
+  watermark?: string
+  color?: boolean
+  /** Validated by cleye's `oneOf()` before this ever runs — a plain string here, not re-checked. */
+  theme?: string
+  scale?: number
+  /** Same as `theme` — already one of `RenderInput['format']`'s members by the time this runs. */
+  format?: string
+  quality?: number
+  out?: string
+  offline?: boolean
+}
+
+/** Generates a quote image from flag values, and writes it to `--out`. */
+export async function renderCommand(
+  options: RenderOptions,
+  deps: CliDeps,
+  io: CliIo,
+): Promise<number> {
+  if (!options.text) {
+    io.line('Error: --text is required.')
+    return 1
+  }
+
+  const format = (options.format ?? 'png') as RenderInput['format']
+  const outPath = options.out ?? `quote.${format}`
+
+  try {
+    const avatar =
+      options.avatar === undefined
+        ? undefined
+        : await (deps.resolveAvatar ?? resolveAvatar)(options.avatar)
+
+    const bytes = await (deps.render ?? renderToBuffer)({
+      text: options.text,
+      ...(avatar !== undefined ? { avatar } : {}),
+      ...(options.username !== undefined ? { username: options.username } : {}),
+      ...(options.displayName !== undefined ? { displayName: options.displayName } : {}),
+      ...(options.watermark !== undefined ? { watermark: options.watermark } : {}),
+      ...(options.color !== undefined ? { color: options.color } : {}),
+      ...(options.theme !== undefined ? { theme: options.theme as RenderInput['theme'] } : {}),
+      ...(options.scale !== undefined ? { scale: options.scale } : {}),
+      ...(options.quality !== undefined ? { quality: options.quality } : {}),
+      format,
+      ...(options.offline ? { offline: true } : {}),
+    })
+
+    await (deps.writeFile ?? writeFile)(outPath, bytes)
+    io.line(`✓ ${outPath} (${formatBytes(bytes.length)})`)
+    return 0
+  } catch (cause) {
+    io.line(`✗ ${cause instanceof Error ? cause.message : String(cause)}`)
+    return 1
+  }
+}
+
+function formatPackageUpdate(status: PackageUpdateStatus, io: CliIo): void {
   if (status.latest === null) {
     io.line(`  ? makeitaquote ${status.current} — could not reach the npm registry`)
-    return false
-  }
-  if (isNewerVersion(status.current, status.latest)) {
+  } else if (isNewerVersion(status.current, status.latest)) {
     io.line(
       `  ↑ makeitaquote ${status.current} → ${status.latest} — npm install -g makeitaquote@latest`,
     )
-    return true
+  } else {
+    io.line(`  ✓ makeitaquote ${status.current} — up to date`)
   }
-  io.line(`  ✓ makeitaquote ${status.current} — up to date`)
-  return false
 }
 
-async function reportTwemojiUpdate(info: TwemojiInfo, deps: CliDeps, io: CliIo): Promise<boolean> {
+function formatTwemojiUpdate(info: TwemojiInfo, latest: string | null, io: CliIo): void {
   if (info.version === null) {
     io.line('  · Twemoji — not installed')
-    return false
-  }
-
-  const latest = await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
-  if (latest === null) {
+  } else if (latest === null) {
     io.line(`  ? Twemoji ${info.version} — could not reach jsDelivr`)
-    return false
-  }
-  if (isNewerVersion(info.version, latest)) {
+  } else if (isNewerVersion(info.version, latest)) {
     io.line(`  ↑ Twemoji ${info.version} → ${latest} — miq install twemoji`)
-    return true
+  } else {
+    io.line(`  ✓ Twemoji ${info.version} — up to date`)
   }
-  io.line(`  ✓ Twemoji ${info.version} — up to date`)
-  return false
 }
 
-async function reportFontUpdates(
-  fonts: readonly InstalledFont[],
-  deps: CliDeps,
-  io: CliIo,
-): Promise<boolean> {
-  const statuses = await (deps.checkFontUpdates ?? checkFontUpdates)(fonts)
-  let outdated = false
-
+function formatFontUpdates(statuses: readonly FontUpdateStatus[], io: CliIo): void {
   for (const status of statuses) {
     if (status.latestVersion === null) {
       io.line(`  ? ${status.family} — could not check`)
     } else if (status.outdated) {
-      outdated = true
       io.line(
         `  ↑ ${status.family} ${status.installedVersion} → ${status.latestVersion} — ` +
           `miq install fonts "${status.family}"`,
@@ -273,8 +509,6 @@ async function reportFontUpdates(
       io.line(`  ✓ ${status.family} — up to date`)
     }
   }
-
-  return outdated
 }
 
 async function installTwemojiStep(deps: CliDeps, io: CliIo): Promise<boolean> {
