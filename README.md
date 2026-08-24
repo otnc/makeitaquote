@@ -611,7 +611,7 @@ await miq.render()                           // the Canvas, to draw on yourself
 
 ## Offline use
 
-Fonts and Twemoji are normally fetched the first time they are needed and cached on disk after that. The CLI downloads them ahead of time instead, so renders never touch the network at all:
+Fonts and Twemoji are normally fetched the first time they are needed and cached on disk after that. The CLI downloads them ahead of time instead, so renders never touch the network at all. It's available as both `miq` and `makeitaquote` once the package is installed — global or local, `npx` works either way:
 
 ```console
 $ npx miq install
@@ -623,30 +623,97 @@ Fonts
   ✓ Noto Sans JP
 ```
 
+### Targets
+
+`install` and `uninstall` both take the same target words:
+
+| Target | Means |
+| --- | --- |
+| _(nothing)_ | Twemoji and the default fonts |
+| `all` | Twemoji and **every** catalogued font (`miq search`) — bigger than the default above |
+| `twemoji`, `emoji` | Just Twemoji |
+| `fonts`, `font` | Just the default fonts, with no family names after it |
+| `fonts "Name"` · `"Name"` | One or more specific families, by their Google Fonts name |
+
+`all` only changes what `install` does — `uninstall all` and plain `uninstall` are identical, since removing everything doesn't care which fonts are catalogued. `outdated` takes no target; it always checks miq itself, Twemoji, and every installed font.
+
+### Commands
+
 | Command | Aliases | What it does |
 | --- | --- | --- |
-| `miq install` | `add`, `i` | Everything: every Twemoji image and the default fonts |
-| `miq install twemoji` |  | Every Twemoji image (~4000 files, ~4 MB) — the full current release, not a subset |
-| `miq install fonts` |  | The default font families, weights 400 and 700 |
-| `miq install fonts "Dela Gothic One"` |  | Specific families, by their Google Fonts name |
-| `miq install "Dela Gothic One"` |  | The same, without the keyword |
-| `miq uninstall` | `remove`, `rm`, `un` | Removes everything the commands above put on disk |
-| `miq uninstall twemoji` · `miq uninstall fonts` |  | Removes one kind |
-| `miq uninstall fonts "Dela Gothic One"` |  | Removes specific families |
+| `miq install [target…]` | `add`, `i` | Downloads a target (see above); no target = the default set |
+| `miq uninstall [target…]` | `remove`, `rm`, `r`, `un`, `unlink` | Deletes a target; a real failure (a locked file, a permission error) is reported and exits non-zero rather than being silently skipped |
 | `miq ls` | `list` | Lists what is installed — Twemoji included — how much it takes, and where |
-| `miq search` | `find`, `s` | Lists fonts miq knows by name; `miq search gothic` filters it |
-| `miq outdated` |  | Checks miq, Twemoji and every installed font against what's currently published |
+| `miq search [query]` | `find`, `s` | Lists fonts miq knows by name; `miq search gothic` filters it |
+| `miq outdated` |  | Checks miq itself, Twemoji, and every installed font against what's currently published |
 | `miq update` |  | Applies what `outdated` finds — Twemoji and fonts only, never the miq install itself |
-| `miq prune` |  | Deletes stale-version font files an update left behind, keeping the newest per family |
+| `miq prune [family…]` |  | Deletes stale-version font files an update left behind, keeping the newest per family |
 | `miq env` | `doctor` | Shows resolved storage paths, whether they're writable, and network reachability |
 | `miq generate` | `render` | Generates a quote image from flags and writes it to disk |
 | `miq --version` |  | Prints the installed miq version |
 
-`ls`, `search`, `outdated` and `env` also take `--json`, for scripts and CI.
+`ls`, `search`, `outdated` and `env` also take `--json`, for scripts and CI:
+
+```console
+$ miq outdated --json
+{"package":{"current":"10.0.0","latest":"10.0.0"},"twemoji":{"installed":"17.0.3","latest":"17.0.3"},"fonts":[]}
+```
 
 `miq search` lists the curated names miq suggests and autocorrects typos against — any Google Fonts family works whether or not it's listed, since there is no way to enumerate Google's full ~1800-family catalogue without an API key, which this package deliberately doesn't ask you to configure.
 
-`miq generate` covers the common case — text, avatar, username, display name, watermark, a built-in theme, scale, output format/quality — as flags. For anything the full `Theme` system offers beyond that, use the library directly (see below):
+### Keeping things current
+
+`outdated` only reports; `update` acts on what it finds, and `prune` cleans up after it — a newer Twemoji release is reinstalled clean (a plain reinstall only adds new files, see below), and an outdated font is re-fetched and immediately pruned so the stale version doesn't linger. None of the three ever touch the miq install itself — a newer miq is a command to run yourself (`npm install -g makeitaquote@latest`), never something this process does to its own package manager:
+
+```console
+$ miq outdated
+  ↑ makeitaquote 10.0.0 → 10.1.0 — npm install -g makeitaquote@latest
+  ↑ Twemoji 17.0.3 → 17.0.4 — miq install twemoji
+Fonts
+  ✓ M PLUS Rounded 1c — up to date
+$ miq update
+Twemoji
+  ✓ updated to 17.0.4
+```
+
+Re-running `install twemoji` after a new release only _adds_ files — it never deletes ones an update removed upstream — so `miq uninstall twemoji` first is how to force a clean re-download outside of `update`.
+
+### Diagnosing a setup
+
+`miq env` (alias `doctor`) prints where things resolve to, whether that location is actually writable, and whether the hosts miq talks to (Google Fonts, the Twemoji CDN, the npm registry) are reachable from here — handy for confirming a CI cache or a sandboxed environment is set up the way you expect:
+
+```console
+$ miq env
+Storage
+  Project root           /home/me/my-bot
+  Fonts                  /home/me/my-bot/.makeitaquote/fonts (writable)
+  Twemoji                /home/me/my-bot/.makeitaquote/twemoji (writable)
+  MIQ_FONT_CACHE_DIR     (not set)
+  MIQ_TWEMOJI_CACHE_DIR  (not set)
+
+Network
+  fonts.googleapis.com     reachable
+  cdn.jsdelivr.net         reachable
+  data.jsdelivr.com        reachable
+  registry.npmjs.org       reachable
+```
+
+### Generating an image from the command line
+
+`miq generate` (alias `render`) covers the common case as flags. For anything the full `Theme` system offers beyond that, use the library directly (see [Themes](#themes)):
+
+| Flag | Does |
+| --- | --- |
+| `--text <string>` | The quoted text (required) |
+| `--avatar <string>` | A URL, or a local image file |
+| `--username`, `--display-name`, `--watermark <string>` | The same three fields `setUsername()`/`setDisplayName()`/`setWatermark()` set |
+| `--theme <name>` | `dark` (default), `light`, `color`, `portrait`, `portrait-light` or `custom` |
+| `--color` | Shortcut for `--theme color` |
+| `--scale <number>` | Resize the whole image, keeping its layout — up to 8 |
+| `--format <name>` | `png` (default), `jpeg`/`jpg`, `webp` or `avif` |
+| `--quality <number>` | 1–100, ignored for `png` |
+| `--out <path>` | Where to write the image; defaults to `quote.<format>` |
+| `--offline` | Never fetch a font — use only what's already installed |
 
 ```console
 $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png \
@@ -654,7 +721,7 @@ $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png
 ✓ quote.png (31 KB)
 ```
 
-The command is available as both `miq` and `makeitaquote` once the package is installed. Everything it stores is an ordinary file in an ordinary directory — deleting the directory uninstalls just as well.
+### Where things are stored
 
 Storage is project-local by default: the nearest ancestor directory of `cwd` with a `package.json` (falling back to `cwd` itself if none is found), not a location shared by every project on the machine — so one project's `uninstall` never reaches into another's cache, and two projects on different `makeitaquote` versions never fight over the same files:
 
@@ -663,11 +730,11 @@ Storage is project-local by default: the nearest ancestor directory of `cwd` wit
 | Fonts   | `<project root>/.makeitaquote/fonts`   | `MIQ_FONT_CACHE_DIR`    |
 | Twemoji | `<project root>/.makeitaquote/twemoji` | `MIQ_TWEMOJI_CACHE_DIR` |
 
-Add `.makeitaquote/` to `.gitignore`.
+Add `.makeitaquote/` to `.gitignore`. Everything under it is an ordinary file in an ordinary directory — deleting it uninstalls just as well as the CLI does.
 
 After installing, renders work with the network down. Fonts already on disk are registered without asking Google first, and a Twemoji image is read from the local store instead of the CDN. Nothing changes until then — an uninstalled machine keeps fetching on first use exactly as before.
 
-The same operations are available programmatically:
+The install/uninstall/list operations are available programmatically too:
 
 ```ts
 import { installFonts, installTwemoji, listInstalledFonts, twemojiInfo } from 'makeitaquote'

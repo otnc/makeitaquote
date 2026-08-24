@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TwemojiInfo, TwemojiInstallResult } from '../emoji/twemojiStore'
+import { FONT_CATALOGUE } from '../font/catalogue'
 import type { FontInstallResult, InstalledFont, PruneResult } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
 import type { FontUpdateStatus } from '../font/updates'
@@ -216,6 +217,24 @@ describe('install', () => {
     expect(d.installFonts).toHaveBeenCalledWith(['Dela Gothic One'])
   })
 
+  it('installs twemoji and every catalogued font for the all target', async () => {
+    const d = deps()
+
+    await run(['install', 'all'], d, io())
+
+    expect(d.installTwemoji).toHaveBeenCalledTimes(1)
+    expect(d.installFonts).toHaveBeenCalledWith([...FONT_CATALOGUE])
+  })
+
+  it('installs only twemoji for the emoji target', async () => {
+    const d = deps()
+
+    await run(['install', 'emoji'], d, io())
+
+    expect(d.installTwemoji).toHaveBeenCalledTimes(1)
+    expect(d.installFonts).not.toHaveBeenCalled()
+  })
+
   it('fails when a family cannot be installed', async () => {
     const d = deps()
     d.installFonts = vi.fn(
@@ -298,6 +317,48 @@ describe('uninstall', () => {
     expect(d.uninstallTwemoji).not.toHaveBeenCalled()
     expect(d.uninstallFonts).toHaveBeenCalledWith(['Dela Gothic One'])
   })
+
+  it('removes everything for the all target, same as no target', async () => {
+    const d = deps()
+
+    await run(['uninstall', 'all'], d, io())
+
+    expect(d.uninstallTwemoji).toHaveBeenCalledTimes(1)
+    expect(d.uninstallFonts).toHaveBeenCalledWith(undefined)
+  })
+
+  it('removes only twemoji for the emoji target', async () => {
+    const d = deps()
+
+    await run(['uninstall', 'emoji'], d, io())
+
+    expect(d.uninstallTwemoji).toHaveBeenCalledTimes(1)
+    expect(d.uninstallFonts).not.toHaveBeenCalled()
+  })
+
+  it('fails and reports when removing twemoji throws', async () => {
+    const d = deps()
+    d.uninstallTwemoji = vi.fn(async () => {
+      throw new Error('EPERM: file is in use')
+    })
+    const spy = io()
+
+    await expect(run(['uninstall', 'twemoji'], d, spy)).resolves.toBe(1)
+
+    expect(spy.lines.join('\n')).toContain('EPERM: file is in use')
+  })
+
+  it('fails and reports when removing fonts throws', async () => {
+    const d = deps()
+    d.uninstallFonts = vi.fn(async () => {
+      throw new Error('EPERM: file is in use')
+    })
+    const spy = io()
+
+    await expect(run(['uninstall', 'fonts'], d, spy)).resolves.toBe(1)
+
+    expect(spy.lines.join('\n')).toContain('EPERM: file is in use')
+  })
 })
 
 describe('ls', () => {
@@ -350,8 +411,8 @@ describe('aliases', () => {
     }
   })
 
-  it('accepts remove, rm and un for uninstall', async () => {
-    for (const command of ['remove', 'rm', 'un']) {
+  it('accepts remove, rm, r, un and unlink for uninstall', async () => {
+    for (const command of ['remove', 'rm', 'r', 'un', 'unlink']) {
       const d = deps()
       await run([command, 'twemoji'], d, io())
       expect(d.uninstallTwemoji).toHaveBeenCalledTimes(1)
