@@ -188,6 +188,17 @@
       "bytes": 185758,
       "ok": true,
       "error": null
+    },
+    {
+      "name": "Castoro Titling",
+      "file": "06-fonts/castoro-titling.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 185415,
+      "ok": true,
+      "error": null
     }
   ]
 }
