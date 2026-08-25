@@ -5,6 +5,7 @@ describe('isCatalogued', () => {
   it('matches a listed family exactly', () => {
     expect(isCatalogued('Noto Sans JP')).toBe(true)
     expect(isCatalogued('DotGothic16')).toBe(true)
+    expect(isCatalogued('Castoro Titling')).toBe(true)
   })
 
   it('is exact — spelling and case both count', () => {
@@ -19,7 +20,7 @@ describe('unavailableReason', () => {
   })
 
   it('ignores surrounding space and case', () => {
-    expect(unavailableReason('  CASTOR TITLING ')).toBeDefined()
+    expect(unavailableReason('  JIYU NO TSUBASA ')).toBeDefined()
   })
 
   it('is undefined for anything else', () => {

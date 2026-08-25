@@ -33,6 +33,7 @@ export const FONT_CATALOGUE = [
   'Poltawski Nowy',
   'Vina Sans',
   'Dancing Script',
+  'Castoro Titling',
 ] as const
 
 export type CataloguedFont = (typeof FONT_CATALOGUE)[number]
@@ -51,7 +52,6 @@ export function isCatalogued(family: string): boolean {
  */
 const KNOWN_UNAVAILABLE: Record<string, string> = {
   'jiyu no tsubasa': 'not distributed through Google Fonts; its licence is unclear',
-  'castor titling': 'not distributed through Google Fonts',
 }
 
 /**
