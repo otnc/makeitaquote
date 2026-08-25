@@ -1,7 +1,14 @@
 import { distance } from 'fastest-levenshtein'
 
 /**
- * Fonts this package knows how to fetch by name.
+ * Fonts this package knows how to fetch by name, one row each — the single
+ * source `FONT_CATALOGUE` and `FONT_ALIASES` below are both built from, so
+ * adding, removing or renaming a font (and its alias) is one edit here
+ * instead of two kept in sync by hand.
+ *
+ * `alias` matches the official Make it a Quote bot's own `font=` option
+ * names; `null` for a family with no short option there (the default, Noto
+ * Sans JP).
  *
  * Everything here is served by Google Fonts, which only distributes fonts
  * under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — so
@@ -13,30 +20,33 @@ import { distance } from 'fastest-levenshtein'
  * The list is a convenience, not a limit: any Google Fonts family works, and
  * `fonts.registerFromPath()` takes files from anywhere.
  */
-export const FONT_CATALOGUE = [
+const FONTS = [
   // Japanese
-  'Noto Sans JP',
-  'M PLUS Rounded 1c',
-  'Dela Gothic One',
-  'DotGothic16',
-  'Hachi Maru Pop',
-  'Rampart One',
-  'Reggae One',
-  'RocknRoll One',
-  'Zen Old Mincho',
-  'Yuji Syuku',
-  'Yusei Magic',
+  { family: 'Noto Sans JP', alias: null },
+  { family: 'M PLUS Rounded 1c', alias: 'mplus' },
+  { family: 'Dela Gothic One', alias: 'dela' },
+  { family: 'DotGothic16', alias: 'dot' },
+  { family: 'Hachi Maru Pop', alias: 'pop' },
+  { family: 'Rampart One', alias: 'rampart' },
+  { family: 'Reggae One', alias: 'reggae' },
+  { family: 'RocknRoll One', alias: 'rocknroll' },
+  { family: 'Zen Old Mincho', alias: 'serif' },
+  { family: 'Yuji Syuku', alias: 'yuji' },
+  { family: 'Yusei Magic', alias: 'yusei' },
   // Latin
-  'Inconsolata',
-  'Exo 2',
-  'Bruno Ace SC',
-  'Poltawski Nowy',
-  'Vina Sans',
-  'Dancing Script',
-  'Castoro Titling',
+  { family: 'Inconsolata', alias: 'inconsolata' },
+  { family: 'Exo 2', alias: 'exo2' },
+  { family: 'Bruno Ace SC', alias: 'bruno' },
+  { family: 'Poltawski Nowy', alias: 'poltawski' },
+  { family: 'Vina Sans', alias: 'vina' },
+  { family: 'Dancing Script', alias: 'script' },
+  { family: 'Castoro Titling', alias: 'castoro' },
 ] as const
 
-export type CataloguedFont = (typeof FONT_CATALOGUE)[number]
+export type CataloguedFont = (typeof FONTS)[number]['family']
+
+/** Families this package can fetch by name, in the order listed above. */
+export const FONT_CATALOGUE: readonly CataloguedFont[] = FONTS.map((entry) => entry.family)
 
 /**
  * CSS generic family keywords — resolved by the system, never by name.
@@ -67,31 +77,19 @@ export function isCatalogued(family: string): boolean {
  * Short, typing-friendly names for the catalogue, matching the option names
  * the official Make it a Quote bot uses for its own `font=` choices.
  *
- * A convenience for consumers exposing font choice through something like a
- * Discord slash command option, so they don't each have to hand-roll the same
- * mapping. Keys are lower-cased; look them up through `resolveFontAlias()`
- * rather than indexing this object directly if the input isn't already
- * normalized.
+ * Built from `FONTS` above, not hand-maintained separately — a convenience
+ * for consumers exposing font choice through something like a Discord slash
+ * command option, so they don't each have to hand-roll the same mapping. Keys
+ * are lower-cased; look them up through `resolveFontAlias()` rather than
+ * indexing this object directly if the input isn't already normalized.
  */
-export const FONT_ALIASES: Record<string, CataloguedFont> = {
-  mplus: 'M PLUS Rounded 1c',
-  dela: 'Dela Gothic One',
-  dot: 'DotGothic16',
-  pop: 'Hachi Maru Pop',
-  rampart: 'Rampart One',
-  reggae: 'Reggae One',
-  rocknroll: 'RocknRoll One',
-  serif: 'Zen Old Mincho',
-  yuji: 'Yuji Syuku',
-  yusei: 'Yusei Magic',
-  inconsolata: 'Inconsolata',
-  exo2: 'Exo 2',
-  bruno: 'Bruno Ace SC',
-  poltawski: 'Poltawski Nowy',
-  vina: 'Vina Sans',
-  script: 'Dancing Script',
-  castoro: 'Castoro Titling',
-}
+export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = (() => {
+  const aliases: Record<string, CataloguedFont> = {}
+  for (const entry of FONTS) {
+    if (entry.alias !== null) aliases[entry.alias] = entry.family
+  }
+  return aliases
+})()
 
 const CATALOGUE_BY_LOWERCASE = new Map<string, CataloguedFont>(
   FONT_CATALOGUE.map((family) => [family.toLowerCase(), family]),
