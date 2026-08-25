@@ -477,6 +477,16 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
 
+Short, typing-friendly names for the same list — matching the official Make it a Quote bot's own `font=` option names — are in `FONT_ALIASES`:
+
+```ts
+import { FONT_ALIASES } from 'makeitaquote'
+
+FONT_ALIASES.pop // 'Hachi Maru Pop'
+```
+
+Handy for exposing font choice through something like a Discord command option, without hand-rolling the same mapping yourself.
+
 ### Licensing
 
 **Fonts are only ever fetched from Google Fonts**, which distributes exclusively under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — all of which allow rendering text into images freely.

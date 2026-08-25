@@ -46,6 +46,36 @@ export function isCatalogued(family: string): boolean {
 }
 
 /**
+ * Short, typing-friendly names for the catalogue, matching the option names
+ * the official Make it a Quote bot uses for its own `font=` choices.
+ *
+ * A convenience for consumers exposing font choice through something like a
+ * Discord slash command option, so they don't each have to hand-roll the same
+ * mapping. Keys are lower-cased; look them up through `resolveFontAlias()`
+ * rather than indexing this object directly if the input isn't already
+ * normalized.
+ */
+export const FONT_ALIASES: Record<string, CataloguedFont> = {
+  mplus: 'M PLUS Rounded 1c',
+  dela: 'Dela Gothic One',
+  dot: 'DotGothic16',
+  pop: 'Hachi Maru Pop',
+  rampart: 'Rampart One',
+  reggae: 'Reggae One',
+  rocknroll: 'RocknRoll One',
+  serif: 'Zen Old Mincho',
+  yuji: 'Yuji Syuku',
+  yusei: 'Yusei Magic',
+  inconsolata: 'Inconsolata',
+  exo2: 'Exo 2',
+  bruno: 'Bruno Ace SC',
+  poltawski: 'Poltawski Nowy',
+  vina: 'Vina Sans',
+  script: 'Dancing Script',
+  castoro: 'Castoro Titling',
+}
+
+/**
  * Names people are likely to ask for that Google Fonts does not serve.
  *
  * Kept explicit so the error can say why, rather than just "400 Bad Request".

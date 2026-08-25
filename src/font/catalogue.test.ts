@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { isCatalogued, suggestionFor, unavailableReason } from './catalogue'
+import {
+  FONT_ALIASES,
+  FONT_CATALOGUE,
+  isCatalogued,
+  suggestionFor,
+  unavailableReason,
+} from './catalogue'
 
 describe('isCatalogued', () => {
   it('matches a listed family exactly', () => {
@@ -57,5 +63,19 @@ describe('suggestionFor', () => {
   it('is undefined for a name with nothing to compare', () => {
     expect(suggestionFor('')).toBeUndefined()
     expect(suggestionFor('   ')).toBeUndefined()
+  })
+})
+
+describe('FONT_ALIASES', () => {
+  it('maps every alias to a catalogued family', () => {
+    for (const family of Object.values(FONT_ALIASES)) {
+      expect(FONT_CATALOGUE).toContain(family)
+    }
+  })
+
+  it('matches the official bot option names', () => {
+    expect(FONT_ALIASES.pop).toBe('Hachi Maru Pop')
+    expect(FONT_ALIASES.dot).toBe('DotGothic16')
+    expect(FONT_ALIASES.castoro).toBe('Castoro Titling')
   })
 })
