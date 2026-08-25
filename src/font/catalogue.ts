@@ -75,6 +75,27 @@ export const FONT_ALIASES: Record<string, CataloguedFont> = {
   castoro: 'Castoro Titling',
 }
 
+const CATALOGUE_BY_LOWERCASE = new Map<string, CataloguedFont>(
+  FONT_CATALOGUE.map((family) => [family.toLowerCase(), family]),
+)
+
+/**
+ * Turns whatever a caller typed — an alias, or a catalogued family name in
+ * any case — into the exact spelling `fonts.use()` expects.
+ *
+ * Meant for a case like a Discord `font=` option: the input could be a short
+ * alias, the real name typed in any case, or neither. Aliases are checked
+ * first, though the two tables don't actually collide today.
+ *
+ * Returns `undefined` for anything neither table recognizes — pair with
+ * `suggestionFor()` if the caller wants a "did you mean" hint for that case.
+ */
+export function resolveFontAlias(input: string): string | undefined {
+  const key = input.trim().toLowerCase()
+  if (key.length === 0) return undefined
+  return FONT_ALIASES[key] ?? CATALOGUE_BY_LOWERCASE.get(key)
+}
+
 /**
  * Names people are likely to ask for that Google Fonts does not serve.
  *

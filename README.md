@@ -485,7 +485,18 @@ import { FONT_ALIASES } from 'makeitaquote'
 FONT_ALIASES.pop // 'Hachi Maru Pop'
 ```
 
-Handy for exposing font choice through something like a Discord command option, without hand-rolling the same mapping yourself.
+Handy for exposing font choice through something like a Discord command option, without hand-rolling the same mapping yourself. To turn whatever a user actually typed — an alias, or the real name in any case — into the exact spelling `fonts.use()` expects, use `resolveFontAlias()`:
+
+```ts
+import { resolveFontAlias } from 'makeitaquote'
+
+resolveFontAlias('pop')          // 'Hachi Maru Pop' (alias)
+resolveFontAlias('POP')          // 'Hachi Maru Pop' (case-insensitive)
+resolveFontAlias('dotgothic16')  // 'DotGothic16' (exact family name works too, any case)
+resolveFontAlias('not-a-font')   // undefined
+```
+
+It only checks `FONT_ALIASES` and `FONT_CATALOGUE` — pair it with `suggestionFor()` if you want a "did you mean" hint when it comes back `undefined`.
 
 ### Licensing
 
