@@ -6,9 +6,10 @@ import { distance } from 'fastest-levenshtein'
  * adding, removing or renaming a font (and its alias) is one edit here
  * instead of two kept in sync by hand.
  *
- * `alias` matches the official Make it a Quote bot's own `font=` option
- * names; `null` for a family with no short option there (the default, Noto
- * Sans JP).
+ * `alias` matches the official Make it a Quote bot's own `font=` option names,
+ * except `sans` (Noto Sans JP), which the bot has no option for — added here
+ * anyway since it's the fallback default and worth naming just as tersely.
+ * `null` is for a family that should have no short option at all.
  *
  * Everything here is served by Google Fonts, which only distributes fonts
  * under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — so
@@ -22,7 +23,7 @@ import { distance } from 'fastest-levenshtein'
  */
 const FONTS = [
   // Japanese
-  { family: 'Noto Sans JP', alias: null },
+  { family: 'Noto Sans JP', alias: 'sans' },
   { family: 'M PLUS Rounded 1c', alias: 'mplus' },
   { family: 'Dela Gothic One', alias: 'dela' },
   { family: 'DotGothic16', alias: 'dot' },
@@ -74,8 +75,9 @@ export function isCatalogued(family: string): boolean {
 }
 
 /**
- * Short, typing-friendly names for the catalogue, matching the option names
- * the official Make it a Quote bot uses for its own `font=` choices.
+ * Short, typing-friendly names for the catalogue — mostly matching the option
+ * names the official Make it a Quote bot uses for its own `font=` choices
+ * (see `FONTS` above for the one addition, `sans`).
  *
  * Built from `FONTS` above, not hand-maintained separately — a convenience
  * for consumers exposing font choice through something like a Discord slash
