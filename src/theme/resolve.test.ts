@@ -130,10 +130,74 @@ describe('defineTheme', () => {
         defineTheme({ backgroundImage: { source: 'a.png', fit: 'cover', opacity: 1.5 } }),
       ).toThrow(ValidationError)
     })
+
+    it('rejects an unknown backgroundGradient type', () => {
+      expect(() =>
+        defineTheme({
+          backgroundGradient: {
+            type: 'conic' as never,
+            direction: 'diagonal',
+            stops: [
+              ['#000', 0],
+              ['#FFF', 1],
+            ],
+          },
+        }),
+      ).toThrow(ValidationError)
+    })
+
+    it('rejects an unknown backgroundGradient direction', () => {
+      expect(() =>
+        defineTheme({
+          backgroundGradient: {
+            type: 'linear',
+            direction: 'upward' as never,
+            stops: [
+              ['#000', 0],
+              ['#FFF', 1],
+            ],
+          },
+        }),
+      ).toThrow(ValidationError)
+    })
+
+    it('rejects a backgroundGradient with fewer than two stops', () => {
+      expect(() =>
+        defineTheme({
+          backgroundGradient: { type: 'linear', direction: 'horizontal', stops: [['#000', 0]] },
+        }),
+      ).toThrow(ValidationError)
+    })
   })
 
   it('leaves backgroundImage null by default', () => {
     expect(defineTheme().backgroundImage).toBeNull()
+  })
+
+  it('leaves backgroundGradient null by default', () => {
+    expect(defineTheme().backgroundGradient).toBeNull()
+  })
+
+  it('accepts a backgroundGradient', () => {
+    const theme = defineTheme({
+      backgroundGradient: {
+        type: 'linear',
+        direction: 'diagonal',
+        stops: [
+          ['#FF7E5F', 0],
+          ['#6A3093', 1],
+        ],
+      },
+    })
+
+    expect(theme.backgroundGradient).toEqual({
+      type: 'linear',
+      direction: 'diagonal',
+      stops: [
+        ['#FF7E5F', 0],
+        ['#6A3093', 1],
+      ],
+    })
   })
 
   it('accepts a full backgroundImage object', () => {

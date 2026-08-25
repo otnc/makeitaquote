@@ -178,6 +178,24 @@ export interface BackgroundImageTheme {
   opacity: number
 }
 
+/** Which way a `'linear'` background gradient runs. Ignored for `'radial'`. */
+export type BackgroundGradientDirection =
+  | 'horizontal'
+  | 'vertical'
+  | 'diagonal'
+  | 'diagonal-reverse'
+
+export interface BackgroundGradientTheme {
+  /** `'linear'` runs along `direction`; `'radial'` fades outward from the canvas centre. */
+  type: 'linear' | 'radial'
+  direction: BackgroundGradientDirection
+  /**
+   * Color at each stop, 0–1 along the gradient — two or more, in any order.
+   * A translucent color lets `background` show through underneath it.
+   */
+  stops: ReadonlyArray<readonly [color: ColorInput, offset: number]>
+}
+
 export interface Theme {
   layout: LayoutMode
   width: number
@@ -185,6 +203,11 @@ export interface Theme {
   background: ColorInput
   /** Drawn over `background` and behind everything else. `null` (default): none. */
   backgroundImage: BackgroundImageTheme | null
+  /**
+   * A generated gradient fill, drawn over `background` and behind
+   * `backgroundImage`. `null` (default): none.
+   */
+  backgroundGradient: BackgroundGradientTheme | null
   avatar: AvatarTheme
   gradient: GradientTheme
   text: TextTheme

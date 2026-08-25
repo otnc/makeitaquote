@@ -55,6 +55,7 @@ const dark: Theme = {
   ...LANDSCAPE,
   background: palettes.dark.background,
   backgroundImage: null,
+  backgroundGradient: null,
   avatar: {
     grayscale: true,
     position: 'left',

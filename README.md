@@ -416,7 +416,39 @@ Leave `background` alone and you get a PNG with a transparent background, ready 
 
 Drawn over `background` and behind everything else — `source` takes the same things `setAvatar()` does (a URL, a local path, a `Buffer`). `fit` is `'cover'` (crops to fill) or `'contain'` (fits whole, letterboxed in `background`). `null` (the default on every preset) means no image.
 
-The avatar-fade gradient is skipped automatically once a background image is set — it fades the avatar into a _flat_ background color, which a canvas gradient does by painting an opaque wash over most of the canvas, and that would hide the image. There's no way to have both at once.
+### Background gradient
+
+```ts
+.setTheme({
+  backgroundGradient: {
+    type: 'linear',
+    direction: 'diagonal', // or 'horizontal' | 'vertical' | 'diagonal-reverse'
+    stops: [
+      ['#FF7E5F', 0],
+      ['#6A3093', 1],
+    ],
+  },
+})
+```
+
+A generated gradient fill — for a two-tone (or more) background without pre-rendering an image yourself. Drawn over `background` and behind `backgroundImage`, so a translucent stop still shows `background` underneath, and an opaque `backgroundImage` still draws on top of it. `null` (the default) means none.
+
+`stops` is `[color, offset]` pairs, two or more, offsets 0–1 — any `ColorInput` works, including a translucent one. `type: 'radial'` fades outward from the canvas centre to its farthest corner instead of running along `direction`, which is then ignored:
+
+```ts
+.setTheme({
+  backgroundGradient: {
+    type: 'radial',
+    direction: 'horizontal', // ignored
+    stops: [
+      ['#1A1B26', 0],
+      ['#0F0F17', 1],
+    ],
+  },
+})
+```
+
+The avatar-fade gradient is skipped automatically once a background image or gradient is set — it fades the avatar into a _flat_ background color, which a canvas gradient does by painting an opaque wash over most of the canvas, and that would hide either one. There's no way to have both at once.
 
 ---
 
