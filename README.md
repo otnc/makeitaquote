@@ -498,6 +498,19 @@ resolveFontAlias('not-a-font')   // undefined
 
 It only checks `FONT_ALIASES` and `FONT_CATALOGUE` — pair it with `suggestionFor()` if you want a "did you mean" hint when it comes back `undefined`.
 
+You don't actually have to call `resolveFontAlias()` yourself, though — an alias works anywhere a font is named, resolved for you automatically:
+
+```ts
+.setTheme({ text: { font: 'pop' } })       // == 'Hachi Maru Pop'
+.setTheme({ text: { font: 'pop, dot' } })  // == 'Hachi Maru Pop, DotGothic16'
+await fonts.use('pop')                     // fetches Hachi Maru Pop
+```
+
+```
+miq install pop
+miq search mplus   # → M PLUS Rounded 1c (alias "mplus")
+```
+
 ### Licensing
 
 **Fonts are only ever fetched from Google Fonts**, which distributes exclusively under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — all of which allow rendering text into images freely.

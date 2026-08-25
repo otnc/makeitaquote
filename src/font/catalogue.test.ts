@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import {
   FONT_ALIASES,
   FONT_CATALOGUE,
+  GENERIC_FONT_FAMILIES,
   isCatalogued,
   resolveFontAlias,
+  resolveFontStack,
   suggestionFor,
   unavailableReason,
 } from './catalogue'
@@ -103,5 +105,38 @@ describe('resolveFontAlias', () => {
     expect(resolveFontAlias('not-a-font')).toBeUndefined()
     expect(resolveFontAlias('')).toBeUndefined()
     expect(resolveFontAlias('   ')).toBeUndefined()
+  })
+})
+
+describe('resolveFontStack', () => {
+  it('resolves an alias standing alone', () => {
+    expect(resolveFontStack('pop')).toBe('Hachi Maru Pop')
+  })
+
+  it('resolves each family in a stack independently', () => {
+    expect(resolveFontStack('pop, dot, sans-serif')).toBe('Hachi Maru Pop, DotGothic16, sans-serif')
+  })
+
+  it('leaves anything neither table recognizes untouched, just trimmed', () => {
+    expect(resolveFontStack('  Custom Font  , pop')).toBe('Custom Font, Hachi Maru Pop')
+  })
+
+  it('never resolves a generic keyword, even one that is also an alias key', () => {
+    expect(FONT_ALIASES.serif).toBe('Zen Old Mincho')
+    expect(resolveFontStack('Vina Sans, serif')).toBe('Vina Sans, serif')
+  })
+
+  it('strips quotes around a family name', () => {
+    expect(resolveFontStack(`"Vina Sans", 'pop'`)).toBe('Vina Sans, Hachi Maru Pop')
+  })
+})
+
+describe('GENERIC_FONT_FAMILIES', () => {
+  it('lists the CSS generic keywords', () => {
+    expect(GENERIC_FONT_FAMILIES.has('sans-serif')).toBe(true)
+    expect(GENERIC_FONT_FAMILIES.has('serif')).toBe(true)
+    expect(GENERIC_FONT_FAMILIES.has('monospace')).toBe(true)
+    expect(GENERIC_FONT_FAMILIES.has('cursive')).toBe(true)
+    expect(GENERIC_FONT_FAMILIES.has('fantasy')).toBe(true)
   })
 })

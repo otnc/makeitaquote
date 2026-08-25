@@ -56,7 +56,8 @@ export async function run(
           'Download assets so rendering works offline. With no target, installs Twemoji ' +
           'and the default fonts; "all" installs Twemoji and every catalogued font ' +
           '(`miq search`) instead. Other targets: "twemoji"/"emoji" for just Twemoji, ' +
-          '"fonts"/"font" for just the default families, or a specific family name.',
+          '"fonts"/"font" for just the default families, or a specific family name — a ' +
+          'FONT_ALIASES short name (`pop`) works too.',
         examples: [
           'miq install',
           'miq install all',
@@ -65,6 +66,7 @@ export async function run(
           'miq install fonts',
           'miq install fonts "Dela Gothic One"',
           'miq install "Dela Gothic One"',
+          'miq install pop',
         ],
       },
     },
@@ -82,7 +84,8 @@ export async function run(
         description:
           'Delete downloaded assets. "all" and no target both mean everything — unlike ' +
           'install, removing does not care which fonts are catalogued. Other targets: ' +
-          '"twemoji"/"emoji", "fonts"/"font", or a specific family name.',
+          '"twemoji"/"emoji", "fonts"/"font", or a specific family name (a FONT_ALIASES ' +
+          'short name works too).',
         examples: [
           'miq uninstall',
           'miq uninstall all',

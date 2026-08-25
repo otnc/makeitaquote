@@ -476,6 +476,16 @@ describe('search', () => {
     expect(parsed.query).toBe('gothic')
     expect(parsed.matches).toContain('Dela Gothic One')
   })
+
+  it('finds a family by its FONT_ALIASES short name, not just a substring', async () => {
+    const spy = io()
+
+    await run(['search', 'mplus'], deps(), spy)
+
+    const out = spy.lines.join('\n')
+    expect(out).toContain('M PLUS Rounded 1c')
+    expect(out).toContain('alias "mplus"')
+  })
 })
 
 describe('outdated', () => {

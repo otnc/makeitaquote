@@ -99,6 +99,18 @@ describe('installFonts', () => {
 
     expect(results).toEqual([{ family: 'Definitely Not A Font', ok: false }])
   })
+
+  it('resolves a FONT_ALIASES short name and reports the real family', async () => {
+    stubGoogleFonts('M PLUS Rounded 1c')
+    const { fetcher } = fontFetcher()
+
+    const results = await installFonts(['mplus'], { cacheDir: dir, fetcher })
+
+    expect(results).toEqual([{ family: 'M PLUS Rounded 1c', ok: true }])
+    expect(await readdir(dir)).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^M-PLUS-Rounded-1c-/)]),
+    )
+  })
 })
 
 describe('uninstallFonts', () => {
@@ -108,6 +120,17 @@ describe('uninstallFonts', () => {
     await writeFile(join(dir, NOTO_400), 'a')
 
     const removed = await uninstallFonts(['M PLUS Rounded 1c'], dir)
+
+    expect(removed).toBe(2)
+    expect(await readdir(dir)).toEqual([NOTO_400])
+  })
+
+  it('resolves a FONT_ALIASES short name to the same slug as the real name', async () => {
+    await writeFile(join(dir, M_PLUS_400), 'a')
+    await writeFile(join(dir, M_PLUS_700), 'a')
+    await writeFile(join(dir, NOTO_400), 'a')
+
+    const removed = await uninstallFonts(['mplus'], dir)
 
     expect(removed).toBe(2)
     expect(await readdir(dir)).toEqual([NOTO_400])
@@ -184,6 +207,17 @@ describe('pruneFonts', () => {
 
     expect(results).toEqual([{ family: 'M PLUS Rounded 1c', removed: 2, bytes: 2 }])
     expect((await readdir(dir)).sort()).toEqual([M_PLUS_400, M_PLUS_700, NOTO_400].sort())
+  })
+
+  it('resolves a FONT_ALIASES short name to the same slug as the real name', async () => {
+    await writeFile(join(dir, M_PLUS_400), 'aa')
+    await writeFile(join(dir, M_PLUS_400_OLD), 'a')
+    await writeFile(join(dir, NOTO_400), 'a')
+
+    const results = await pruneFonts(['mplus'], dir)
+
+    expect(results).toEqual([{ family: 'M PLUS Rounded 1c', removed: 1, bytes: 1 }])
+    expect((await readdir(dir)).sort()).toEqual([M_PLUS_400, NOTO_400].sort())
   })
 
   it('does nothing when every family has one version', async () => {

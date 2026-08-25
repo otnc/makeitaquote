@@ -1,3 +1,4 @@
+import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
 import type { Theme, ThemeName } from './types'
 
 /**
@@ -6,8 +7,11 @@ import type { Theme, ThemeName } from './types'
  * M PLUS Rounded 1c first, Noto Sans JP behind it for anything the rounded
  * face does not cover. Skia resolves a stack per glyph, so this is a genuine
  * fallback rather than an either/or.
+ *
+ * Built from `DEFAULT_FONT_FAMILIES` rather than retyping the same two names,
+ * so the two can't quietly drift apart.
  */
-const SANS = 'M PLUS Rounded 1c, Noto Sans JP, sans-serif'
+const SANS = [...DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY].join(', ')
 
 /**
  * The default palettes.

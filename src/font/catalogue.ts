@@ -38,6 +38,24 @@ export const FONT_CATALOGUE = [
 
 export type CataloguedFont = (typeof FONT_CATALOGUE)[number]
 
+/**
+ * CSS generic family keywords — resolved by the system, never by name.
+ *
+ * The canonical list `resolveFamily()` (registry.ts) and `candidateFamilies()`
+ * (render/pipeline.ts) both key off of, so a font stack's `sans-serif`
+ * fallback is recognized the same way everywhere. Also what `resolveFontStack()`
+ * below skips, so an alias never shadows one of these — `FONT_ALIASES.serif`
+ * (`Zen Old Mincho`) is a real risk here, since `serif` is also this generic
+ * keyword.
+ */
+export const GENERIC_FONT_FAMILIES = new Set([
+  'sans-serif',
+  'serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+])
+
 const CATALOGUE_SET = new Set<string>(FONT_CATALOGUE)
 
 /** Whether a family is one of the names listed above. */
@@ -94,6 +112,26 @@ export function resolveFontAlias(input: string): string | undefined {
   const key = input.trim().toLowerCase()
   if (key.length === 0) return undefined
   return FONT_ALIASES[key] ?? CATALOGUE_BY_LOWERCASE.get(key)
+}
+
+/**
+ * Resolves every alias in a CSS-style, comma-separated font stack to its real
+ * family name — so `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end
+ * up identical wherever a font is set (`theme.text.font`, `fonts.use()`, the
+ * CLI). A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even
+ * when it also happens to be an alias key (`serif`), and anything neither
+ * table recognizes — an arbitrary Google Fonts family, a font registered by
+ * hand — passes through as typed, just trimmed and unquoted.
+ */
+export function resolveFontStack(stack: string): string {
+  return stack
+    .split(',')
+    .map((part) => {
+      const family = part.trim().replace(/^["']|["']$/g, '')
+      if (family.length === 0 || GENERIC_FONT_FAMILIES.has(family)) return family
+      return resolveFontAlias(family) ?? family
+    })
+    .join(', ')
 }
 
 /**

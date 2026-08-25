@@ -1,6 +1,6 @@
 import { AssetFetchError } from '../core/errors'
 import { createClient } from '../http/client'
-import { suggestionFor, unavailableReason } from './catalogue'
+import { resolveFontAlias, suggestionFor, unavailableReason } from './catalogue'
 
 const CSS_ENDPOINT = 'https://fonts.googleapis.com/css2'
 
@@ -34,11 +34,16 @@ export interface ResolveOptions {
  *
  * The API answers with TTF for user agents it can't confirm support WOFF2,
  * which includes ours — and TTF is what the canvas can register.
+ *
+ * `family` may be a `FONT_ALIASES` short name — resolved to the real family
+ * before anything else, so the URL, the parsed faces, and any error message
+ * all agree on the same name.
  */
 export async function resolveGoogleFont(
-  family: string,
+  requested: string,
   options: ResolveOptions = {},
 ): Promise<FontFace[]> {
+  const family = resolveFontAlias(requested) ?? requested
   const weights = normalizeWeights(options.weights)
   const url = buildCssUrl(family, weights, options.italic ?? false)
 

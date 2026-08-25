@@ -1,6 +1,7 @@
 import { readdirSync, statSync } from 'node:fs'
 import { extname, join } from 'node:path'
 import { GlobalFonts } from '../render/canvasFactory'
+import { GENERIC_FONT_FAMILIES } from './catalogue'
 
 const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.ttc', '.woff', '.woff2'])
 
@@ -119,7 +120,7 @@ export function resolveFamily(request: string): string | null {
   for (const part of request.split(',')) {
     const family = part.trim().replace(/^["']|["']$/g, '')
     if (family.length === 0) continue
-    if (family === 'sans-serif' || family === 'serif' || family === 'monospace') return family
+    if (GENERIC_FONT_FAMILIES.has(family)) return family
     if (fonts.has(family)) return family
   }
   return null
