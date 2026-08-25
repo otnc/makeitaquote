@@ -3,6 +3,7 @@ import {
   FONT_ALIASES,
   FONT_CATALOGUE,
   isCatalogued,
+  resolveFontAlias,
   suggestionFor,
   unavailableReason,
 } from './catalogue'
@@ -77,5 +78,30 @@ describe('FONT_ALIASES', () => {
     expect(FONT_ALIASES.pop).toBe('Hachi Maru Pop')
     expect(FONT_ALIASES.dot).toBe('DotGothic16')
     expect(FONT_ALIASES.castoro).toBe('Castoro Titling')
+  })
+})
+
+describe('resolveFontAlias', () => {
+  it('resolves an alias', () => {
+    expect(resolveFontAlias('pop')).toBe('Hachi Maru Pop')
+  })
+
+  it('is case-insensitive for aliases', () => {
+    expect(resolveFontAlias('POP')).toBe('Hachi Maru Pop')
+  })
+
+  it('also accepts a catalogued family name, in any case', () => {
+    expect(resolveFontAlias('DotGothic16')).toBe('DotGothic16')
+    expect(resolveFontAlias('dotgothic16')).toBe('DotGothic16')
+  })
+
+  it('trims surrounding space', () => {
+    expect(resolveFontAlias('  pop  ')).toBe('Hachi Maru Pop')
+  })
+
+  it('is undefined for anything neither table recognizes', () => {
+    expect(resolveFontAlias('not-a-font')).toBeUndefined()
+    expect(resolveFontAlias('')).toBeUndefined()
+    expect(resolveFontAlias('   ')).toBeUndefined()
   })
 })

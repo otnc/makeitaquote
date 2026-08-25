@@ -48,7 +48,13 @@ export {
 } from './emoji/twemojiStore'
 export { ensureDefaultFonts, installFont, useFont } from './font/autoload'
 export type { CataloguedFont } from './font/catalogue'
-export { FONT_ALIASES, FONT_CATALOGUE, isCatalogued } from './font/catalogue'
+export {
+  FONT_ALIASES,
+  FONT_CATALOGUE,
+  isCatalogued,
+  resolveFontAlias,
+  suggestionFor,
+} from './font/catalogue'
 export { resolveCacheDir } from './font/diskCache'
 export type { FontFace } from './font/googleFonts'
 export { resolveGoogleFont } from './font/googleFonts'
