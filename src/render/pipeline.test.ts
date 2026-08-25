@@ -283,6 +283,110 @@ describe('render', () => {
   })
 })
 
+describe('backgroundGradient', () => {
+  // The dark preset's avatar covers the left half (x < 600), so every sample
+  // point below stays clear of it, the same way the plain background-color
+  // tests above do.
+
+  it('interpolates a linear gradient across its stops', async () => {
+    const miq = quote().setTheme({
+      backgroundGradient: {
+        type: 'linear',
+        direction: 'horizontal',
+        stops: [
+          ['#FF0000', 0],
+          ['#0000FF', 1],
+        ],
+      },
+    })
+
+    const [nearR, , nearB] = await pixelAt(miq, 650, 315)
+    const [farR, , farB] = await pixelAt(miq, 1190, 315)
+
+    expect(nearR).toBeGreaterThan(farR)
+    expect(farB).toBeGreaterThan(nearB)
+  })
+
+  it('runs a vertical gradient top to bottom', async () => {
+    const miq = quote().setTheme({
+      backgroundGradient: {
+        type: 'linear',
+        direction: 'vertical',
+        stops: [
+          ['#FF0000', 0],
+          ['#0000FF', 1],
+        ],
+      },
+    })
+
+    const [topR, , topB] = await pixelAt(miq, 1100, 5)
+    const [bottomR, , bottomB] = await pixelAt(miq, 1100, 625)
+
+    expect(topR).toBeGreaterThan(bottomR)
+    expect(bottomB).toBeGreaterThan(topB)
+  })
+
+  it('fades a radial gradient outward from the centre', async () => {
+    const miq = quote().setTheme({
+      backgroundGradient: {
+        type: 'radial',
+        direction: 'horizontal', // ignored for radial
+        stops: [
+          ['#FF0000', 0],
+          ['#0000FF', 1],
+        ],
+      },
+    })
+
+    const [nearR, , nearB] = await pixelAt(miq, 650, 315) // close to the centre
+    const [farR, , farB] = await pixelAt(miq, 1198, 2) // near a corner
+
+    expect(nearR).toBeGreaterThan(farR)
+    expect(farB).toBeGreaterThan(nearB)
+  })
+
+  it('lets the background color show through a translucent stop', async () => {
+    const miq = quote().setTheme({
+      background: '#FFFFFF',
+      backgroundGradient: {
+        type: 'linear',
+        direction: 'horizontal',
+        stops: [
+          ['rgba(255, 0, 0, 0.5)', 0],
+          ['rgba(255, 0, 0, 0.5)', 1],
+        ],
+      },
+    })
+
+    const [r, g, b] = await pixelAt(miq, 1100, 5)
+
+    // Translucent red over white: red stays full, green/blue land near half.
+    expect(r).toBe(255)
+    expect(g).toBeGreaterThan(100)
+    expect(g).toBeLessThan(155)
+    expect(b).toBeGreaterThan(100)
+    expect(b).toBeLessThan(155)
+  })
+
+  it('draws backgroundImage over backgroundGradient', async () => {
+    const miq = quote().setTheme({
+      backgroundGradient: {
+        type: 'linear',
+        direction: 'horizontal',
+        stops: [
+          ['#FF0000', 0],
+          ['#0000FF', 1],
+        ],
+      },
+      backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 1 },
+    })
+
+    const [r, g, b] = await pixelAt(miq, 1100, 5)
+
+    expect([r, g, b]).toEqual([255, 0, 0]) // the stubbed fetch always returns a red square
+  })
+})
+
 describe('portrait / stacked layout', () => {
   it('renders the portrait preset', async () => {
     const buffer = await quote().setTheme('portrait').setAvatar(redSquare()).toBuffer('png')

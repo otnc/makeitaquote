@@ -1,7 +1,14 @@
 import { ValidationError } from '../core/errors'
 import { resolveFontStack } from '../font/catalogue'
 import { clone, isThemeName, themes } from './presets'
-import type { Theme, ThemeInput, ThemeName } from './types'
+import type { BackgroundGradientDirection, Theme, ThemeInput, ThemeName } from './types'
+
+const BACKGROUND_GRADIENT_DIRECTIONS = new Set<BackgroundGradientDirection>([
+  'horizontal',
+  'vertical',
+  'diagonal',
+  'diagonal-reverse',
+])
 
 /**
  * Turns a partial theme into a complete one.
@@ -137,6 +144,28 @@ function validate(theme: Theme): void {
     if (!Number.isFinite(opacity) || opacity < 0 || opacity > 1) {
       throw new ValidationError('theme.backgroundImage.opacity must be between 0 and 1', {
         field: 'theme.backgroundImage.opacity',
+      })
+    }
+  }
+
+  if (theme.backgroundGradient) {
+    const { type, direction, stops } = theme.backgroundGradient
+    if (type !== 'linear' && type !== 'radial') {
+      throw new ValidationError(
+        `Unknown backgroundGradient type "${type}". Expected linear or radial.`,
+        { field: 'theme.backgroundGradient.type' },
+      )
+    }
+    if (!BACKGROUND_GRADIENT_DIRECTIONS.has(direction)) {
+      throw new ValidationError(
+        `Unknown backgroundGradient direction "${direction}". Expected horizontal, ` +
+          'vertical, diagonal or diagonal-reverse.',
+        { field: 'theme.backgroundGradient.direction' },
+      )
+    }
+    if (stops.length < 2) {
+      throw new ValidationError('theme.backgroundGradient.stops needs at least two stops', {
+        field: 'theme.backgroundGradient.stops',
       })
     }
   }
