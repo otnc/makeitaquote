@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { FontNotAvailableError } from '../core/errors'
 import type { AutoFontOptions } from '../core/types'
 import { createClient } from '../http/client'
+import { resolveFontAlias } from './catalogue'
 import { cachedFontPath, isCached, resolveCacheDir, writeCachedFont } from './diskCache'
 import { type FontFace, fileNameFor, resolveGoogleFont, slugFor } from './googleFonts'
 import { fonts } from './registry'
@@ -64,8 +65,14 @@ function isOnline(options: EnsureOptions): boolean {
  * every time, so the file is always the current release rather than one
  * pinned here — which is also why the disk is only trusted when the API
  * cannot be reached: online, freshness wins; offline, anything beats tofu.
+ *
+ * `family` may be a `FONT_ALIASES` short name (`'pop'`) instead of the real
+ * one — resolved once up front, so everything past this point (the ready/
+ * registered checks, the disk cache slug, the name it ends up registered
+ * under) agrees on the same real family.
  */
-export async function useFont(family: string, options: EnsureOptions = {}): Promise<boolean> {
+export async function useFont(requested: string, options: EnsureOptions = {}): Promise<boolean> {
+  const family = resolveFontAlias(requested) ?? requested
   if (ready.has(family) || fonts.has(family)) return true
 
   if (!isOnline(options)) {
@@ -120,7 +127,11 @@ export async function useFont(family: string, options: EnsureOptions = {}): Prom
  * Weights default to `[400, 700]` here rather than `useFont`'s `[400]`: an
  * install is for keeps, and a real bold face beats the synthetic stroke.
  */
-export async function installFont(family: string, options: EnsureOptions = {}): Promise<boolean> {
+export async function installFont(
+  requested: string,
+  options: EnsureOptions = {},
+): Promise<boolean> {
+  const family = resolveFontAlias(requested) ?? requested
   const weights = options.weights ?? [400, 700]
 
   if (!isOnline(options)) {

@@ -477,12 +477,13 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
 
-Short, typing-friendly names for the same list — matching the official Make it a Quote bot's own `font=` option names — are in `FONT_ALIASES`:
+Short, typing-friendly names for the same list — mostly matching the official Make it a Quote bot's own `font=` option names, plus `sans` for the default — are in `FONT_ALIASES`:
 
 ```ts
 import { FONT_ALIASES } from 'makeitaquote'
 
-FONT_ALIASES.pop // 'Hachi Maru Pop'
+FONT_ALIASES.pop  // 'Hachi Maru Pop'
+FONT_ALIASES.sans // 'Noto Sans JP'
 ```
 
 Handy for exposing font choice through something like a Discord command option, without hand-rolling the same mapping yourself. To turn whatever a user actually typed — an alias, or the real name in any case — into the exact spelling `fonts.use()` expects, use `resolveFontAlias()`:
@@ -497,6 +498,19 @@ resolveFontAlias('not-a-font')   // undefined
 ```
 
 It only checks `FONT_ALIASES` and `FONT_CATALOGUE` — pair it with `suggestionFor()` if you want a "did you mean" hint when it comes back `undefined`.
+
+You don't actually have to call `resolveFontAlias()` yourself, though — an alias works anywhere a font is named, resolved for you automatically:
+
+```ts
+.setTheme({ text: { font: 'pop' } })       // == 'Hachi Maru Pop'
+.setTheme({ text: { font: 'pop, dot' } })  // == 'Hachi Maru Pop, DotGothic16'
+await fonts.use('pop')                     // fetches Hachi Maru Pop
+```
+
+```
+miq install pop
+miq search mplus   # → M PLUS Rounded 1c (alias "mplus")
+```
 
 ### Licensing
 

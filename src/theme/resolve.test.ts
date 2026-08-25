@@ -147,6 +147,40 @@ describe('defineTheme', () => {
       opacity: 0.5,
     })
   })
+
+  describe('font aliases', () => {
+    it('resolves an alias in every font field', () => {
+      const theme = defineTheme({
+        text: { font: 'pop' },
+        displayName: { font: 'dot' },
+        username: { font: 'dela' },
+        watermark: { font: 'rampart' },
+      })
+
+      expect(theme.text.font).toBe('Hachi Maru Pop')
+      expect(theme.displayName.font).toBe('DotGothic16')
+      expect(theme.username.font).toBe('Dela Gothic One')
+      expect(theme.watermark.font).toBe('Rampart One')
+    })
+
+    it('resolves each family in a stack independently', () => {
+      const theme = defineTheme({ text: { font: 'pop, dot, sans-serif' } })
+
+      expect(theme.text.font).toBe('Hachi Maru Pop, DotGothic16, sans-serif')
+    })
+
+    it('leaves a font the caller registered themselves untouched', () => {
+      const theme = defineTheme({ text: { font: 'My Custom Font' } })
+
+      expect(theme.text.font).toBe('My Custom Font')
+    })
+
+    it('never turns the generic "serif" keyword into Zen Old Mincho', () => {
+      const theme = defineTheme({ text: { font: 'Vina Sans, serif' } })
+
+      expect(theme.text.font).toBe('Vina Sans, serif')
+    })
+  })
 })
 
 describe('toPixels', () => {

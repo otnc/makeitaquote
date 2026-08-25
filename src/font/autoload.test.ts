@@ -77,6 +77,31 @@ describe('useFont', () => {
     expect(fetcher.calls).toEqual(['https://fonts.gstatic.com/s/test/v9/hash-400.ttf'])
   })
 
+  it('resolves a FONT_ALIASES short name before asking Google Fonts', async () => {
+    const requestedUrls: string[] = []
+    vi.stubGlobal('fetch', async (input: string | URL | Request) => {
+      requestedUrls.push(input instanceof Request ? input.url : String(input))
+      return new Response(cssFor('Hachi Maru Pop'), {
+        status: 200,
+        headers: { 'content-type': 'text/css' },
+      })
+    })
+
+    await useFont('pop', { cacheDir, fetcher: countingFetcher() })
+
+    expect(requestedUrls[0]).toContain('Hachi+Maru+Pop')
+  })
+
+  it('treats the alias and the real name as the same font once resolved', async () => {
+    stubGoogleFonts(cssFor('Hachi Maru Pop'))
+    const fetcher = countingFetcher()
+
+    await useFont('pop', { cacheDir, fetcher })
+    await useFont('Hachi Maru Pop', { cacheDir, fetcher })
+
+    expect(fetcher.calls).toHaveLength(1)
+  })
+
   it('writes the font into the cache directory', async () => {
     const family = unusedFamily()
     stubGoogleFonts(cssFor(family))

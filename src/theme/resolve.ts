@@ -1,4 +1,5 @@
 import { ValidationError } from '../core/errors'
+import { resolveFontStack } from '../font/catalogue'
 import { clone, isThemeName, themes } from './presets'
 import type { Theme, ThemeInput, ThemeName } from './types'
 
@@ -35,8 +36,23 @@ export function defineTheme(input: ThemeName | ThemeInput = 'dark'): Theme {
 
   const theme = clone(themes[base])
   merge(theme as unknown as Record<string, unknown>, input as Record<string, unknown>, 'theme')
+  resolveFontAliases(theme)
   validate(theme)
   return theme
+}
+
+/**
+ * Resolves an alias (or a catalogued name typed in any case) in every font
+ * field, so `{ text: { font: 'pop' } }` renders exactly like `{ text: { font:
+ * 'Hachi Maru Pop' } }` — an alias works anywhere a theme sets a font, not
+ * just where `resolveFontAlias()` is called directly. A preset's own fonts
+ * are already real names, so running them through here too is a no-op.
+ */
+function resolveFontAliases(theme: Theme): void {
+  theme.text.font = resolveFontStack(theme.text.font)
+  theme.displayName.font = resolveFontStack(theme.displayName.font)
+  theme.username.font = resolveFontStack(theme.username.font)
+  theme.watermark.font = resolveFontStack(theme.watermark.font)
 }
 
 const SKIP = new Set(['extends'])

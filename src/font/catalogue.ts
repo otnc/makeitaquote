@@ -1,7 +1,15 @@
 import { distance } from 'fastest-levenshtein'
 
 /**
- * Fonts this package knows how to fetch by name.
+ * Fonts this package knows how to fetch by name, one row each — the single
+ * source `FONT_CATALOGUE` and `FONT_ALIASES` below are both built from, so
+ * adding, removing or renaming a font (and its alias) is one edit here
+ * instead of two kept in sync by hand.
+ *
+ * `alias` matches the official Make it a Quote bot's own `font=` option names,
+ * except `sans` (Noto Sans JP), which the bot has no option for — added here
+ * anyway since it's the fallback default and worth naming just as tersely.
+ * `null` is for a family that should have no short option at all.
  *
  * Everything here is served by Google Fonts, which only distributes fonts
  * under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — so
@@ -13,30 +21,51 @@ import { distance } from 'fastest-levenshtein'
  * The list is a convenience, not a limit: any Google Fonts family works, and
  * `fonts.registerFromPath()` takes files from anywhere.
  */
-export const FONT_CATALOGUE = [
+const FONTS = [
   // Japanese
-  'Noto Sans JP',
-  'M PLUS Rounded 1c',
-  'Dela Gothic One',
-  'DotGothic16',
-  'Hachi Maru Pop',
-  'Rampart One',
-  'Reggae One',
-  'RocknRoll One',
-  'Zen Old Mincho',
-  'Yuji Syuku',
-  'Yusei Magic',
+  { family: 'Noto Sans JP', alias: 'sans' },
+  { family: 'M PLUS Rounded 1c', alias: 'mplus' },
+  { family: 'Dela Gothic One', alias: 'dela' },
+  { family: 'DotGothic16', alias: 'dot' },
+  { family: 'Hachi Maru Pop', alias: 'pop' },
+  { family: 'Rampart One', alias: 'rampart' },
+  { family: 'Reggae One', alias: 'reggae' },
+  { family: 'RocknRoll One', alias: 'rocknroll' },
+  { family: 'Zen Old Mincho', alias: 'serif' },
+  { family: 'Yuji Syuku', alias: 'yuji' },
+  { family: 'Yusei Magic', alias: 'yusei' },
   // Latin
-  'Inconsolata',
-  'Exo 2',
-  'Bruno Ace SC',
-  'Poltawski Nowy',
-  'Vina Sans',
-  'Dancing Script',
-  'Castoro Titling',
+  { family: 'Inconsolata', alias: 'inconsolata' },
+  { family: 'Exo 2', alias: 'exo2' },
+  { family: 'Bruno Ace SC', alias: 'bruno' },
+  { family: 'Poltawski Nowy', alias: 'poltawski' },
+  { family: 'Vina Sans', alias: 'vina' },
+  { family: 'Dancing Script', alias: 'script' },
+  { family: 'Castoro Titling', alias: 'castoro' },
 ] as const
 
-export type CataloguedFont = (typeof FONT_CATALOGUE)[number]
+export type CataloguedFont = (typeof FONTS)[number]['family']
+
+/** Families this package can fetch by name, in the order listed above. */
+export const FONT_CATALOGUE: readonly CataloguedFont[] = FONTS.map((entry) => entry.family)
+
+/**
+ * CSS generic family keywords — resolved by the system, never by name.
+ *
+ * The canonical list `resolveFamily()` (registry.ts) and `candidateFamilies()`
+ * (render/pipeline.ts) both key off of, so a font stack's `sans-serif`
+ * fallback is recognized the same way everywhere. Also what `resolveFontStack()`
+ * below skips, so an alias never shadows one of these — `FONT_ALIASES.serif`
+ * (`Zen Old Mincho`) is a real risk here, since `serif` is also this generic
+ * keyword.
+ */
+export const GENERIC_FONT_FAMILIES = new Set([
+  'sans-serif',
+  'serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+])
 
 const CATALOGUE_SET = new Set<string>(FONT_CATALOGUE)
 
@@ -46,34 +75,23 @@ export function isCatalogued(family: string): boolean {
 }
 
 /**
- * Short, typing-friendly names for the catalogue, matching the option names
- * the official Make it a Quote bot uses for its own `font=` choices.
+ * Short, typing-friendly names for the catalogue — mostly matching the option
+ * names the official Make it a Quote bot uses for its own `font=` choices
+ * (see `FONTS` above for the one addition, `sans`).
  *
- * A convenience for consumers exposing font choice through something like a
- * Discord slash command option, so they don't each have to hand-roll the same
- * mapping. Keys are lower-cased; look them up through `resolveFontAlias()`
- * rather than indexing this object directly if the input isn't already
- * normalized.
+ * Built from `FONTS` above, not hand-maintained separately — a convenience
+ * for consumers exposing font choice through something like a Discord slash
+ * command option, so they don't each have to hand-roll the same mapping. Keys
+ * are lower-cased; look them up through `resolveFontAlias()` rather than
+ * indexing this object directly if the input isn't already normalized.
  */
-export const FONT_ALIASES: Record<string, CataloguedFont> = {
-  mplus: 'M PLUS Rounded 1c',
-  dela: 'Dela Gothic One',
-  dot: 'DotGothic16',
-  pop: 'Hachi Maru Pop',
-  rampart: 'Rampart One',
-  reggae: 'Reggae One',
-  rocknroll: 'RocknRoll One',
-  serif: 'Zen Old Mincho',
-  yuji: 'Yuji Syuku',
-  yusei: 'Yusei Magic',
-  inconsolata: 'Inconsolata',
-  exo2: 'Exo 2',
-  bruno: 'Bruno Ace SC',
-  poltawski: 'Poltawski Nowy',
-  vina: 'Vina Sans',
-  script: 'Dancing Script',
-  castoro: 'Castoro Titling',
-}
+export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = (() => {
+  const aliases: Record<string, CataloguedFont> = {}
+  for (const entry of FONTS) {
+    if (entry.alias !== null) aliases[entry.alias] = entry.family
+  }
+  return aliases
+})()
 
 const CATALOGUE_BY_LOWERCASE = new Map<string, CataloguedFont>(
   FONT_CATALOGUE.map((family) => [family.toLowerCase(), family]),
@@ -94,6 +112,26 @@ export function resolveFontAlias(input: string): string | undefined {
   const key = input.trim().toLowerCase()
   if (key.length === 0) return undefined
   return FONT_ALIASES[key] ?? CATALOGUE_BY_LOWERCASE.get(key)
+}
+
+/**
+ * Resolves every alias in a CSS-style, comma-separated font stack to its real
+ * family name — so `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end
+ * up identical wherever a font is set (`theme.text.font`, `fonts.use()`, the
+ * CLI). A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even
+ * when it also happens to be an alias key (`serif`), and anything neither
+ * table recognizes — an arbitrary Google Fonts family, a font registered by
+ * hand — passes through as typed, just trimmed and unquoted.
+ */
+export function resolveFontStack(stack: string): string {
+  return stack
+    .split(',')
+    .map((part) => {
+      const family = part.trim().replace(/^["']|["']$/g, '')
+      if (family.length === 0 || GENERIC_FONT_FAMILIES.has(family)) return family
+      return resolveFontAlias(family) ?? family
+    })
+    .join(', ')
 }
 
 /**

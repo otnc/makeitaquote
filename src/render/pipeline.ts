@@ -2,6 +2,7 @@ import { assertRenderable, effectiveDisplayName } from '../core/quote'
 import type { MiQOptions, QuoteData, Segment } from '../core/types'
 import { type EmojiImages, prefetchEmoji } from '../emoji/loader'
 import { ensureDefaultFonts, reportMissingFonts, useFont } from '../font/autoload'
+import { GENERIC_FONT_FAMILIES } from '../font/catalogue'
 import { fonts, resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
 import { alignedX, type DrawLineOptions, drawLine, drawnLineWidth } from '../text/draw'
@@ -137,10 +138,8 @@ function candidateFamilies(request: string): string[] {
   return request
     .split(',')
     .map((part) => part.trim().replace(/^["']|["']$/g, ''))
-    .filter((family) => family.length > 0 && !GENERIC_FAMILIES.has(family))
+    .filter((family) => family.length > 0 && !GENERIC_FONT_FAMILIES.has(family))
 }
-
-const GENERIC_FAMILIES = new Set(['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'])
 
 /** A color that may inherit from another when left null. */
 function inkFor(color: unknown, inherited: unknown, field: string) {

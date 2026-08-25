@@ -18,6 +18,7 @@ export const fonts = {
    *
    * ```ts
    * await fonts.use('Dela Gothic One')
+   * await fonts.use('pop')                                  // FONT_ALIASES short name too
    * await fonts.use('Noto Sans JP', { weights: [400, 700] }) // real bold
    * ```
    *

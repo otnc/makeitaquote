@@ -7,7 +7,7 @@ import {
   twemojiInfo,
   uninstallTwemoji,
 } from '../emoji/twemojiStore'
-import { FONT_CATALOGUE, suggestionFor } from '../font/catalogue'
+import { FONT_CATALOGUE, resolveFontAlias, suggestionFor } from '../font/catalogue'
 import { resolveCacheDir } from '../font/diskCache'
 import {
   type FontInstallResult,
@@ -224,9 +224,17 @@ export function searchCommand(
   options: OutputOptions = {},
 ): number {
   const trimmed = query?.trim()
-  const matches = trimmed
+  // A query might be an alias (`pop`) rather than a substring of the real
+  // name — checked separately, since e.g. `mplus` isn't a substring of
+  // "M PLUS Rounded 1c".
+  const aliasHit = trimmed ? resolveFontAlias(trimmed) : undefined
+  const substringMatches: string[] = trimmed
     ? FONT_CATALOGUE.filter((family) => family.toLowerCase().includes(trimmed.toLowerCase()))
-    : FONT_CATALOGUE
+    : [...FONT_CATALOGUE]
+  const matches =
+    aliasHit && !substringMatches.some((family) => family === aliasHit)
+      ? [aliasHit, ...substringMatches]
+      : substringMatches
 
   if (options.json) {
     const suggestion = matches.length === 0 && trimmed ? (suggestionFor(trimmed) ?? null) : null
@@ -236,7 +244,9 @@ export function searchCommand(
 
   if (matches.length > 0) {
     io.line(trimmed ? `Fonts miq knows by name matching "${trimmed}":` : 'Fonts miq knows by name:')
-    for (const family of matches) io.line(`  ${family}`)
+    for (const family of matches) {
+      io.line(family === aliasHit ? `  ${family}  (alias "${trimmed}")` : `  ${family}`)
+    }
   } else {
     io.line(`No catalogued font matches "${trimmed}".`)
     const suggestion = trimmed ? suggestionFor(trimmed) : undefined
