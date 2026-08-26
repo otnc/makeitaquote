@@ -119,11 +119,9 @@ import { stripDiscordMarkdown } from 'makeitaquote'
 stripDiscordMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, italic, strike, code'
 ```
 
-It handles what Discord message content actually renders — bold, italic, underline, strikethrough, spoilers, code (inline and fenced), block quotes (`>` at the start of a line, same as Discord), headers, subtext (`-# `) and list markers (`-`, `*`, `1.`) — and honours a backslash escape. A code span keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks (a backslash escape is the one exception — `` `\*x\*` `` still resolves to `*x*`, since Discord's own client is the only thing that treats a code span's contents as fully inert).
+It handles what Discord message content actually renders — bold, italic, underline, strikethrough, spoilers, code (inline and fenced), block quotes (`>` at the start of a line, same as Discord), headers, subtext (`-# `), list markers (`-`, `*`, `1.`) and masked links (`[text](url)` reduces to `text`) — and honours a backslash escape. A code span keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks (a backslash escape is the one exception — `` `\*x\*` `` still resolves to `*x*`, since Discord's own client is the only thing that treats a code span's contents as fully inert).
 
-`[text](url)`-style masked links are left alone: they only render as clickable links in embeds, webhooks and messages a bot sent, never in a message a person typed themselves — which is the case this function exists for — so stripping the brackets there would show something the reader's screen never did.
-
-This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's own dialect rather than CommonMark. A generic Markdown stripper gets real things wrong here, like reading `__x__` as bold instead of underline, or deleting the URL out of a `[text](url)` Discord never turned into a link in the first place.
+This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's own dialect rather than CommonMark. A generic Markdown stripper gets real things wrong here, like reading `__x__` as bold instead of underline.
 
 ### Tokens
 

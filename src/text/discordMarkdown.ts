@@ -11,14 +11,9 @@ import { strip } from 'discomd'
  *
  * Built on `discomd`, which covers the syntax Discord's own Markdown 101
  * article documents: bold, italic, underline, strikethrough, spoilers,
- * inline code, code blocks, block quotes, headers, subtext and list markers.
- *
- * `[text](url)`-style masked links are the one thing left disabled: they
- * only render as clickable links in embeds, webhooks and messages a bot
- * sent — not in a message a person typed themselves, which is what this
- * function exists to render. Stripping the brackets there would show
- * something the reader's screen never did.
+ * inline code, code blocks, block quotes, headers, subtext, list markers
+ * and masked links — `[text](url)` reduces to `text`, the URL dropped.
  */
 export function stripDiscordMarkdown(text: string): string {
-  return strip(text, { disable: ['link'] })
+  return strip(text)
 }

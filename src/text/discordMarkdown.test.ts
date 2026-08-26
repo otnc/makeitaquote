@@ -150,8 +150,12 @@ describe('stripDiscordMarkdown', () => {
     expect(stripDiscordMarkdown('snake_case_var')).toBe('snakecasevar')
   })
 
-  it('leaves markdown-style links alone — Discord does not render them as links', () => {
-    expect(stripDiscordMarkdown('[text](https://example.com)')).toBe('[text](https://example.com)')
+  it('strips a masked link down to its label', () => {
+    expect(stripDiscordMarkdown('[text](https://example.com)')).toBe('text')
+  })
+
+  it('strips markdown inside a masked link label', () => {
+    expect(stripDiscordMarkdown('[**bold** label](https://example.com)')).toBe('bold label')
   })
 
   it('strips emphasis inline, keeping the surrounding text', () => {
