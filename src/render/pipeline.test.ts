@@ -11,9 +11,18 @@ const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
 
 /** A solid-red 8x8 PNG, used as an avatar without touching the network. */
 function redSquare(): Buffer {
+  return solidSquare('#FF0000')
+}
+
+/** A solid-green 8x8 PNG — a color that appears in neither a red/blue gradient nor the red stub image. */
+function greenSquare(): Buffer {
+  return solidSquare('#00FF00')
+}
+
+function solidSquare(color: string): Buffer {
   const canvas = createCanvas(8, 8)
   const ctx = canvas.getContext('2d')
-  ctx.fillStyle = '#FF0000'
+  ctx.fillStyle = color
   ctx.fillRect(0, 0, 8, 8)
   return canvas.toBuffer('image/png')
 }
@@ -384,6 +393,80 @@ describe('backgroundGradient', () => {
     const [r, g, b] = await pixelAt(miq, 1100, 5)
 
     expect([r, g, b]).toEqual([255, 0, 0]) // the stubbed fetch always returns a red square
+  })
+})
+
+describe('avatar fade over a generated background', () => {
+  // The dark preset's avatar box is x:0-600, and its fade line runs x:264-600
+  // — so a point near its visible centre (100) still shows the avatar
+  // untouched, while a point right at its far edge (598) is almost fully
+  // faded, and should show whatever is behind it rather than a flat wash.
+
+  it('fades into a backgroundGradient, not a flat wash of the flat background color', async () => {
+    const miq = quote()
+      .setAvatar(greenSquare())
+      .setTheme({
+        avatar: { grayscale: false }, // otherwise the dark preset desaturates the avatar
+        backgroundGradient: {
+          type: 'linear',
+          direction: 'horizontal',
+          stops: [
+            ['#FF0000', 0],
+            ['#0000FF', 1],
+          ],
+        },
+      })
+
+    const [, startG] = await pixelAt(miq, 100, 315)
+    expect(startG).toBeGreaterThan(200)
+
+    const [endR, endG, endB] = await pixelAt(miq, 598, 315)
+    expect(endG).toBeLessThan(50)
+    expect(endR).toBeGreaterThan(50)
+    expect(endB).toBeGreaterThan(50)
+  })
+
+  it('fades into a backgroundImage, not a flat wash of the flat background color', async () => {
+    const miq = quote()
+      .setAvatar(greenSquare())
+      .setTheme({
+        backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 1 },
+      })
+
+    const [endR, endG, endB] = await pixelAt(miq, 598, 315)
+
+    // The stubbed fetch always returns a solid-red image.
+    expect(endR).toBeGreaterThan(200)
+    expect(endG).toBeLessThan(50)
+    expect(endB).toBeLessThan(50)
+  })
+
+  it('fades a circular avatar the same way, without square corner artifacts', async () => {
+    const miq = quote()
+      .setAvatar(greenSquare())
+      .setTheme({
+        avatar: { shape: 'circle' },
+        backgroundGradient: {
+          type: 'linear',
+          direction: 'horizontal',
+          stops: [
+            ['#FF0000', 0],
+            ['#0000FF', 1],
+          ],
+        },
+      })
+
+    // Box corner: outside the circle even before any fade, so it should
+    // already be the gradient's own color at that position, not the avatar.
+    const [cornerR, cornerG, cornerB] = await pixelAt(miq, 10, 10)
+    expect(cornerG).toBeLessThan(50)
+    expect(cornerR).toBeGreaterThan(200)
+    expect(cornerB).toBeLessThan(50)
+
+    const [endR, endG, endB] = await pixelAt(miq, 598, 315)
+    expect(endG).toBeLessThan(50)
+    expect(endR).toBeGreaterThan(50)
+    expect(endB).toBeGreaterThan(50)
   })
 })
 

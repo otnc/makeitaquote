@@ -12,8 +12,8 @@ import { resolveEmojiSegments, segmentText } from '../text/segment'
 import { isTransparent, parseColor, toCSS } from '../theme/color'
 import { toPixels } from '../theme/resolve'
 import type { FontWeight, Theme } from '../theme/types'
-import { avatarBox, drawAvatar, loadAvatar } from './avatar'
-import { drawBackground, drawGradient, loadBackgroundImage } from './background'
+import { avatarBox, loadAvatar } from './avatar'
+import { drawAvatarWithFade, drawBackground, loadBackgroundImage } from './background'
 import { type Canvas, createCanvas, type SKRSContext2D } from './canvasFactory'
 import { coveringStack, needsGlyphFallback } from './glyphs'
 import { computeLayout, fontString, type Layout, sizeToAvatar, watermarkCorner } from './layout'
@@ -67,13 +67,17 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
   drawBackground(ctx, theme, backgroundImage)
 
   const box = avatarBox(layout)
-  drawAvatar(ctx, avatar, {
-    theme: theme.avatar,
-    box,
-    initial: effectiveDisplayName(data),
-    fallbackFont: familyFor(theme.text.font),
-  })
-  drawGradient(ctx, theme)
+  drawAvatarWithFade(
+    ctx,
+    avatar,
+    {
+      theme: theme.avatar,
+      box,
+      initial: effectiveDisplayName(data),
+      fallbackFont: familyFor(theme.text.font),
+    },
+    theme,
+  )
 
   const quoteBottom = drawQuote(ctx, resolved, images, theme, layout, options)
   const afterDivider = drawDivider(ctx, theme, layout, quoteBottom)

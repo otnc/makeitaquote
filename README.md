@@ -448,7 +448,7 @@ A generated gradient fill — for a two-tone (or more) background without pre-re
 })
 ```
 
-The avatar-fade gradient is skipped automatically once a background image or gradient is set — it fades the avatar into a _flat_ background color, which a canvas gradient does by painting an opaque wash over most of the canvas, and that would hide either one. There's no way to have both at once.
+The avatar-fade gradient (`theme.gradient`) composites correctly with either one — it fades the avatar's own edge into whatever is actually behind it, gradient or image included, rather than only ever working over a flat `background`.
 
 ---
 

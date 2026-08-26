@@ -1,7 +1,14 @@
-import { parseColor, toCSS, withAlpha } from '../theme/color'
+import { parseColor, toCSS } from '../theme/color'
 import type { BackgroundGradientDirection, Theme } from '../theme/types'
-import { containRect, coverRect, type LoadAvatarOptions, loadAvatar } from './avatar'
-import type { Image, SKRSContext2D } from './canvasFactory'
+import {
+  containRect,
+  coverRect,
+  type DrawAvatarOptions,
+  drawAvatar,
+  type LoadAvatarOptions,
+  loadAvatar,
+} from './avatar'
+import { createCanvas, type Image, type SKRSContext2D } from './canvasFactory'
 import { gradientLine } from './layout'
 
 /**
@@ -106,36 +113,68 @@ function backgroundGradientLine(
 }
 
 /**
- * Fades the avatar into the background.
+ * Draws the avatar, fading it into whatever is behind it — `background`,
+ * `backgroundGradient` or `backgroundImage` — when `theme.gradient` is
+ * enabled.
  *
  * Runs sideways for the `side` layout and downwards for `stacked`; the
  * horizontal one is mirrored when the avatar is on the right.
+ *
+ * The avatar is drawn onto its own offscreen canvas first, and the fade
+ * erases its alpha there (`destination-out`) before that layer is composited
+ * onto the main one. A canvas has no layers of its own — erasing the avatar
+ * directly on the main canvas wouldn't "reveal" whatever is behind it, since
+ * the two are already flattened together the moment it's drawn; it would
+ * just punch a transparent hole where they'd been merged. Fading on a canvas
+ * that holds nothing but the avatar means the erase instead reveals exactly
+ * what should show through once it's composited back — whatever
+ * `drawBackground()` already drew there, flat, gradient or image alike, not
+ * a repainted guess at it.
  */
-export function drawGradient(ctx: SKRSContext2D, theme: Theme): void {
-  if (!theme.gradient.enabled) return
+export function drawAvatarWithFade(
+  ctx: SKRSContext2D,
+  image: Image | null,
+  options: DrawAvatarOptions,
+  theme: Theme,
+): void {
+  const { box } = options
 
-  // Past its line, a canvas gradient extends its last stop indefinitely — so
-  // with a flat background this fills the far side of the canvas with an
-  // opaque wash of theme.background, which is the point. With a background
-  // image, or a generated backgroundGradient, that wash would hide most of
-  // it, and "fade the avatar into a flat color" is not a sensible effect over
-  // either in the first place.
-  if (theme.backgroundImage || theme.backgroundGradient) return
-
-  const background = parseColor(theme.background, 'theme.background')
   // Fading into a transparent background would only make the avatar vanish,
   // which is not what a gradient is for.
-  if (background.a <= 0) return
-
-  const [x0, y0, x1, y1] = gradientLine(theme)
-  const fill = ctx.createLinearGradient(x0, y0, x1, y1)
-
-  for (const [offset, alpha] of theme.gradient.stops) {
-    fill.addColorStop(clamp01(offset), withAlpha(background, clamp01(alpha)))
+  const background = parseColor(theme.background, 'theme.background')
+  if (!theme.gradient.enabled || background.a <= 0) {
+    drawAvatar(ctx, image, options)
+    return
   }
 
-  ctx.fillStyle = fill
-  ctx.fillRect(0, 0, theme.width, theme.height)
+  // Sized to the box, not the whole canvas — its bounds already confine the
+  // fade to the avatar's own area, so nothing past its edge is ever touched.
+  const width = Math.ceil(box.width)
+  const height = Math.ceil(box.height)
+  const layer = createCanvas(width, height)
+  const layerCtx = layer.getContext('2d')
+
+  drawAvatar(layerCtx, image, {
+    ...options,
+    box: { x: 0, y: 0, width: box.width, height: box.height },
+  })
+
+  const [x0, y0, x1, y1] = gradientLine(theme)
+  const fill = layerCtx.createLinearGradient(x0 - box.x, y0 - box.y, x1 - box.x, y1 - box.y)
+
+  // Only the alpha channel matters under 'destination-out' below — the color
+  // itself is never seen.
+  for (const [offset, alpha] of theme.gradient.stops) {
+    fill.addColorStop(clamp01(offset), `rgba(0, 0, 0, ${clamp01(alpha)})`)
+  }
+
+  layerCtx.save()
+  layerCtx.globalCompositeOperation = 'destination-out'
+  layerCtx.fillStyle = fill
+  layerCtx.fillRect(0, 0, width, height)
+  layerCtx.restore()
+
+  ctx.drawImage(layer, box.x, box.y)
 }
 
 function clamp01(value: number): number {
