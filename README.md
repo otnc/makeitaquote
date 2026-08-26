@@ -12,6 +12,11 @@ Renders locally — no API, no browser, no headless Chrome. Japanese line breaki
 | --- | --- |
 | ![Sample quote image, default dark theme](assets/readme/mono.png) | ![Sample quote image, color theme](assets/readme/color.png) |
 
+> [!Note]
+>   
+> The self-hosted Make it a Quote Bot is now open source:  
+> https://github.com/otnc/OpenMiQ
+
 ```sh
 npm install makeitaquote
 ```
