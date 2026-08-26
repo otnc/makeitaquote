@@ -689,6 +689,48 @@ describe('MiQ', () => {
     expect(miq.getTheme().width).toBe(1000)
   })
 
+  it('adopts a different preset size when nothing was set explicitly first', () => {
+    // Regression: `extends: 'portrait'` alone used to keep the previous
+    // theme's 1200x630 instead of picking up portrait's own 630x790, because
+    // "the object didn't set width/height" was read as "keep whatever the
+    // canvas currently is" rather than "use this preset's own size".
+    const miq = new MiQ().setTheme({ extends: 'portrait', avatar: { grayscale: true } })
+
+    expect(miq.getTheme().width).toBe(630)
+    expect(miq.getTheme().height).toBe(790)
+  })
+
+  it('still keeps an explicit size across a later preset switch', () => {
+    const miq = new MiQ().setSize(800, 400).setTheme({ extends: 'portrait' })
+
+    expect(miq.getTheme().width).toBe(800)
+    expect(miq.getTheme().height).toBe(400)
+  })
+
+  it('adopts a named preset size unconditionally, even over an explicit one', () => {
+    const miq = new MiQ().setSize(800, 400).setTheme('portrait')
+
+    expect(miq.getTheme().width).toBe(630)
+    expect(miq.getTheme().height).toBe(790)
+  })
+
+  it('an explicit size set via setTheme() itself still survives a later plain override', () => {
+    const miq = new MiQ()
+      .setTheme({ width: 1000, height: 500 })
+      .setTheme({ extends: 'portrait', avatar: { grayscale: true } })
+
+    expect(miq.getTheme().width).toBe(1000)
+    expect(miq.getTheme().height).toBe(500)
+  })
+
+  it('carries an explicit size from clone() into a later preset switch', () => {
+    const original = new MiQ().setSize(800, 400)
+    const copy = original.clone().setTheme({ extends: 'portrait' })
+
+    expect(copy.getTheme().width).toBe(800)
+    expect(copy.getTheme().height).toBe(400)
+  })
+
   it('rejects a non-positive size', () => {
     expect(() => new MiQ().setSize(0, 100)).toThrow(ValidationError)
     expect(() => new MiQ().setSize(100, -1)).toThrow(ValidationError)
