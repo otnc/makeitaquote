@@ -2,7 +2,7 @@
 
 Turn a message into a quote image.
 
-[![npm](https://img.shields.io/npm/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote) [![CI](https://img.shields.io/github/actions/workflow/status/otnc/makeitaquote/ci.yml?branch=main&label=ci)](https://github.com/otnc/makeitaquote/actions) [![License](https://img.shields.io/github/license/otnc/makeitaquote)](LICENSE) [![Node](https://img.shields.io/node/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote)
+[![npm](https://img.shields.io/npm/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote) [![CI](https://img.shields.io/github/actions/workflow/status/otnc/makeitaquote/ci.yml?branch=main&label=ci)](https://github.com/otnc/makeitaquote/actions) [![License](https://img.shields.io/github/license/otnc/makeitaquote)](LICENSE) [![Node](https://img.shields.io/node/v/makeitaquote)](https://www.npmjs.com/package/makeitaquote) [![技術者倫理|遵守済み](https://gijutsusharin.li/badge.svg)](https://gijutsusharin.li)
 
 **[See every option as a picture →](https://otnc.github.io/makeitaquote/)**
 
