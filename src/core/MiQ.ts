@@ -53,10 +53,20 @@ export class MiQ {
   #data: QuoteData = emptyQuote()
   #theme: Theme
   #options: MiQOptions
+  /**
+   * A size the caller picked explicitly — via this, `setSize()` or
+   * `setScale()` — as opposed to whatever a preset happens to carry. Only
+   * this survives a later `setTheme()` that does not set its own size; see
+   * `#applyExplicitSize()`.
+   */
+  #explicitWidth: number | null = null
+  #explicitHeight: number | null = null
 
   constructor(options: MiQOptions = {}) {
     this.#options = { ...options }
-    this.#theme = defineTheme(options.theme ?? 'dark')
+    const theme = options.theme ?? 'dark'
+    this.#theme = defineTheme(theme)
+    this.#applyExplicitSize(theme)
   }
 
   setText(text: string): this {
@@ -125,15 +135,35 @@ export class MiQ {
   }
 
   setTheme(theme: ThemeName | ThemeInput): this {
-    const width = this.#theme.width
-    const height = this.#theme.height
     this.#theme = defineTheme(theme)
-
-    // A theme change shouldn't silently undo an explicit setSize().
-    if (typeof theme === 'object' && theme.width === undefined) this.#theme.width = width
-    if (typeof theme === 'object' && theme.height === undefined) this.#theme.height = height
-
+    this.#applyExplicitSize(theme)
     return this
+  }
+
+  /**
+   * Reconciles the newly resolved theme's size with a size the caller
+   * explicitly picked earlier.
+   *
+   * A theme picked by name, or an object that sets its own `width`/`height`,
+   * is unambiguous — its size is used as-is, and remembered as the new
+   * explicit size for `width`/`height` respectively. An object that sets
+   * neither means "keep changing other things", not "go back to whatever
+   * this preset's own size is" — so each dimension that was set explicitly
+   * before is carried over onto the new theme rather than replaced by
+   * whichever preset it (or its `extends`) happens to resolve to.
+   */
+  #applyExplicitSize(theme: ThemeName | ThemeInput): void {
+    if (typeof theme !== 'object') {
+      this.#explicitWidth = null
+      this.#explicitHeight = null
+      return
+    }
+
+    if (theme.width !== undefined) this.#explicitWidth = this.#theme.width
+    else if (this.#explicitWidth !== null) this.#theme.width = this.#explicitWidth
+
+    if (theme.height !== undefined) this.#explicitHeight = this.#theme.height
+    else if (this.#explicitHeight !== null) this.#theme.height = this.#explicitHeight
   }
 
   /**
@@ -184,6 +214,8 @@ export class MiQ {
 
     this.#theme.width = Math.round(width)
     this.#theme.height = Math.round(height)
+    this.#explicitWidth = this.#theme.width
+    this.#explicitHeight = this.#theme.height
     return this
   }
 
@@ -199,6 +231,8 @@ export class MiQ {
     const copy = new MiQ(this.#options)
     copy.#data = { ...this.#data }
     copy.#theme = structuredClone(this.#theme)
+    copy.#explicitWidth = this.#explicitWidth
+    copy.#explicitHeight = this.#explicitHeight
     return copy
   }
 
