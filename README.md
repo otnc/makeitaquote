@@ -881,6 +881,15 @@ otoneko. https://github.com/otnc
 
 ---
 
+## Credits
+
+### Inspiration
+
+- Make it a Quote (Twitter) https://twitter.com/MakeItAQuote
+- Make it a Quote (Discord / Misskey / Bluesky) https://miq.moe/
+
+---
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
