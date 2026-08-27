@@ -66,10 +66,8 @@ function isOnline(options: EnsureOptions): boolean {
  * pinned here — which is also why the disk is only trusted when the API
  * cannot be reached: online, freshness wins; offline, anything beats tofu.
  *
- * `family` may be a `FONT_ALIASES` short name (`'pop'`) instead of the real
- * one — resolved once up front, so everything past this point (the ready/
- * registered checks, the disk cache slug, the name it ends up registered
- * under) agrees on the same real family.
+ * `family` may be a `FONT_ALIASES` short name, resolved once up front so
+ * everything past this point agrees on the same real family.
  */
 export async function useFont(requested: string, options: EnsureOptions = {}): Promise<boolean> {
   const family = resolveFontAlias(requested) ?? requested

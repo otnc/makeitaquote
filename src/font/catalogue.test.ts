@@ -76,13 +76,10 @@ describe('FONT_ALIASES', () => {
     }
   })
 
-  it('matches the official bot option names', () => {
+  it('has the expected short names', () => {
     expect(FONT_ALIASES.pop).toBe('Hachi Maru Pop')
     expect(FONT_ALIASES.dot).toBe('DotGothic16')
     expect(FONT_ALIASES.castoro).toBe('Castoro Titling')
-  })
-
-  it('has the one addition, sans, for the default font', () => {
     expect(FONT_ALIASES.sans).toBe('Noto Sans JP')
   })
 })

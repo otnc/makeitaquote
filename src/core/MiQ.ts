@@ -54,10 +54,9 @@ export class MiQ {
   #theme: Theme
   #options: MiQOptions
   /**
-   * A size the caller picked explicitly — via this, `setSize()` or
-   * `setScale()` — as opposed to whatever a preset happens to carry. Only
-   * this survives a later `setTheme()` that does not set its own size; see
-   * `#applyExplicitSize()`.
+   * A size picked explicitly (this, `setSize()`, `setScale()`), as opposed
+   * to a preset's own — only this survives a later `setTheme()` with no
+   * size of its own. See `#applyExplicitSize()`.
    */
   #explicitWidth: number | null = null
   #explicitHeight: number | null = null
@@ -141,16 +140,13 @@ export class MiQ {
   }
 
   /**
-   * Reconciles the newly resolved theme's size with a size the caller
-   * explicitly picked earlier.
+   * Reconciles the new theme's size with an explicit one from earlier.
    *
-   * A theme picked by name, or an object that sets its own `width`/`height`,
-   * is unambiguous — its size is used as-is, and remembered as the new
-   * explicit size for `width`/`height` respectively. An object that sets
-   * neither means "keep changing other things", not "go back to whatever
-   * this preset's own size is" — so each dimension that was set explicitly
-   * before is carried over onto the new theme rather than replaced by
-   * whichever preset it (or its `extends`) happens to resolve to.
+   * A theme picked by name, or an object setting its own `width`/`height`,
+   * wins outright and becomes the new explicit size. An object that sets
+   * neither means "keep changing other things" — so each dimension set
+   * explicitly before carries over instead of being replaced by whatever
+   * the new preset happens to have.
    */
   #applyExplicitSize(theme: ThemeName | ThemeInput): void {
     if (typeof theme !== 'object') {
