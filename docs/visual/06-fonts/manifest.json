@@ -199,6 +199,39 @@
       "bytes": 185415,
       "ok": true,
       "error": null
+    },
+    {
+      "name": "Noto Sans SC",
+      "file": "06-fonts/noto-sans-sc.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 183561,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Nanum Gothic",
+      "file": "06-fonts/nanum-gothic.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 183155,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "IBM Plex Sans Arabic",
+      "file": "06-fonts/ibm-plex-sans-arabic.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 185396,
+      "ok": true,
+      "error": null
     }
   ]
 }

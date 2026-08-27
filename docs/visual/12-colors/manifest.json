@@ -51,9 +51,9 @@
       "file": "12-colors/translucent-background-over-the-avatar.png",
       "note": "#RRGGBBAA — the avatar shows through the wash",
       "format": "png",
-      "width": 1200,
-      "height": 630,
-      "bytes": 318885,
+      "width": 630,
+      "height": 790,
+      "bytes": 250255,
       "ok": true,
       "error": null
     },
