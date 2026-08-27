@@ -1,25 +1,15 @@
 import { distance } from 'fastest-levenshtein'
 
 /**
- * Fonts this package knows how to fetch by name, one row each — the single
- * source `FONT_CATALOGUE` and `FONT_ALIASES` below are both built from, so
- * adding, removing or renaming a font (and its alias) is one edit here
- * instead of two kept in sync by hand.
+ * Fonts this package can fetch by name, one row each — the single source
+ * `FONT_CATALOGUE` and `FONT_ALIASES` are both built from. `alias` is a
+ * short option name; `null` for none.
  *
- * `alias` matches the official Make it a Quote bot's own `font=` option names,
- * except `sans` (Noto Sans JP), which the bot has no option for — added here
- * anyway since it's the fallback default and worth naming just as tersely.
- * `null` is for a family that should have no short option at all.
- *
- * Everything here is served by Google Fonts, which only distributes fonts
- * under the SIL Open Font License, Apache 2.0 or the Ubuntu Font Licence — so
- * anything resolvable through it is free to redistribute and embed. Fonts that
- * are paid, or licensed on other terms, are not on Google Fonts and therefore
- * cannot be requested by name; `fonts.use()` rejects them rather than guessing
- * at some other download source.
- *
- * The list is a convenience, not a limit: any Google Fonts family works, and
- * `fonts.registerFromPath()` takes files from anywhere.
+ * Everything here is served by Google Fonts, which only distributes SIL
+ * Open Font License, Apache 2.0 or Ubuntu Font Licence fonts — a paid or
+ * otherwise-licensed font isn't on Google Fonts and can't be requested by
+ * name here. The list is a convenience, not a limit: any Google Fonts
+ * family works.
  */
 const FONTS = [
   // Japanese
@@ -42,6 +32,10 @@ const FONTS = [
   { family: 'Vina Sans', alias: 'vina' },
   { family: 'Dancing Script', alias: 'script' },
   { family: 'Castoro Titling', alias: 'castoro' },
+  // Script fallback only, not selectable via font= — see font/sources.ts.
+  { family: 'Noto Sans SC', alias: null },
+  { family: 'Nanum Gothic', alias: null },
+  { family: 'IBM Plex Sans Arabic', alias: null },
 ] as const
 
 export type CataloguedFont = (typeof FONTS)[number]['family']
@@ -50,14 +44,11 @@ export type CataloguedFont = (typeof FONTS)[number]['family']
 export const FONT_CATALOGUE: readonly CataloguedFont[] = FONTS.map((entry) => entry.family)
 
 /**
- * CSS generic family keywords — resolved by the system, never by name.
- *
- * The canonical list `resolveFamily()` (registry.ts) and `candidateFamilies()`
- * (render/pipeline.ts) both key off of, so a font stack's `sans-serif`
- * fallback is recognized the same way everywhere. Also what `resolveFontStack()`
- * below skips, so an alias never shadows one of these — `FONT_ALIASES.serif`
- * (`Zen Old Mincho`) is a real risk here, since `serif` is also this generic
- * keyword.
+ * CSS generic family keywords, resolved by the system rather than by name.
+ * Shared with `resolveFamily()` (registry.ts) and `candidateFamilies()`
+ * (render/pipeline.ts), and skipped by `resolveFontStack()` below so an
+ * alias never shadows one — `FONT_ALIASES.serif` is `Zen Old Mincho`, and
+ * `serif` is also this generic keyword.
  */
 export const GENERIC_FONT_FAMILIES = new Set([
   'sans-serif',
@@ -75,15 +66,10 @@ export function isCatalogued(family: string): boolean {
 }
 
 /**
- * Short, typing-friendly names for the catalogue — mostly matching the option
- * names the official Make it a Quote bot uses for its own `font=` choices
- * (see `FONTS` above for the one addition, `sans`).
- *
- * Built from `FONTS` above, not hand-maintained separately — a convenience
- * for consumers exposing font choice through something like a Discord slash
- * command option, so they don't each have to hand-roll the same mapping. Keys
- * are lower-cased; look them up through `resolveFontAlias()` rather than
- * indexing this object directly if the input isn't already normalized.
+ * Short, typing-friendly names for the catalogue, built from `FONTS` above —
+ * handy for exposing font choice through something like a command option.
+ * Keys are lower-cased; use `resolveFontAlias()` rather than indexing this
+ * directly if the input isn't already normalized.
  */
 export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = (() => {
   const aliases: Record<string, CataloguedFont> = {}
@@ -98,15 +84,9 @@ const CATALOGUE_BY_LOWERCASE = new Map<string, CataloguedFont>(
 )
 
 /**
- * Turns whatever a caller typed — an alias, or a catalogued family name in
- * any case — into the exact spelling `fonts.use()` expects.
- *
- * Meant for a case like a Discord `font=` option: the input could be a short
- * alias, the real name typed in any case, or neither. Aliases are checked
- * first, though the two tables don't actually collide today.
- *
- * Returns `undefined` for anything neither table recognizes — pair with
- * `suggestionFor()` if the caller wants a "did you mean" hint for that case.
+ * Turns an alias, or a catalogued family name in any case, into the exact
+ * spelling `fonts.use()` expects. `undefined` for anything neither table
+ * recognizes — pair with `suggestionFor()` for a "did you mean" hint.
  */
 export function resolveFontAlias(input: string): string | undefined {
   const key = input.trim().toLowerCase()
@@ -115,13 +95,11 @@ export function resolveFontAlias(input: string): string | undefined {
 }
 
 /**
- * Resolves every alias in a CSS-style, comma-separated font stack to its real
- * family name — so `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end
- * up identical wherever a font is set (`theme.text.font`, `fonts.use()`, the
- * CLI). A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even
- * when it also happens to be an alias key (`serif`), and anything neither
- * table recognizes — an arbitrary Google Fonts family, a font registered by
- * hand — passes through as typed, just trimmed and unquoted.
+ * Resolves every alias in a CSS-style, comma-separated font stack, so
+ * `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end up identical.
+ * A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even when
+ * it's also an alias key; anything else unrecognized passes through as
+ * typed, just trimmed and unquoted.
  */
 export function resolveFontStack(stack: string): string {
   return stack

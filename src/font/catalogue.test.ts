@@ -17,6 +17,12 @@ describe('isCatalogued', () => {
     expect(isCatalogued('Castoro Titling')).toBe(true)
   })
 
+  it('includes the script-fallback fonts', () => {
+    expect(isCatalogued('Noto Sans SC')).toBe(true)
+    expect(isCatalogued('Nanum Gothic')).toBe(true)
+    expect(isCatalogued('IBM Plex Sans Arabic')).toBe(true)
+  })
+
   it('is exact — spelling and case both count', () => {
     expect(isCatalogued('noto sans jp')).toBe(false)
     expect(isCatalogued('Helvetica')).toBe(false)
@@ -76,14 +82,17 @@ describe('FONT_ALIASES', () => {
     }
   })
 
-  it('matches the official bot option names', () => {
+  it('has the expected short names', () => {
     expect(FONT_ALIASES.pop).toBe('Hachi Maru Pop')
     expect(FONT_ALIASES.dot).toBe('DotGothic16')
     expect(FONT_ALIASES.castoro).toBe('Castoro Titling')
+    expect(FONT_ALIASES.sans).toBe('Noto Sans JP')
   })
 
-  it('has the one addition, sans, for the default font', () => {
-    expect(FONT_ALIASES.sans).toBe('Noto Sans JP')
+  it('has no alias for the script-fallback fonts', () => {
+    expect(Object.values(FONT_ALIASES)).not.toContain('Noto Sans SC')
+    expect(Object.values(FONT_ALIASES)).not.toContain('Nanum Gothic')
+    expect(Object.values(FONT_ALIASES)).not.toContain('IBM Plex Sans Arabic')
   })
 })
 
