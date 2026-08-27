@@ -453,6 +453,27 @@ A generated gradient fill — for a two-tone (or more) background without pre-re
 
 The avatar-fade gradient (`theme.gradient`) composites correctly with either one — it fades the avatar's own edge into whatever is actually behind it, gradient or image included, rather than only ever working over a flat `background`.
 
+### Named color themes
+
+The official Make it a Quote bot's 21 named background presets — `COLOR_THEME_CATALOGUE` gives you each one's gradient and which text palette it needs for contrast, and `resolveColorTheme()` turns whatever a user typed (the bot's own short alias, its full `theme=` key, or that key without underscores) into the key the other two expect:
+
+```ts
+import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from 'makeitaquote'
+
+const key = resolveColorTheme('mb') // 'midnight_blurple' — also accepts the key itself, any case
+if (key) {
+  await new MiQ()
+    .setText('…')
+    .setTheme({
+      extends: colorThemeTextBase(key) === 'light' ? 'light' : 'dark',
+      backgroundGradient: colorThemeGradient(key),
+    })
+    .toBuffer('png')
+}
+```
+
+`extends` picks this package's own `light`/`dark` (or `portrait-light`/`portrait`, for a portrait layout) text palette — fixed per theme, the same way the official bot forces black or white text for contrast against each gradient, rather than left to a `light`/`dark` toggle of your own. The bot's plain "Black"/"White" backgrounds aren't in the catalogue: they're flat colors, already exactly this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+
 ---
 
 ## Size
