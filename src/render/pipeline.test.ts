@@ -4,6 +4,7 @@ import { FontNotAvailableError, RenderError, ValidationError } from '../core/err
 import { MiQ } from '../core/MiQ'
 import { clearEmojiCache } from '../emoji/cache'
 import { resetAutoloadForTests } from '../font/autoload'
+import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from '../theme/colorThemes'
 import { resetFilterDetectionForTests } from './avatar'
 import { createCanvas } from './canvasFactory'
 
@@ -467,6 +468,42 @@ describe('avatar fade over a generated background', () => {
     expect(endG).toBeLessThan(50)
     expect(endR).toBeGreaterThan(50)
     expect(endB).toBeGreaterThan(50)
+  })
+})
+
+describe('named color themes', () => {
+  it('renders a resolved dark theme with its own gradient and the dark text palette', async () => {
+    const key = resolveColorTheme('mb') // Midnight Blurple's short alias
+    expect(key).toBe('midnight_blurple')
+    if (!key) throw new Error('unreachable')
+
+    const miq = quote().setTheme({
+      extends: colorThemeTextBase(key) === 'light' ? 'light' : 'dark',
+      backgroundGradient: colorThemeGradient(key),
+    })
+
+    // Near the gradient's own "to" end (#151738), not the base dark
+    // preset's plain black — proves the catalogue's gradient actually made
+    // it onto the canvas rather than falling back to the flat background.
+    const [r, , b] = await pixelAt(miq, 1100, 5)
+    expect(r).toBeGreaterThan(10)
+    expect(r).toBeLessThan(40)
+    expect(b).toBeGreaterThan(40)
+
+    // textBase: 'dark' means the dark preset's white text palette.
+    expect(miq.getTheme().text.color).toBe('#FFFFFF')
+  })
+
+  it('renders a resolved light theme with the light text palette', async () => {
+    const key = resolveColorTheme('mint_apple')
+    if (!key) throw new Error('unreachable')
+
+    const miq = quote().setTheme({
+      extends: colorThemeTextBase(key) === 'light' ? 'light' : 'dark',
+      backgroundGradient: colorThemeGradient(key),
+    })
+
+    expect(miq.getTheme().text.color).toBe('#111111')
   })
 })
 

@@ -32,6 +32,10 @@ const FONTS = [
   { family: 'Vina Sans', alias: 'vina' },
   { family: 'Dancing Script', alias: 'script' },
   { family: 'Castoro Titling', alias: 'castoro' },
+  // Script fallback only, not selectable via font= — see font/sources.ts.
+  { family: 'Noto Sans SC', alias: null },
+  { family: 'Nanum Gothic', alias: null },
+  { family: 'IBM Plex Sans Arabic', alias: null },
 ] as const
 
 export type CataloguedFont = (typeof FONTS)[number]['family']

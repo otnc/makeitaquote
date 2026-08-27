@@ -453,6 +453,27 @@ A generated gradient fill — for a two-tone (or more) background without pre-re
 
 The avatar-fade gradient (`theme.gradient`) composites correctly with either one — it fades the avatar's own edge into whatever is actually behind it, gradient or image included, rather than only ever working over a flat `background`.
 
+### Named color themes
+
+21 named background presets. `COLOR_THEME_CATALOGUE` gives you each one's gradient and which text palette it needs for contrast; `resolveColorTheme()` turns a short alias, a full key, or a key without underscores into the key the other two expect:
+
+```ts
+import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from 'makeitaquote'
+
+const key = resolveColorTheme('mb') // 'midnight_blurple' — also accepts the key itself, any case
+if (key) {
+  await new MiQ()
+    .setText('…')
+    .setTheme({
+      extends: colorThemeTextBase(key) === 'light' ? 'light' : 'dark',
+      backgroundGradient: colorThemeGradient(key),
+    })
+    .toBuffer('png')
+}
+```
+
+`extends` picks this package's own `light`/`dark` (or `portrait-light`/`portrait`, for a portrait layout) text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+
 ---
 
 ## Size
@@ -484,7 +505,7 @@ For a different shape, set it on the theme:
 
 ## Fonts
 
-**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it for anything it doesn't cover.
+**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic behind that for Korean, Simplified Chinese and Arabic.
 
 Name any font and it is fetched on demand:
 
@@ -511,6 +532,7 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | --- | --- |
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
+| Script fallback | Nanum Gothic (Korean) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but fallback-only, so none of them has a `FONT_ALIASES` short name |
 
 Short, typing-friendly names for the same list are in `FONT_ALIASES`:
 

@@ -69,5 +69,13 @@ export { stripMarkdown } from './text/markdown'
 export { stripMfm } from './text/mfm'
 export type { ColorInput, RGBA } from './theme/color'
 export { isTransparent, parseColor, toCSS, toHex } from './theme/color'
+export type { CataloguedColorTheme } from './theme/colorThemes'
+export {
+  COLOR_THEME_ALIASES,
+  COLOR_THEME_CATALOGUE,
+  colorThemeGradient,
+  colorThemeTextBase,
+  resolveColorTheme,
+} from './theme/colorThemes'
 export { palettes, themes } from './theme/presets'
 export { defineTheme } from './theme/resolve'
