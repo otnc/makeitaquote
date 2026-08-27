@@ -57,13 +57,7 @@ export function defineTheme(input: ThemePalette | ThemeInput = 'dark'): Theme {
   return theme
 }
 
-/**
- * Resolves an alias (or a catalogued name typed in any case) in every font
- * field, so `{ text: { font: 'pop' } }` renders exactly like `{ text: { font:
- * 'Hachi Maru Pop' } }` — an alias works anywhere a theme sets a font, not
- * just where `resolveFontAlias()` is called directly. A preset's own fonts
- * are already real names, so running them through here too is a no-op.
- */
+/** Resolves a font alias in every font field, so `{ font: 'pop' }` renders like `{ font: 'Hachi Maru Pop' }`. */
 function resolveFontAliases(theme: Theme): void {
   theme.text.font = resolveFontStack(theme.text.font)
   theme.displayName.font = resolveFontStack(theme.displayName.font)

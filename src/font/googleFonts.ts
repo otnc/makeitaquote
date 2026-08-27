@@ -35,9 +35,8 @@ export interface ResolveOptions {
  * The API answers with TTF for user agents it can't confirm support WOFF2,
  * which includes ours — and TTF is what the canvas can register.
  *
- * `family` may be a `FONT_ALIASES` short name — resolved to the real family
- * before anything else, so the URL, the parsed faces, and any error message
- * all agree on the same name.
+ * `family` may be a `FONT_ALIASES` short name, resolved before anything
+ * else so the URL, the parsed faces and any error message all agree.
  */
 export async function resolveGoogleFont(
   requested: string,

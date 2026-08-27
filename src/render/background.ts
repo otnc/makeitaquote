@@ -113,23 +113,14 @@ function backgroundGradientLine(
 }
 
 /**
- * Draws the avatar, fading it into whatever is behind it — `background`,
- * `backgroundGradient` or `backgroundImage` — when `theme.gradient` is
- * enabled.
+ * Draws the avatar, fading it into `background`/`backgroundGradient`/
+ * `backgroundImage` when `theme.gradient` is enabled. Sideways for `side`,
+ * downwards for `stacked`; mirrored when the avatar is on the right.
  *
- * Runs sideways for the `side` layout and downwards for `stacked`; the
- * horizontal one is mirrored when the avatar is on the right.
- *
- * The avatar is drawn onto its own offscreen canvas first, and the fade
- * erases its alpha there (`destination-out`) before that layer is composited
- * onto the main one. A canvas has no layers of its own — erasing the avatar
- * directly on the main canvas wouldn't "reveal" whatever is behind it, since
- * the two are already flattened together the moment it's drawn; it would
- * just punch a transparent hole where they'd been merged. Fading on a canvas
- * that holds nothing but the avatar means the erase instead reveals exactly
- * what should show through once it's composited back — whatever
- * `drawBackground()` already drew there, flat, gradient or image alike, not
- * a repainted guess at it.
+ * Drawn onto its own offscreen canvas first, then faded there
+ * (`destination-out`) before compositing onto the main one — a canvas has
+ * no layers, so erasing the avatar in place on the main canvas would just
+ * punch a transparent hole rather than reveal what's behind it.
  */
 export function drawAvatarWithFade(
   ctx: SKRSContext2D,
