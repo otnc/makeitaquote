@@ -484,7 +484,7 @@ For a different shape, set it on the theme:
 
 ## Fonts
 
-**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it for anything it doesn't cover.
+**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic (Korean), Noto Sans SC (Simplified Chinese) and IBM Plex Sans Arabic behind that for the scripts neither of those cover.
 
 Name any font and it is fetched on demand:
 
@@ -511,6 +511,7 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | --- | --- |
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
+| Script fallback | Nanum Gothic (Korean) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but not one of the official bot's `font=` choices, so none of them has a `FONT_ALIASES` short name |
 
 Short, typing-friendly names for the same list — mostly matching the official Make it a Quote bot's own `font=` option names, plus `sans` for the default — are in `FONT_ALIASES`:
 
