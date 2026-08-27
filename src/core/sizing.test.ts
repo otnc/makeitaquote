@@ -137,8 +137,8 @@ describe('sizeToAvatar', () => {
   })
 
   it('works for the new layout, where the avatar is the whole canvas', () => {
-    const stacked = defineTheme({ layout: 'new' })
-    const resized = sizeToAvatar(stacked, { width: 1024, height: 1024 }, 'width')
+    const newLayout = defineTheme({ layout: 'new' })
+    const resized = sizeToAvatar(newLayout, { width: 1024, height: 1024 }, 'width')
 
     expect(resized.width).toBe(1024)
   })

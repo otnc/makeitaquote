@@ -36,8 +36,8 @@
       "error": null
     },
     {
-      "name": "stacked",
-      "file": "01-themes/stacked.png",
+      "name": "new",
+      "file": "01-themes/new.png",
       "note": null,
       "format": "png",
       "width": 630,
@@ -47,8 +47,8 @@
       "error": null
     },
     {
-      "name": "stacked (light)",
-      "file": "01-themes/stacked-light.png",
+      "name": "new (light)",
+      "file": "01-themes/new-light.png",
       "note": null,
       "format": "png",
       "width": 630,

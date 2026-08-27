@@ -286,7 +286,7 @@ new MiQ({ theme: 'dark' })      // at construction
 new MiQ().setTheme('light')     // or later
 ```
 
-A palette combines with `layout` (`'side'` (default) or `'new'` — see [Stacked layout](#stacked-layout)) and any other override, so every combination is reachable without a preset name for each one:
+A palette combines with `layout` (`'side'` (default) or `'new'` — see [New layout](#new-layout)) and any other override, so every combination is reachable without a preset name for each one:
 
 ```ts
 await new MiQ()
@@ -320,7 +320,7 @@ The quote area, the gradient and the watermark all mirror automatically — `tex
 
 Clips the avatar, and its fallback tile, to the largest circle that fits the box — the default `'rectangle'` uses the whole box instead. On a wide or tall box that leaves background showing at the sides or top and bottom, the same as a round profile picture would anywhere else.
 
-### Stacked layout
+### New layout
 
 ```ts
 await new MiQ({ theme: { layout: 'new' } })
@@ -469,7 +469,7 @@ if (key) {
 }
 ```
 
-`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'new'` alongside it for a [stacked layout](#stacked-layout). Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'new'` alongside it for a [new layout](#new-layout). Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
 
 ---
 

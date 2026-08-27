@@ -227,7 +227,7 @@ export async function run(
         },
         layout: {
           type: oneOf('side', 'new'),
-          description: 'Side-by-side or full-bleed stacked avatar (default: side)',
+          description: 'side by side, or new: full-bleed, fading downwards (default: side)',
         },
         scale: { type: Number, description: 'Resize the whole image, keeping its layout (max 8)' },
         format: {

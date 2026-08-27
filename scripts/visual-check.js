@@ -185,10 +185,10 @@ add('01-themes', 'color (avatar keeps its color)', () =>
     .setAvatar(avatars.illustration)
     .setTheme({ avatar: { grayscale: false } }),
 )
-add('01-themes', 'stacked', () =>
+add('01-themes', 'new', () =>
   base().setText(text.short).setAvatar(avatars.illustration).setTheme({ layout: 'new' }),
 )
-add('01-themes', 'stacked (light)', () =>
+add('01-themes', 'new (light)', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.illustration)
@@ -219,7 +219,7 @@ add('02-layout', 'narrow avatar', () =>
       gradient: { startRatio: 0.14, endRatio: 0.32 },
     }),
 )
-add('02-layout', 'stacked on a landscape canvas', () =>
+add('02-layout', 'new layout on a landscape canvas', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.photo)

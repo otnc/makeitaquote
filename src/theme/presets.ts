@@ -44,7 +44,7 @@ export const palettes = {
 const LANDSCAPE = { width: 1200, height: 630 }
 
 /** The same bot's vertical mode, for the `new` layout. */
-const STACKED = { width: 630, height: 790 }
+const NEW_LAYOUT_SIZE = { width: 630, height: 790 }
 
 /**
  * The original Make it a Quote look: black background, desaturated avatar on
@@ -142,18 +142,18 @@ const light: Theme = {
 
 /**
  * The `new` layout: the avatar fills the canvas and fades downwards, with big
- * quote marks, the quote, a rule and the attribution stacked over the bottom
- * of it.
+ * quote marks, the quote, a rule and the attribution laid over the bottom of
+ * it.
  */
-const darkStacked: Theme = {
+const darkNew: Theme = {
   ...clone(dark),
   layout: 'new',
-  ...STACKED,
+  ...NEW_LAYOUT_SIZE,
   avatar: { ...clone(dark).avatar, widthRatio: 1, position: 'left' },
   gradient: {
     ...clone(dark).gradient,
     direction: 'vertical',
-    // The avatar is the top half of a stacked quote, so it has to stay
+    // The avatar is the top half of a `new`-layout quote, so it has to stay
     // legible there. Fading from 12% swallowed the subject's face before the
     // text needed the space; this keeps the fade below it and only reaches the
     // background where the quote actually sits.
@@ -172,14 +172,14 @@ const darkStacked: Theme = {
   username: { ...clone(dark).username, size: 0.022, prefix: '@' },
 }
 
-const lightStacked: Theme = {
-  ...clone(darkStacked),
+const lightNew: Theme = {
+  ...clone(darkNew),
   background: palettes.light.background,
-  avatar: { ...clone(darkStacked).avatar, fallback: { ...palettes.light.avatarFallback } },
-  text: { ...clone(darkStacked).text, color: palettes.light.text },
-  displayName: { ...clone(darkStacked).displayName, color: palettes.light.text },
-  username: { ...clone(darkStacked).username, color: palettes.light.muted },
-  watermark: { ...clone(darkStacked).watermark, color: palettes.light.faint },
+  avatar: { ...clone(darkNew).avatar, fallback: { ...palettes.light.avatarFallback } },
+  text: { ...clone(darkNew).text, color: palettes.light.text },
+  displayName: { ...clone(darkNew).displayName, color: palettes.light.text },
+  username: { ...clone(darkNew).username, color: palettes.light.muted },
+  watermark: { ...clone(darkNew).watermark, color: palettes.light.faint },
 }
 
 /**
@@ -199,22 +199,22 @@ const custom: Theme = {
   watermark: { ...clone(dark).watermark, color: 'transparent' },
 }
 
-/** The `new`-layout counterpart to `custom`, same relationship `darkStacked` has to `dark`. */
-const customStacked: Theme = {
-  ...clone(darkStacked),
+/** The `new`-layout counterpart to `custom`, same relationship `darkNew` has to `dark`. */
+const customNew: Theme = {
+  ...clone(darkNew),
   background: 'transparent',
-  avatar: { ...clone(darkStacked).avatar, fallback: null },
-  text: { ...clone(darkStacked).text, color: 'transparent' },
-  displayName: { ...clone(darkStacked).displayName, color: 'transparent' },
-  username: { ...clone(darkStacked).username, color: 'transparent' },
-  watermark: { ...clone(darkStacked).watermark, color: 'transparent' },
+  avatar: { ...clone(darkNew).avatar, fallback: null },
+  text: { ...clone(darkNew).text, color: 'transparent' },
+  displayName: { ...clone(darkNew).displayName, color: 'transparent' },
+  username: { ...clone(darkNew).username, color: 'transparent' },
+  watermark: { ...clone(darkNew).watermark, color: 'transparent' },
 }
 
 /** Every base preset, by palette then layout. */
 export const themes: Record<ThemePalette, Record<LayoutMode, Theme>> = {
-  dark: { side: dark, new: darkStacked },
-  light: { side: light, new: lightStacked },
-  custom: { side: custom, new: customStacked },
+  dark: { side: dark, new: darkNew },
+  light: { side: light, new: lightNew },
+  custom: { side: custom, new: customNew },
 }
 
 const PALETTES = new Set<string>(Object.keys(themes))

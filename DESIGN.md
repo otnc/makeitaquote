@@ -1557,9 +1557,9 @@ v8 の README にある「API issue で `.generate()` が使えないときは `
 
 ### 14.1 レイアウトの抽象化
 
-`Theme.layout: 'side' | 'stacked'` を導入し、レイアウト計算を `src/render/layout.ts` に集約した。
+`Theme.layout: 'side' | 'new'` を導入し、レイアウト計算を `src/render/layout.ts` に集約した。
 
-|                | `side`                        | `stacked`                |
+|                | `side`                        | `new`                    |
 | -------------- | ----------------------------- | ------------------------ |
 | アバター       | 幅 `widthRatio`、左右どちらか | キャンバス全面           |
 | グラデーション | 水平（右配置時は自動ミラー）  | 垂直（上→下）            |
@@ -1567,16 +1567,16 @@ v8 の README にある「API issue で `.generate()` が使えないときは `
 | 区切り線       | 無効                          | 有効                     |
 | 既定サイズ     | 1280×720                      | 800×1000                 |
 
-プリセットに `stacked` レイアウトの `dark`/`light` 版を追加（計 5 種）。 `stacked` は縦長専用ではなく、横長キャンバスにも適用できる。
+プリセットに `new` レイアウトの `dark`/`light` 版を追加（計 5 種）。 `new` は縦長専用ではなく、横長キャンバスにも適用できる。
 
 ### 14.2 `text.area: 'auto'` — 反転対応の要
 
 反転（テキスト左・アバター右）を `avatar.position` の指定だけで成立させるため、 `text.area` の既定値を `'auto'` とし、レイアウトと `position` から導出するようにした。
 
 ```
-side:    width = 1 - widthRatio - gap * 2
-         x     = position === 'right' ? gap : widthRatio + gap
-stacked: { x: 0.08, y: 0.56, width: 0.84, height: 0.18 }
+side: width = 1 - widthRatio - gap * 2
+      x     = position === 'right' ? gap : widthRatio + gap
+new:  { x: 0.08, y: 0.56, width: 0.84, height: 0.18 }
 ```
 
 既定値（`widthRatio 0.5`, `gap 0.04`）は従来ハードコードしていた値（`x 0.54` / `width 0.42`）と一致するため、既存テーマの見た目は変わらない。`widthRatio` を変えたときにテキストが追随するようになった、という副次効果もある。
@@ -1675,7 +1675,7 @@ GET https://fonts.googleapis.com/css2?family=Dela+Gothic+One
 
 ### 15.4 既定の変更・機能削除
 
-- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。 `stacked` プリセットのみ `'block'`。
+- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。 `new` プリセットのみ `'block'`。
 - **`avatar.shape`（`circle` / `rounded`）を削除**。不要との判断。 `clipToShape()` とその呼び出しも削除した。
 
 ### 15.5 visual-check の再編
