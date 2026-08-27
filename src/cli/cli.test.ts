@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TwemojiInfo, TwemojiInstallResult } from '../emoji/twemojiStore'
-import { FONT_CATALOGUE } from '../font/catalogue'
+import { FONT_CATALOGUE, FONT_CATALOGUE_FALLBACK_ONLY } from '../font/catalogue'
 import type { FontInstallResult, InstalledFont, PruneResult } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
 import type { FontUpdateStatus } from '../font/updates'
@@ -224,6 +224,36 @@ describe('install', () => {
 
     expect(d.installTwemoji).toHaveBeenCalledTimes(1)
     expect(d.installFonts).toHaveBeenCalledWith([...FONT_CATALOGUE])
+  })
+
+  it('skips the script-fallback fonts with --no-fallback on the all target', async () => {
+    const d = deps()
+
+    await run(['install', 'all', '--no-fallback'], d, io())
+
+    const expected = FONT_CATALOGUE.filter(
+      (family) => !FONT_CATALOGUE_FALLBACK_ONLY.includes(family),
+    )
+    expect(d.installFonts).toHaveBeenCalledWith(expected)
+  })
+
+  it('skips the script-fallback fonts with --no-fallback on a bare install', async () => {
+    const d = deps()
+
+    await run(['install', '--no-fallback'], d, io())
+
+    const expected = DEFAULT_FONT_FAMILIES.filter(
+      (family) => !FONT_CATALOGUE_FALLBACK_ONLY.includes(family),
+    )
+    expect(d.installFonts).toHaveBeenCalledWith(expected)
+  })
+
+  it('does not let --no-fallback drop an explicitly named family', async () => {
+    const d = deps()
+
+    await run(['install', 'Nanum Gothic', '--no-fallback'], d, io())
+
+    expect(d.installFonts).toHaveBeenCalledWith(['Nanum Gothic'])
   })
 
   it('installs only twemoji for the emoji target', async () => {

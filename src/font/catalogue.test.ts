@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   FONT_ALIASES,
   FONT_CATALOGUE,
+  FONT_CATALOGUE_FALLBACK_ONLY,
   GENERIC_FONT_FAMILIES,
   isCatalogued,
   resolveFontAlias,
@@ -93,6 +94,22 @@ describe('FONT_ALIASES', () => {
     expect(Object.values(FONT_ALIASES)).not.toContain('Noto Sans SC')
     expect(Object.values(FONT_ALIASES)).not.toContain('Nanum Gothic')
     expect(Object.values(FONT_ALIASES)).not.toContain('IBM Plex Sans Arabic')
+  })
+})
+
+describe('FONT_CATALOGUE_FALLBACK_ONLY', () => {
+  it('is exactly the three script-fallback fonts', () => {
+    expect(FONT_CATALOGUE_FALLBACK_ONLY).toEqual([
+      'Noto Sans SC',
+      'Nanum Gothic',
+      'IBM Plex Sans Arabic',
+    ])
+  })
+
+  it('is a subset of FONT_CATALOGUE', () => {
+    for (const family of FONT_CATALOGUE_FALLBACK_ONLY) {
+      expect(FONT_CATALOGUE).toContain(family)
+    }
   })
 })
 

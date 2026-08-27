@@ -7,7 +7,12 @@ import {
   twemojiInfo,
   uninstallTwemoji,
 } from '../emoji/twemojiStore'
-import { FONT_CATALOGUE, resolveFontAlias, suggestionFor } from '../font/catalogue'
+import {
+  FONT_CATALOGUE,
+  FONT_CATALOGUE_FALLBACK_ONLY,
+  resolveFontAlias,
+  suggestionFor,
+} from '../font/catalogue'
 import { resolveCacheDir } from '../font/diskCache'
 import {
   type FontInstallResult,
@@ -70,6 +75,8 @@ export const defaultIo: CliIo = {
   line: (text) => console.log(text),
 }
 
+const FALLBACK_ONLY = new Set<string>(FONT_CATALOGUE_FALLBACK_ONLY)
+
 /** What a command line's targets add up to. */
 interface Targets {
   /** The `all` keyword — the same as passing no target at all. */
@@ -103,13 +110,25 @@ export function parseTargets(args: readonly string[]): Targets {
   return targets
 }
 
+/** Options specific to `install`. */
+export interface InstallOptions {
+  /**
+   * Skip `FONT_CATALOGUE_FALLBACK_ONLY` — the script-fallback fonts fetched
+   * automatically but never picked by name. Only affects a broad target
+   * (no target, `all`, or `fonts`): a family named explicitly always installs.
+   */
+  noFallback?: boolean
+}
+
 export async function installCommand(
   args: readonly string[],
   deps: CliDeps,
   io: CliIo,
+  options: InstallOptions = {},
 ): Promise<number> {
   const targets = parseTargets(args)
   const bare = args.length === 0
+  const broad = bare || targets.all || targets.defaultFonts
   let failed = false
 
   if (bare || targets.all || targets.twemoji) {
@@ -122,10 +141,12 @@ export async function installCommand(
   const families = targets.all
     ? [...FONT_CATALOGUE]
     : bare || targets.defaultFonts
-      ? DEFAULT_FONT_FAMILIES
+      ? [...DEFAULT_FONT_FAMILIES]
       : targets.families
-  if (families.length > 0) {
-    const ok = await installFontsStep(families, deps, io)
+  const filtered =
+    options.noFallback && broad ? families.filter((family) => !FALLBACK_ONLY.has(family)) : families
+  if (filtered.length > 0) {
+    const ok = await installFontsStep(filtered, deps, io)
     failed ||= !ok
   }
 

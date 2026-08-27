@@ -51,6 +51,14 @@ export async function run(
       name: 'install',
       alias: ['add', 'i'],
       parameters: ['[targets...]'],
+      flags: {
+        noFallback: {
+          type: Boolean,
+          description:
+            'Skip the automatic script-fallback fonts (Nanum Gothic, Noto Sans SC, IBM Plex ' +
+            'Sans Arabic) — only fonts selectable with `font=`. No effect on a specific family.',
+        },
+      },
       help: {
         description:
           'Download assets so rendering works offline. With no target, installs Twemoji ' +
@@ -61,6 +69,7 @@ export async function run(
         examples: [
           'miq install',
           'miq install all',
+          'miq install all --no-fallback',
           'miq install twemoji',
           'miq install emoji',
           'miq install fonts',
@@ -71,7 +80,9 @@ export async function run(
       },
     },
     async (parsed) => {
-      exitCode = await installCommand(parsed._.targets, deps, io)
+      exitCode = await installCommand(parsed._.targets, deps, io, {
+        noFallback: parsed.flags.noFallback,
+      })
     },
   )
 

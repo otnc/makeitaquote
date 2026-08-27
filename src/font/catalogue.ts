@@ -44,6 +44,15 @@ export type CataloguedFont = (typeof FONTS)[number]['family']
 export const FONT_CATALOGUE: readonly CataloguedFont[] = FONTS.map((entry) => entry.family)
 
 /**
+ * The catalogued families with no alias — installed automatically as script
+ * fallback (`font/sources.ts`), but never picked by name through `font=`.
+ * `miq install all --no-fallback` skips these.
+ */
+export const FONT_CATALOGUE_FALLBACK_ONLY: readonly CataloguedFont[] = FONTS.filter(
+  (entry) => entry.alias === null,
+).map((entry) => entry.family)
+
+/**
  * CSS generic family keywords, resolved by the system rather than by name.
  * Shared with `resolveFamily()` (registry.ts) and `candidateFamilies()`
  * (render/pipeline.ts), and skipped by `resolveFontStack()` below so an
