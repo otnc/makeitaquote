@@ -12,7 +12,7 @@ export type ThemePalette = 'dark' | 'light' | 'custom'
  * - `side` puts them next to each other, the avatar fading sideways into the
  *   background.
  * - `new` fills the canvas with the avatar and fades it downwards, with the
- *   quote sitting over the bottom of it. Suits portrait canvases.
+ *   quote sitting over the bottom of it. Suits a tall canvas.
  */
 export type LayoutMode = 'side' | 'new'
 

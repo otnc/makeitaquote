@@ -1,0 +1,303 @@
+{
+  "name": "17-all-themes",
+  "title": "All themes",
+  "cases": [
+    {
+      "name": "dark / side",
+      "file": "17-all-themes/dark-side.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 176969,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "dark / new",
+      "file": "17-all-themes/dark-new.png",
+      "note": null,
+      "format": "png",
+      "width": 630,
+      "height": 790,
+      "bytes": 147159,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "light / side",
+      "file": "17-all-themes/light-side.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 183733,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "light / new",
+      "file": "17-all-themes/light-new.png",
+      "note": null,
+      "format": "png",
+      "width": 630,
+      "height": 790,
+      "bytes": 154971,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "custom / side",
+      "file": "17-all-themes/custom-side.png",
+      "note": "custom starts fully transparent; colors set explicitly here",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 192804,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "custom / new",
+      "file": "17-all-themes/custom-new.png",
+      "note": "custom starts fully transparent; colors set explicitly here",
+      "format": "png",
+      "width": 630,
+      "height": 790,
+      "bytes": 167299,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Sunset",
+      "file": "17-all-themes/sunset.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 263929,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Chroma Glow",
+      "file": "17-all-themes/chroma-glow.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 281077,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Forest",
+      "file": "17-all-themes/forest.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249419,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Crimson Moon",
+      "file": "17-all-themes/crimson-moon.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 220964,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Midnight Blurple",
+      "file": "17-all-themes/midnight-blurple.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 263660,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Mars",
+      "file": "17-all-themes/mars.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 199500,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Dusk",
+      "file": "17-all-themes/dusk.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 238452,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Under the Sea",
+      "file": "17-all-themes/under-the-sea.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 198818,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Retro Storm",
+      "file": "17-all-themes/retro-storm.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249389,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Neon Nights",
+      "file": "17-all-themes/neon-nights.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249650,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Strawberry Lemonade",
+      "file": "17-all-themes/strawberry-lemonade.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 231515,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Aurora",
+      "file": "17-all-themes/aurora.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249300,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Sepia",
+      "file": "17-all-themes/sepia.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 235181,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Mint Apple",
+      "file": "17-all-themes/mint-apple.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 220760,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Citrus Sherbert",
+      "file": "17-all-themes/citrus-sherbert.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 228512,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Retro Raincloud",
+      "file": "17-all-themes/retro-raincloud.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 236193,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Hanami",
+      "file": "17-all-themes/hanami.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 218759,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Sunrise",
+      "file": "17-all-themes/sunrise.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 230662,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Cotton Candy",
+      "file": "17-all-themes/cotton-candy.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 225260,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "LoFi Vibes",
+      "file": "17-all-themes/lofi-vibes.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 235435,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Desert Khaki",
+      "file": "17-all-themes/desert-khaki.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 212421,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

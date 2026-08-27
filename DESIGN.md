@@ -1567,7 +1567,7 @@ v8 の README にある「API issue で `.generate()` が使えないときは `
 | 区切り線       | 無効                          | 有効                     |
 | 既定サイズ     | 1280×720                      | 800×1000                 |
 
-プリセットに `portrait` / `portrait-light` を追加（計 5 種）。 `stacked` は縦長専用ではなく、横長キャンバスにも適用できる。
+プリセットに `stacked` レイアウトの `dark`/`light` 版を追加（計 5 種）。 `stacked` は縦長専用ではなく、横長キャンバスにも適用できる。
 
 ### 14.2 `text.area: 'auto'` — 反転対応の要
 
@@ -1675,7 +1675,7 @@ GET https://fonts.googleapis.com/css2?family=Dela+Gothic+One
 
 ### 15.4 既定の変更・機能削除
 
-- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。 `portrait` プリセットのみ `'block'`。
+- **`quoteMark.display` の既定を `'inline'` → `'none'`**。引用符なしが標準。 `stacked` プリセットのみ `'block'`。
 - **`avatar.shape`（`circle` / `rounded`）を削除**。不要との判断。 `clipToShape()` とその呼び出しも削除した。
 
 ### 15.5 visual-check の再編

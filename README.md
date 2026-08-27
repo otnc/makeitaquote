@@ -475,7 +475,7 @@ if (key) {
 
 ## Size
 
-The default canvas is **1200×630 landscape, 630×790 portrait** — not a round ratio, but the size a real deployment actually renders at.
+The default canvas is **1200×630** for the `side` layout, **630×790** for `new` — not a round ratio, but the size a real deployment actually renders at.
 
 ```ts
 .setScale(2)      // 2400×1260, the same image at twice the resolution

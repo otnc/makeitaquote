@@ -9,7 +9,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 228904,
+      "bytes": 228888,
       "ok": true,
       "error": null
     },
@@ -20,7 +20,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 235612,
+      "bytes": 235609,
       "ok": true,
       "error": null
     },
@@ -31,24 +31,24 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 311249,
+      "bytes": 311257,
       "ok": true,
       "error": null
     },
     {
-      "name": "portrait",
-      "file": "01-themes/portrait.png",
+      "name": "stacked",
+      "file": "01-themes/stacked.png",
       "note": null,
       "format": "png",
       "width": 630,
       "height": 790,
-      "bytes": 147168,
+      "bytes": 147159,
       "ok": true,
       "error": null
     },
     {
-      "name": "portrait-light",
-      "file": "01-themes/portrait-light.png",
+      "name": "stacked (light)",
+      "file": "01-themes/stacked-light.png",
       "note": null,
       "format": "png",
       "width": 630,
