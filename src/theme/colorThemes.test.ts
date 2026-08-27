@@ -8,7 +8,7 @@ import {
 } from './colorThemes'
 
 describe('COLOR_THEME_CATALOGUE', () => {
-  it('lists all 21 official color themes', () => {
+  it('lists all 21 color themes', () => {
     expect(COLOR_THEME_CATALOGUE).toHaveLength(21)
   })
 
@@ -41,12 +41,12 @@ describe('COLOR_THEME_ALIASES', () => {
     }
   })
 
-  it('matches the official bot option names', () => {
+  it('has the expected short names', () => {
     expect(COLOR_THEME_ALIASES.mb).toBe('midnight_blurple')
     expect(COLOR_THEME_ALIASES.ma).toBe('mint_apple')
   })
 
-  it('has no entry for a theme with no official short alias', () => {
+  it('has no entry for a theme with no short alias', () => {
     expect(Object.values(COLOR_THEME_ALIASES)).not.toContain('forest')
   })
 })

@@ -2,22 +2,18 @@ import type { ColorInput } from './color'
 import type { BackgroundGradientTheme } from './types'
 
 /**
- * The official Make it a Quote bot's named background presets, one row each
- * — the single source `COLOR_THEME_CATALOGUE` and `COLOR_THEME_ALIASES`
- * below are both built from, the same way `FONTS` is for fonts
- * (`font/catalogue.ts`).
+ * Named background presets, one row each — the single source
+ * `COLOR_THEME_CATALOGUE` and `COLOR_THEME_ALIASES` are both built from,
+ * the same way `FONTS` is for fonts (`font/catalogue.ts`).
  *
- * `key` and `alias` are the bot's own `theme=` codes and short option names
- * (see https://wiki.neody.land/wiki/Make_it_a_Quote/Themes) — `null` for a
- * theme the bot has no short alias for. `textBase` is which of this
- * package's own `dark`/`light` text palettes the theme needs for contrast —
- * a color theme fixes this rather than leaving it to the `dark`/`light`
- * choice, since a pale gradient with white text (or a rich one with black
- * text) would be illegible.
+ * `alias` is a short `theme=`-style option name; `null` for none.
+ * `textBase` is which of this package's own `dark`/`light` text palettes
+ * the theme needs for contrast, fixed per theme rather than left to a
+ * `dark`/`light` choice — a pale gradient with white text (or a rich one
+ * with black text) would be illegible.
  *
- * The bot's plain "Black"/"White" entries are deliberately not here: they
- * are flat colors, not gradients, and this package already has them as the
- * `dark`/`light` presets themselves.
+ * Plain black/white aren't here: they're flat colors, not gradients, and
+ * this package already has them as the `dark`/`light` presets themselves.
  */
 const COLOR_THEMES = [
   {
@@ -164,7 +160,7 @@ export interface CataloguedColorTheme {
   gradient: readonly [from: ColorInput, to: ColorInput]
   /** Which of this package's own text palettes the theme needs for contrast. */
   textBase: 'dark' | 'light'
-  /** The official bot's short `theme=` option name, if it has one. */
+  /** Short `theme=`-style option name, if it has one. */
   alias: string | null
 }
 
@@ -172,10 +168,8 @@ export interface CataloguedColorTheme {
 export const COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = COLOR_THEMES
 
 /**
- * Short option names for the catalogue above, matching the official bot's
- * own `theme=` choices — the same relationship `FONT_ALIASES` has to
- * `FONT_CATALOGUE`. Built from `COLOR_THEMES`, not hand-maintained
- * separately.
+ * Short option names for the catalogue above, built from `COLOR_THEMES` —
+ * the same relationship `FONT_ALIASES` has to `FONT_CATALOGUE`.
  */
 export const COLOR_THEME_ALIASES: Readonly<Record<string, string>> = (() => {
   const aliases: Record<string, string> = {}
@@ -202,9 +196,8 @@ function normalize(token: string): string {
 }
 
 /**
- * Turns whatever a caller typed — the official bot's short alias, its full
- * `theme=` key, or that key without underscores — into the canonical key
- * `colorThemeGradient()`/`colorThemeTextBase()` expect.
+ * Turns an alias, a full key, or a key without underscores into the
+ * canonical key `colorThemeGradient()`/`colorThemeTextBase()` expect.
  *
  * ```ts
  * resolveColorTheme('mb')               // 'midnight_blurple' (alias)
@@ -242,10 +235,8 @@ export function colorThemeGradient(key: string): BackgroundGradientTheme | undef
 }
 
 /**
- * Which of this package's own text palettes a resolved color theme key
- * needs for contrast — pass to `extends` as `'light'`/`'dark'` (or
- * `'portrait-light'`/`'portrait'`), overriding whatever a `light`/`dark`
- * toggle of your own would otherwise pick.
+ * Which text palette a resolved color theme key needs for contrast — pass
+ * to `extends` as `'light'`/`'dark'` (or `'portrait-light'`/`'portrait'`).
  */
 export function colorThemeTextBase(key: string): 'dark' | 'light' | undefined {
   return BY_KEY.get(key)?.textBase

@@ -473,7 +473,7 @@ describe('avatar fade over a generated background', () => {
 
 describe('named color themes', () => {
   it('renders a resolved dark theme with its own gradient and the dark text palette', async () => {
-    const key = resolveColorTheme('mb') // Midnight Blurple, an official short alias
+    const key = resolveColorTheme('mb') // Midnight Blurple's short alias
     expect(key).toBe('midnight_blurple')
     if (!key) throw new Error('unreachable')
 
