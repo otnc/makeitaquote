@@ -453,6 +453,27 @@ A generated gradient fill — for a two-tone (or more) background without pre-re
 
 The avatar-fade gradient (`theme.gradient`) composites correctly with either one — it fades the avatar's own edge into whatever is actually behind it, gradient or image included, rather than only ever working over a flat `background`.
 
+### Named color themes
+
+21 named background presets. `COLOR_THEME_CATALOGUE` gives you each one's gradient and which text palette it needs for contrast; `resolveColorTheme()` turns a short alias, a full key, or a key without underscores into the key the other two expect:
+
+```ts
+import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from 'makeitaquote'
+
+const key = resolveColorTheme('mb') // 'midnight_blurple' — also accepts the key itself, any case
+if (key) {
+  await new MiQ()
+    .setText('…')
+    .setTheme({
+      extends: colorThemeTextBase(key) === 'light' ? 'light' : 'dark',
+      backgroundGradient: colorThemeGradient(key),
+    })
+    .toBuffer('png')
+}
+```
+
+`extends` picks this package's own `light`/`dark` (or `portrait-light`/`portrait`, for a portrait layout) text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+
 ---
 
 ## Size
