@@ -710,6 +710,9 @@ Twemoji
 Fonts
   ✓ M PLUS Rounded 1c
   ✓ Noto Sans JP
+  ✓ Nanum Gothic
+  ✓ Noto Sans SC
+  ✓ IBM Plex Sans Arabic
 ```
 
 ### Targets
@@ -725,6 +728,8 @@ Fonts
 | `fonts "Name"` · `"Name"` | One or more specific families, by their Google Fonts name |
 
 `all` only changes what `install` does — `uninstall all` and plain `uninstall` are identical, since removing everything doesn't care which fonts are catalogued. `outdated` takes no target; it always checks miq itself, Twemoji, and every installed font.
+
+`install --no-fallback` skips Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic — the fonts fetched automatically as script fallback (see [Fonts](#fonts)) but never selectable with `font=`. It only trims a broad target (no target, `all`, `fonts`); naming a family explicitly always installs it, fallback or not.
 
 ### Commands
 
