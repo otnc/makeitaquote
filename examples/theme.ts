@@ -46,9 +46,9 @@ await writeFile(
     .toBuffer('png'),
 )
 
-// Stacked layout: the avatar fills the canvas and fades downwards, with the
-// quote stacked over the bottom of it.
-await writeFile('portrait.png', await quote().setTheme({ layout: 'new' }).toBuffer('png'))
+// The new layout: the avatar fills the canvas and fades downwards, with the
+// quote laid over the bottom of it.
+await writeFile('new.png', await quote().setTheme({ layout: 'new' }).toBuffer('png'))
 
 // Flip the sides. The quote area, the gradient and the watermark all follow.
 await writeFile(

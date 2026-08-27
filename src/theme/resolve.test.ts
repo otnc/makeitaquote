@@ -17,7 +17,7 @@ describe('defineTheme', () => {
     expect(defineTheme({ avatar: { grayscale: false } }).avatar.grayscale).toBe(false)
   })
 
-  it('combines a palette with a stacked layout', () => {
+  it('combines a palette with the new layout', () => {
     const theme = defineTheme({ extends: 'light', layout: 'new' })
 
     expect(theme.layout).toBe('new')
@@ -32,7 +32,7 @@ describe('defineTheme', () => {
     expect(theme.avatar.widthRatio).toBe(1)
   })
 
-  it('has a stacked custom preset too', () => {
+  it('has a new-layout custom preset too', () => {
     const theme = defineTheme({ extends: 'custom', layout: 'new' })
 
     expect(theme.background).toBe('transparent')

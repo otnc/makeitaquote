@@ -115,7 +115,7 @@ function backgroundGradientLine(
 /**
  * Draws the avatar, fading it into `background`/`backgroundGradient`/
  * `backgroundImage` when `theme.gradient` is enabled. Sideways for `side`,
- * downwards for `stacked`; mirrored when the avatar is on the right.
+ * downwards for `new`; mirrored when the avatar is on the right.
  *
  * Drawn onto its own offscreen canvas first, then faded there
  * (`destination-out`) before compositing onto the main one — a canvas has

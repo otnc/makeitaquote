@@ -61,9 +61,15 @@ if (!existsSync(distEntry)) {
   process.exit(1)
 }
 
-const { MiQ, MiQConversation, FONT_CATALOGUE, stripMarkdown } = await import(
-  pathToFileURL(distEntry).href
-)
+const {
+  MiQ,
+  MiQConversation,
+  FONT_CATALOGUE,
+  COLOR_THEME_CATALOGUE,
+  colorThemeGradient,
+  colorThemeTextBase,
+  stripMarkdown,
+} = await import(pathToFileURL(distEntry).href)
 
 const packageVersion = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')).version
 
@@ -179,10 +185,10 @@ add('01-themes', 'color (avatar keeps its color)', () =>
     .setAvatar(avatars.illustration)
     .setTheme({ avatar: { grayscale: false } }),
 )
-add('01-themes', 'portrait', () =>
+add('01-themes', 'new', () =>
   base().setText(text.short).setAvatar(avatars.illustration).setTheme({ layout: 'new' }),
 )
-add('01-themes', 'portrait-light', () =>
+add('01-themes', 'new (light)', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.illustration)
@@ -213,7 +219,7 @@ add('02-layout', 'narrow avatar', () =>
       gradient: { startRatio: 0.14, endRatio: 0.32 },
     }),
 )
-add('02-layout', 'stacked on a landscape canvas', () =>
+add('02-layout', 'new layout on a landscape canvas', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.photo)
@@ -364,6 +370,51 @@ for (const family of FONT_CATALOGUE) {
         .setAvatar(avatars.illustration)
         .setTheme({ text: { font: `${family}, Noto Sans JP, sans-serif` } }),
     { network: true },
+  )
+}
+
+// --- 17-all-themes: every palette × layout combination, plus every named
+// color theme — the exhaustive counterpart to the curated highlights in
+// 01-themes ------------------------------------------------------------
+
+const CUSTOM_DEMO_COLORS = {
+  background: '#1A1B26',
+  text: { color: '#C0CAF5' },
+  displayName: { color: '#7AA2F7' },
+  username: { color: '#565F89' },
+  watermark: { color: '#414868' },
+}
+
+for (const palette of ['dark', 'light', 'custom']) {
+  for (const layout of ['side', 'new']) {
+    add(
+      '17-all-themes',
+      `${palette} / ${layout}`,
+      () =>
+        base()
+          .setText(text.short)
+          .setAvatar(avatars.illustration)
+          .setTheme({
+            extends: palette,
+            layout,
+            ...(palette === 'custom' ? CUSTOM_DEMO_COLORS : {}),
+          }),
+      palette === 'custom'
+        ? { note: 'custom starts fully transparent; colors set explicitly here' }
+        : {},
+    )
+  }
+}
+
+for (const colorTheme of COLOR_THEME_CATALOGUE) {
+  add('17-all-themes', colorTheme.label, () =>
+    base()
+      .setText(text.short)
+      .setAvatar(avatars.illustration)
+      .setTheme({
+        extends: colorThemeTextBase(colorTheme.key),
+        backgroundGradient: colorThemeGradient(colorTheme.key),
+      }),
   )
 }
 

@@ -9,7 +9,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 228904,
+      "bytes": 228888,
       "ok": true,
       "error": null
     },
@@ -20,7 +20,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 238208,
+      "bytes": 238216,
       "ok": true,
       "error": null
     },
@@ -31,13 +31,13 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 194458,
+      "bytes": 194463,
       "ok": true,
       "error": null
     },
     {
-      "name": "stacked on a landscape canvas",
-      "file": "02-layout/stacked-on-a-landscape-canvas.png",
+      "name": "new layout on a landscape canvas",
+      "file": "02-layout/new-layout-on-a-landscape-canvas.png",
       "note": null,
       "format": "png",
       "width": 1280,
@@ -53,7 +53,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 222455,
+      "bytes": 222482,
       "ok": true,
       "error": null
     },
@@ -64,7 +64,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 131711,
+      "bytes": 131722,
       "ok": true,
       "error": null
     }

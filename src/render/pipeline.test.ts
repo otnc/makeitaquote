@@ -510,14 +510,14 @@ describe('named color themes', () => {
   })
 })
 
-describe('portrait / new layout', () => {
+describe('the new layout', () => {
   it('renders the new layout', async () => {
     const buffer = await quote().setTheme({ layout: 'new' }).setAvatar(redSquare()).toBuffer('png')
 
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
 
-  it('uses the preset portrait size', async () => {
+  it('uses the new layout preset size', async () => {
     const canvas = await quote().setTheme({ layout: 'new' }).render()
 
     expect(canvas.height).toBeGreaterThan(canvas.width)

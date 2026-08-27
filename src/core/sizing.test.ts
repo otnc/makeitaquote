@@ -19,7 +19,7 @@ describe('default size', () => {
     expect(new MiQ().getTheme().height).toBe(630)
   })
 
-  it('is 630 wide in portrait', () => {
+  it('is 630 wide with the new layout', () => {
     expect(new MiQ({ theme: { layout: 'new' } }).getTheme().width).toBe(630)
   })
 
@@ -137,8 +137,8 @@ describe('sizeToAvatar', () => {
   })
 
   it('works for the new layout, where the avatar is the whole canvas', () => {
-    const portrait = defineTheme({ layout: 'new' })
-    const resized = sizeToAvatar(portrait, { width: 1024, height: 1024 }, 'width')
+    const newLayout = defineTheme({ layout: 'new' })
+    const resized = sizeToAvatar(newLayout, { width: 1024, height: 1024 }, 'width')
 
     expect(resized.width).toBe(1024)
   })
