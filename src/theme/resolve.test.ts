@@ -18,22 +18,22 @@ describe('defineTheme', () => {
   })
 
   it('combines a palette with a stacked layout', () => {
-    const theme = defineTheme({ extends: 'light', layout: 'stacked' })
+    const theme = defineTheme({ extends: 'light', layout: 'new' })
 
-    expect(theme.layout).toBe('stacked')
+    expect(theme.layout).toBe('new')
     expect(theme.background).toBe('#FFFFFF')
     expect(theme.avatar.widthRatio).toBe(1)
   })
 
   it('defaults to the dark palette for a bare layout override', () => {
-    const theme = defineTheme({ layout: 'stacked' })
+    const theme = defineTheme({ layout: 'new' })
 
     expect(theme.background).toBe('#000000')
     expect(theme.avatar.widthRatio).toBe(1)
   })
 
   it('has a stacked custom preset too', () => {
-    const theme = defineTheme({ extends: 'custom', layout: 'stacked' })
+    const theme = defineTheme({ extends: 'custom', layout: 'new' })
 
     expect(theme.background).toBe('transparent')
     expect(theme.avatar.widthRatio).toBe(1)

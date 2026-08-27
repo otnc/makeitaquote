@@ -215,7 +215,7 @@ export async function run(
           description: 'A built-in color palette (default: dark)',
         },
         layout: {
-          type: oneOf('side', 'stacked'),
+          type: oneOf('side', 'new'),
           description: 'Side-by-side or full-bleed stacked avatar (default: side)',
         },
         scale: { type: Number, description: 'Resize the whole image, keeping its layout (max 8)' },
@@ -233,7 +233,7 @@ export async function run(
         examples: [
           'miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png --out quote.png',
           'miq generate --text "Hello" --theme light --format webp',
-          'miq generate --text "Hello" --layout stacked',
+          'miq generate --text "Hello" --layout new',
         ],
       },
     },

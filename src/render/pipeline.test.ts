@@ -510,25 +510,22 @@ describe('named color themes', () => {
   })
 })
 
-describe('portrait / stacked layout', () => {
-  it('renders the stacked layout', async () => {
-    const buffer = await quote()
-      .setTheme({ layout: 'stacked' })
-      .setAvatar(redSquare())
-      .toBuffer('png')
+describe('portrait / new layout', () => {
+  it('renders the new layout', async () => {
+    const buffer = await quote().setTheme({ layout: 'new' }).setAvatar(redSquare()).toBuffer('png')
 
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
 
   it('uses the preset portrait size', async () => {
-    const canvas = await quote().setTheme({ layout: 'stacked' }).render()
+    const canvas = await quote().setTheme({ layout: 'new' }).render()
 
     expect(canvas.height).toBeGreaterThan(canvas.width)
   })
 
   it('fills the whole canvas with the avatar', async () => {
     // Top-right would be background in a side layout; here it is the avatar.
-    const miq = quote().setTheme({ layout: 'stacked' }).setAvatar(redSquare()).setSize(400, 600)
+    const miq = quote().setTheme({ layout: 'new' }).setAvatar(redSquare()).setSize(400, 600)
     const [r, g, b] = await pixelAt(miq, 395, 5)
 
     expect(r).toBe(g)
@@ -537,7 +534,7 @@ describe('portrait / stacked layout', () => {
   })
 
   it('fades downwards rather than sideways', async () => {
-    const miq = quote().setTheme({ layout: 'stacked' }).setAvatar(redSquare()).setSize(400, 600)
+    const miq = quote().setTheme({ layout: 'new' }).setAvatar(redSquare()).setSize(400, 600)
     const canvas = await miq.render()
     const ctx = canvas.getContext('2d')
 
@@ -549,9 +546,9 @@ describe('portrait / stacked layout', () => {
     expect(bottom).toBeLessThan(16)
   })
 
-  it('renders a stacked light theme on white', async () => {
+  it('renders a new-layout light theme on white', async () => {
     const miq = quote()
-      .setTheme({ extends: 'light', layout: 'stacked' })
+      .setTheme({ extends: 'light', layout: 'new' })
       .setAvatar(redSquare())
       .setSize(400, 600)
     const [r, g, b] = await pixelAt(miq, 200, 595)
@@ -561,7 +558,7 @@ describe('portrait / stacked layout', () => {
 
   it('works on a landscape canvas too', async () => {
     const canvas = await quote()
-      .setTheme({ layout: 'stacked', width: 800, height: 400 })
+      .setTheme({ layout: 'new', width: 800, height: 400 })
       .setAvatar(redSquare())
       .render()
 
@@ -819,19 +816,19 @@ describe('MiQ', () => {
   })
 
   it('adopts a different preset size when nothing was set explicitly first', () => {
-    // Regression: `layout: 'stacked'` alone used to keep the previous
-    // theme's 1200x630 instead of picking up the stacked preset's own
+    // Regression: `layout: 'new'` alone used to keep the previous
+    // theme's 1200x630 instead of picking up the new-layout preset's own
     // 630x790, because "the object didn't set width/height" was read as
     // "keep whatever the canvas currently is" rather than "use this
     // preset's own size".
-    const miq = new MiQ().setTheme({ layout: 'stacked', avatar: { grayscale: true } })
+    const miq = new MiQ().setTheme({ layout: 'new', avatar: { grayscale: true } })
 
     expect(miq.getTheme().width).toBe(630)
     expect(miq.getTheme().height).toBe(790)
   })
 
   it('still keeps an explicit size across a later preset switch', () => {
-    const miq = new MiQ().setSize(800, 400).setTheme({ layout: 'stacked' })
+    const miq = new MiQ().setSize(800, 400).setTheme({ layout: 'new' })
 
     expect(miq.getTheme().width).toBe(800)
     expect(miq.getTheme().height).toBe(400)
@@ -847,7 +844,7 @@ describe('MiQ', () => {
   it('an explicit size set via setTheme() itself still survives a later plain override', () => {
     const miq = new MiQ()
       .setTheme({ width: 1000, height: 500 })
-      .setTheme({ layout: 'stacked', avatar: { grayscale: true } })
+      .setTheme({ layout: 'new', avatar: { grayscale: true } })
 
     expect(miq.getTheme().width).toBe(1000)
     expect(miq.getTheme().height).toBe(500)
@@ -855,7 +852,7 @@ describe('MiQ', () => {
 
   it('carries an explicit size from clone() into a later preset switch', () => {
     const original = new MiQ().setSize(800, 400)
-    const copy = original.clone().setTheme({ layout: 'stacked' })
+    const copy = original.clone().setTheme({ layout: 'new' })
 
     expect(copy.getTheme().width).toBe(800)
     expect(copy.getTheme().height).toBe(400)

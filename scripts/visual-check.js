@@ -180,13 +180,13 @@ add('01-themes', 'color (avatar keeps its color)', () =>
     .setTheme({ avatar: { grayscale: false } }),
 )
 add('01-themes', 'portrait', () =>
-  base().setText(text.short).setAvatar(avatars.illustration).setTheme({ layout: 'stacked' }),
+  base().setText(text.short).setAvatar(avatars.illustration).setTheme({ layout: 'new' }),
 )
 add('01-themes', 'portrait-light', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.illustration)
-    .setTheme({ extends: 'light', layout: 'stacked' }),
+    .setTheme({ extends: 'light', layout: 'new' }),
 )
 
 // --- 02-layout: arrangement, not styling ----------------------------------
@@ -217,7 +217,7 @@ add('02-layout', 'stacked on a landscape canvas', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.photo)
-    .setTheme({ layout: 'stacked', width: 1280, height: 720 }),
+    .setTheme({ layout: 'new', width: 1280, height: 720 }),
 )
 add('02-layout', 'no gradient', () =>
   base()
@@ -683,7 +683,7 @@ add(
       .setAvatar(avatars.illustration)
       .setTheme({
         extends: 'custom',
-        layout: 'stacked',
+        layout: 'new',
         background: '#000000A0',
         gradient: { enabled: false },
         text: { color: '#FFFFFF' },

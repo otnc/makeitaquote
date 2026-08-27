@@ -8,20 +8,20 @@
 
 ```diff
 - .setTheme('portrait')
-+ .setTheme({ layout: 'stacked' })
++ .setTheme({ layout: 'new' })
 
 - .setTheme('portrait-light')
-+ .setTheme({ extends: 'light', layout: 'stacked' })
++ .setTheme({ extends: 'light', layout: 'new' })
 
 - .setTheme('color')
 + .setTheme({ avatar: { grayscale: false } })
 ```
 
-`layout` was already a `Theme` field (`'side' | 'stacked'`) — it just could not be combined freely with a palette before. `extends` now only accepts `'dark' | 'light' | 'custom'`.
+`layout` was already a `Theme` field (`'side' | 'new'`) — it just could not be combined freely with a palette before. `extends` now only accepts `'dark' | 'light' | 'custom'`.
 
-`setFromObject({ color: true })` and the CLI's `--color` flag are unaffected. The CLI's `--theme` flag lost `color`/`portrait`/`portrait-light`; use `--theme dark|light|custom` with the new `--layout side|stacked` flag instead.
+`setFromObject({ color: true })` and the CLI's `--color` flag are unaffected. The CLI's `--theme` flag lost `color`/`portrait`/`portrait-light`; use `--theme dark|light|custom` with the new `--layout side|new` flag instead.
 
-`themes`, exported from the package root, changed shape to match: it used to be one `Theme` per name, now it is `themes[palette][layout]` — `themes['portrait-light']` is `themes.light.stacked`.
+`themes`, exported from the package root, changed shape to match: it used to be one `Theme` per name, now it is `themes[palette][layout]` — `themes['portrait-light']` is `themes.light.new`.
 
 ## From v9
 

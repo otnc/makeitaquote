@@ -286,7 +286,7 @@ new MiQ({ theme: 'dark' })      // at construction
 new MiQ().setTheme('light')     // or later
 ```
 
-A palette combines with `layout` (`'side'` (default) or `'stacked'` — see [Stacked layout](#stacked-layout)) and any other override, so every combination is reachable without a preset name for each one:
+A palette combines with `layout` (`'side'` (default) or `'new'` — see [Stacked layout](#stacked-layout)) and any other override, so every combination is reachable without a preset name for each one:
 
 ```ts
 await new MiQ()
@@ -302,7 +302,7 @@ await new MiQ()
 
 Sizes inside a theme are **fractions of the canvas** when between 0 and 1, and pixels when larger. That is what makes [scaling](#size) a true zoom.
 
-`themes` and `palettes` are exported too. `palettes` is the `dark`/`light` colour pairs presets are built from, for a custom theme that wants to start from one rather than repeat its hex codes. `themes` is the full resolved `Theme` behind each palette/layout pair — `themes.light.stacked`, for instance. `defineTheme(palette | input)` runs the same resolution `.setTheme()` does, if you want the resolved `Theme` itself rather than to render with it.
+`themes` and `palettes` are exported too. `palettes` is the `dark`/`light` colour pairs presets are built from, for a custom theme that wants to start from one rather than repeat its hex codes. `themes` is the full resolved `Theme` behind each palette/layout pair — `themes.light.new`, for instance. `defineTheme(palette | input)` runs the same resolution `.setTheme()` does, if you want the resolved `Theme` itself rather than to render with it.
 
 ### Flipping sides
 
@@ -323,14 +323,14 @@ Clips the avatar, and its fallback tile, to the largest circle that fits the box
 ### Stacked layout
 
 ```ts
-await new MiQ({ theme: { layout: 'stacked' } })
+await new MiQ({ theme: { layout: 'new' } })
   .setText('猫は液体である')
   .setAvatar(avatarUrl)
   .setUsername('otoneko.')
   .toBuffer('png')
 ```
 
-Draws the avatar full-bleed, fades it downwards, and puts large quote marks, the quote, a rule and the attribution over the bottom. Combines with any palette (`{ extends: 'light', layout: 'stacked' }`) and is not limited to tall canvases — `{ layout: 'stacked', width: 1280, height: 720 }` works too.
+Draws the avatar full-bleed, fades it downwards, and puts large quote marks, the quote, a rule and the attribution over the bottom. Combines with any palette (`{ extends: 'light', layout: 'new' }`) and is not limited to tall canvases — `{ layout: 'new', width: 1280, height: 720 }` works too.
 
 ### Bold
 
@@ -469,7 +469,7 @@ if (key) {
 }
 ```
 
-`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'stacked'` alongside it for a [stacked layout](#stacked-layout). Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'new'` alongside it for a [stacked layout](#stacked-layout). Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
 
 ---
 
@@ -797,7 +797,7 @@ Network
 | `--avatar <string>` | A URL, or a local image file |
 | `--username`, `--display-name`, `--watermark <string>` | The same three fields `setUsername()`/`setDisplayName()`/`setWatermark()` set |
 | `--theme <name>` | `dark` (default), `light` or `custom` |
-| `--layout <name>` | `side` (default) or `stacked` |
+| `--layout <name>` | `side` (default) or `new` |
 | `--color` | Keep the avatar in color instead of desaturating it |
 | `--scale <number>` | Resize the whole image, keeping its layout — up to 8 |
 | `--format <name>` | `png` (default), `jpeg`/`jpg`, `webp` or `avif` |

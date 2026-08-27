@@ -11,10 +11,10 @@ export type ThemePalette = 'dark' | 'light' | 'custom'
  *
  * - `side` puts them next to each other, the avatar fading sideways into the
  *   background.
- * - `stacked` fills the canvas with the avatar and fades it downwards, with the
+ * - `new` fills the canvas with the avatar and fades it downwards, with the
  *   quote sitting over the bottom of it. Suits portrait canvases.
  */
-export type LayoutMode = 'side' | 'stacked'
+export type LayoutMode = 'side' | 'new'
 
 /** BudouX model used to find phrase boundaries. `'none'` disables phrase breaking. */
 export type PhraseLocale = 'ja' | 'zh-hans' | 'zh-hant' | 'none'
@@ -27,9 +27,9 @@ export type FontWeight = 'normal' | 'bold' | 'lighter' | 'bolder' | number
 export interface AvatarTheme {
   /** Draw the avatar in black and white. */
   grayscale: boolean
-  /** Which side it sits on. Ignored when the layout is `stacked`. */
+  /** Which side it sits on. Ignored when the layout is `new`. */
   position: 'left' | 'right'
-  /** Fraction of the canvas width it occupies. Forced to 1 when `stacked`. */
+  /** Fraction of the canvas width it occupies. Forced to 1 when `new`. */
   widthRatio: number
   /**
    * How the image fills its box.
@@ -152,7 +152,7 @@ export interface WatermarkTheme {
   size: number
   /**
    * `'auto'` keeps it clear of the avatar: opposite side for `side` layouts,
-   * bottom right for `stacked` ones.
+   * bottom right for `new` ones.
    */
   position: 'auto' | 'bottom-right' | 'bottom-left' | 'bottom-center'
 }

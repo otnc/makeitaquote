@@ -146,7 +146,7 @@ const light: Theme = {
  */
 const portrait: Theme = {
   ...clone(dark),
-  layout: 'stacked',
+  layout: 'new',
   ...PORTRAIT,
   avatar: { ...clone(dark).avatar, widthRatio: 1, position: 'left' },
   gradient: {
@@ -198,7 +198,7 @@ const custom: Theme = {
   watermark: { ...clone(dark).watermark, color: 'transparent' },
 }
 
-/** The `stacked`-layout counterpart to `custom`, same relationship `portrait` has to `dark`. */
+/** The `new`-layout counterpart to `custom`, same relationship `portrait` has to `dark`. */
 const customStacked: Theme = {
   ...clone(portrait),
   background: 'transparent',
@@ -211,9 +211,9 @@ const customStacked: Theme = {
 
 /** Every base preset, by palette then layout. */
 export const themes: Record<ThemePalette, Record<LayoutMode, Theme>> = {
-  dark: { side: dark, stacked: portrait },
-  light: { side: light, stacked: portraitLight },
-  custom: { side: custom, stacked: customStacked },
+  dark: { side: dark, new: portrait },
+  light: { side: light, new: portraitLight },
+  custom: { side: custom, new: customStacked },
 }
 
 const PALETTES = new Set<string>(Object.keys(themes))

@@ -14,7 +14,7 @@ describe('renderToBuffer', () => {
     const buffer = await renderToBuffer({
       text: 'Hi',
       theme: 'light',
-      layout: 'stacked',
+      layout: 'new',
       format: 'png',
       offline: true,
     })
@@ -26,7 +26,7 @@ describe('renderToBuffer', () => {
   it('applies --layout alone, defaulting the palette to dark', async () => {
     const buffer = await renderToBuffer({
       text: 'Hi',
-      layout: 'stacked',
+      layout: 'new',
       format: 'png',
       offline: true,
     })

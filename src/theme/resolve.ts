@@ -48,7 +48,7 @@ export function defineTheme(input: ThemePalette | ThemeInput = 'dark'): Theme {
   // Picked before merging, since it decides which base preset's own
   // gradient/quoteMark/sizes to start from; validate() still catches a
   // bad theme.layout on the final merged result.
-  const layout: LayoutMode = input.layout === 'stacked' ? 'stacked' : 'side'
+  const layout: LayoutMode = input.layout === 'new' ? 'new' : 'side'
 
   const theme = clone(presetFor(palette, layout))
   merge(theme as unknown as Record<string, unknown>, input as Record<string, unknown>, 'theme')
@@ -108,8 +108,8 @@ function validate(theme: Theme): void {
   assertRatio(theme.avatar.widthRatio, 'theme.avatar.widthRatio')
   assertPositive(theme.text.lineHeight, 'theme.text.lineHeight')
 
-  if (theme.layout !== 'side' && theme.layout !== 'stacked') {
-    throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or stacked.`, {
+  if (theme.layout !== 'side' && theme.layout !== 'new') {
+    throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or new.`, {
       field: 'theme.layout',
     })
   }
