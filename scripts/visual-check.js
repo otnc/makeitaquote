@@ -165,7 +165,7 @@ function add(group, name, build, extra = {}) {
   cases.push({ group, name, build, ...extra })
 }
 
-// --- 01-themes: the five presets, side by side ----------------------------
+// --- 01-themes: palette/layout/color combinations, side by side ------------
 
 add('01-themes', 'dark (default)', () =>
   base().setText(text.jaLong).setAvatar(avatars.illustration),
@@ -174,13 +174,19 @@ add('01-themes', 'light', () =>
   base().setText(text.jaLong).setAvatar(avatars.illustration).setTheme('light'),
 )
 add('01-themes', 'color (avatar keeps its color)', () =>
-  base().setText(text.jaLong).setAvatar(avatars.illustration).setTheme('color'),
+  base()
+    .setText(text.jaLong)
+    .setAvatar(avatars.illustration)
+    .setTheme({ avatar: { grayscale: false } }),
 )
 add('01-themes', 'portrait', () =>
-  base().setText(text.short).setAvatar(avatars.illustration).setTheme('portrait'),
+  base().setText(text.short).setAvatar(avatars.illustration).setTheme({ layout: 'stacked' }),
 )
 add('01-themes', 'portrait-light', () =>
-  base().setText(text.short).setAvatar(avatars.illustration).setTheme('portrait-light'),
+  base()
+    .setText(text.short)
+    .setAvatar(avatars.illustration)
+    .setTheme({ extends: 'light', layout: 'stacked' }),
 )
 
 // --- 02-layout: arrangement, not styling ----------------------------------
@@ -211,7 +217,7 @@ add('02-layout', 'stacked on a landscape canvas', () =>
   base()
     .setText(text.short)
     .setAvatar(avatars.photo)
-    .setTheme({ extends: 'portrait', width: 1280, height: 720 }),
+    .setTheme({ layout: 'stacked', width: 1280, height: 720 }),
 )
 add('02-layout', 'no gradient', () =>
   base()

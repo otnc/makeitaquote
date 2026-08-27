@@ -1,5 +1,5 @@
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
-import type { Theme, ThemeName } from './types'
+import type { LayoutMode, Theme, ThemePalette } from './types'
 
 /**
  * The default stack.
@@ -140,12 +140,6 @@ const light: Theme = {
   watermark: { ...dark.watermark, color: palettes.light.faint },
 }
 
-/** Leaves the avatar in color — the v8 `setColor(true)` behaviour. */
-const color: Theme = {
-  ...clone(dark),
-  avatar: { ...clone(dark).avatar, grayscale: false },
-}
-
 /**
  * Portrait: the avatar fills the canvas and fades downwards, with big quote
  * marks, the quote, a rule and the attribution stacked over the bottom of it.
@@ -204,22 +198,36 @@ const custom: Theme = {
   watermark: { ...clone(dark).watermark, color: 'transparent' },
 }
 
-export const themes: Record<ThemeName, Theme> = {
-  dark,
-  light,
-  color,
-  portrait,
-  'portrait-light': portraitLight,
-  custom,
+/** The `stacked`-layout counterpart to `custom`, same relationship `portrait` has to `dark`. */
+const customStacked: Theme = {
+  ...clone(portrait),
+  background: 'transparent',
+  avatar: { ...clone(portrait).avatar, fallback: null },
+  text: { ...clone(portrait).text, color: 'transparent' },
+  displayName: { ...clone(portrait).displayName, color: 'transparent' },
+  username: { ...clone(portrait).username, color: 'transparent' },
+  watermark: { ...clone(portrait).watermark, color: 'transparent' },
 }
 
-const NAMES = new Set<string>(Object.keys(themes))
-
-export function isThemeName(value: unknown): value is ThemeName {
-  return typeof value === 'string' && NAMES.has(value)
+/** Every base preset, by palette then layout. */
+export const themes: Record<ThemePalette, Record<LayoutMode, Theme>> = {
+  dark: { side: dark, stacked: portrait },
+  light: { side: light, stacked: portraitLight },
+  custom: { side: custom, stacked: customStacked },
 }
 
-export const themeNames = Object.keys(themes) as ThemeName[]
+const PALETTES = new Set<string>(Object.keys(themes))
+
+export function isThemePalette(value: unknown): value is ThemePalette {
+  return typeof value === 'string' && PALETTES.has(value)
+}
+
+export const themePaletteNames = Object.keys(themes) as ThemePalette[]
+
+/** The base preset for a palette/layout combination. */
+export function presetFor(palette: ThemePalette, layout: LayoutMode): Theme {
+  return themes[palette][layout]
+}
 
 /** A deep copy, so presets can never be mutated by a caller. */
 export function clone<T>(value: T): T {

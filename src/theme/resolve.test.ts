@@ -10,7 +10,33 @@ describe('defineTheme', () => {
 
   it('returns a preset by name', () => {
     expect(defineTheme('light').background).toBe('#FFFFFF')
-    expect(defineTheme('color').avatar.grayscale).toBe(false)
+    expect(defineTheme('custom').background).toBe('transparent')
+  })
+
+  it('keeps the avatar in color via an explicit override', () => {
+    expect(defineTheme({ avatar: { grayscale: false } }).avatar.grayscale).toBe(false)
+  })
+
+  it('combines a palette with a stacked layout', () => {
+    const theme = defineTheme({ extends: 'light', layout: 'stacked' })
+
+    expect(theme.layout).toBe('stacked')
+    expect(theme.background).toBe('#FFFFFF')
+    expect(theme.avatar.widthRatio).toBe(1)
+  })
+
+  it('defaults to the dark palette for a bare layout override', () => {
+    const theme = defineTheme({ layout: 'stacked' })
+
+    expect(theme.background).toBe('#000000')
+    expect(theme.avatar.widthRatio).toBe(1)
+  })
+
+  it('has a stacked custom preset too', () => {
+    const theme = defineTheme({ extends: 'custom', layout: 'stacked' })
+
+    expect(theme.background).toBe('transparent')
+    expect(theme.avatar.widthRatio).toBe(1)
   })
 
   it('rejects an unknown preset name', () => {
@@ -21,14 +47,14 @@ describe('defineTheme', () => {
     const theme = defineTheme('dark')
     theme.background = '#123456'
 
-    expect(themes.dark.background).toBe('#000000')
+    expect(themes.dark.side.background).toBe('#000000')
   })
 
   it('deep-copies nested objects too', () => {
     const theme = defineTheme('dark')
     theme.text.color = '#123456'
 
-    expect(themes.dark.text.color).toBe('#FFFFFF')
+    expect(themes.dark.side.text.color).toBe('#FFFFFF')
   })
 
   it('merges a shallow override', () => {
@@ -39,8 +65,8 @@ describe('defineTheme', () => {
     const theme = defineTheme({ text: { color: '#FF0000' } })
 
     expect(theme.text.color).toBe('#FF0000')
-    expect(theme.text.lineHeight).toBe(themes.dark.text.lineHeight)
-    expect(theme.text.font).toBe(themes.dark.text.font)
+    expect(theme.text.lineHeight).toBe(themes.dark.side.text.lineHeight)
+    expect(theme.text.font).toBe(themes.dark.side.text.font)
   })
 
   it('extends the named preset', () => {
@@ -103,6 +129,10 @@ describe('defineTheme', () => {
 
     it('rejects an avatar wider than the canvas', () => {
       expect(() => defineTheme({ avatar: { widthRatio: 1.5 } })).toThrow(ValidationError)
+    })
+
+    it('rejects an unknown layout', () => {
+      expect(() => defineTheme({ layout: 'grid' as never })).toThrow(ValidationError)
     })
 
     it('rejects a minimum font size above the maximum', () => {

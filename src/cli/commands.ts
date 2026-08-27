@@ -452,6 +452,8 @@ export interface RenderOptions {
   color?: boolean
   /** Validated by cleye's `oneOf()` before this ever runs — a plain string here, not re-checked. */
   theme?: string
+  /** Same as `theme` — validated by cleye's `oneOf()` already. */
+  layout?: string
   scale?: number
   /** Same as `theme` — already one of `RenderInput['format']`'s members by the time this runs. */
   format?: string
@@ -488,6 +490,7 @@ export async function renderCommand(
       ...(options.watermark !== undefined ? { watermark: options.watermark } : {}),
       ...(options.color !== undefined ? { color: options.color } : {}),
       ...(options.theme !== undefined ? { theme: options.theme as RenderInput['theme'] } : {}),
+      ...(options.layout !== undefined ? { layout: options.layout as RenderInput['layout'] } : {}),
       ...(options.scale !== undefined ? { scale: options.scale } : {}),
       ...(options.quality !== undefined ? { quality: options.quality } : {}),
       format,

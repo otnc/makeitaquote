@@ -20,7 +20,7 @@ describe('default size', () => {
   })
 
   it('is 630 wide in portrait', () => {
-    expect(new MiQ({ theme: 'portrait' }).getTheme().width).toBe(630)
+    expect(new MiQ({ theme: { layout: 'stacked' } }).getTheme().width).toBe(630)
   })
 
   it('matches what api.voids.top itself renders at, not a round ratio', () => {
@@ -137,7 +137,7 @@ describe('sizeToAvatar', () => {
   })
 
   it('works for the stacked layout, where the avatar is the whole canvas', () => {
-    const portrait = defineTheme('portrait')
+    const portrait = defineTheme({ layout: 'stacked' })
     const resized = sizeToAvatar(portrait, { width: 1024, height: 1024 }, 'width')
 
     expect(resized.width).toBe(1024)

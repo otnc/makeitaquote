@@ -7,7 +7,6 @@ const quote = () =>
 // Presets
 await writeFile('dark.png', await quote().toBuffer('png'))
 await writeFile('light.png', await quote().setTheme('light').toBuffer('png'))
-await writeFile('color.png', await quote().setTheme('color').toBuffer('png'))
 
 // Partial overrides merge onto a preset, so only what you name changes.
 await writeFile(
@@ -47,9 +46,9 @@ await writeFile(
     .toBuffer('png'),
 )
 
-// Portrait: the avatar fills the canvas and fades downwards, with the quote
-// stacked over the bottom of it.
-await writeFile('portrait.png', await quote().setTheme('portrait').toBuffer('png'))
+// Stacked layout: the avatar fills the canvas and fades downwards, with the
+// quote stacked over the bottom of it.
+await writeFile('portrait.png', await quote().setTheme({ layout: 'stacked' }).toBuffer('png'))
 
 // Flip the sides. The quote area, the gradient and the watermark all follow.
 await writeFile(

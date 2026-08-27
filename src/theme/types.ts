@@ -1,12 +1,16 @@
 import type { ColorInput } from './color'
 
-export type ThemeName = 'dark' | 'light' | 'color' | 'portrait' | 'portrait-light' | 'custom'
+/**
+ * A built-in color palette — combined with `layout` to pick a base preset.
+ * `'custom'` starts fully transparent, for compositing your own colors over.
+ */
+export type ThemePalette = 'dark' | 'light' | 'custom'
 
 /**
  * How the avatar and the quote are arranged.
  *
  * - `side` puts them next to each other, the avatar fading sideways into the
- *   background. This is the original Make it a Quote look.
+ *   background.
  * - `stacked` fills the canvas with the avatar and fades it downwards, with the
  *   quote sitting over the bottom of it. Suits portrait canvases.
  */
@@ -228,6 +232,6 @@ export type DeepPartial<T> = {
 }
 
 export type ThemeInput = DeepPartial<Theme> & {
-  /** Preset to start from. Defaults to `'dark'`. */
-  extends?: ThemeName
+  /** Palette to start from. Defaults to `'dark'`. Combines with `layout`. */
+  extends?: ThemePalette
 }

@@ -236,7 +236,7 @@ export function colorThemeGradient(key: string): BackgroundGradientTheme | undef
 
 /**
  * Which text palette a resolved color theme key needs for contrast — pass
- * to `extends` as `'light'`/`'dark'` (or `'portrait-light'`/`'portrait'`).
+ * to `extends` as `'light'`/`'dark'`, alongside whatever `layout` you want.
  */
 export function colorThemeTextBase(key: string): 'dark' | 'light' | undefined {
   return BY_KEY.get(key)?.textBase

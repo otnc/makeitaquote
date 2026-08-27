@@ -3,7 +3,7 @@ import { encode, encodeDataURL, encodeStream } from '../output/encode'
 import type { Canvas } from '../render/canvasFactory'
 import { renderQuote } from '../render/pipeline'
 import { defineTheme } from '../theme/resolve'
-import type { Theme, ThemeInput, ThemeName } from '../theme/types'
+import type { Theme, ThemeInput, ThemePalette } from '../theme/types'
 import { deprecate } from './deprecate'
 import { ValidationError } from './errors'
 import { fromNote } from './note'
@@ -126,15 +126,15 @@ export class MiQ {
    * Merges a partial quote.
    *
    * `color: true` is accepted for symmetry with the API client, where it is a
-   * wire field; here it selects the `color` theme.
+   * wire field; here it keeps the avatar in color instead of desaturating it.
    */
   setFromObject(input: QuoteInput): this {
     this.#data = applyInput(this.#data, input)
-    if (input.color === true) this.setTheme('color')
+    if (input.color === true) this.setTheme({ avatar: { grayscale: false } })
     return this
   }
 
-  setTheme(theme: ThemeName | ThemeInput): this {
+  setTheme(theme: ThemePalette | ThemeInput): this {
     this.#theme = defineTheme(theme)
     this.#applyExplicitSize(theme)
     return this
@@ -152,7 +152,7 @@ export class MiQ {
    * before is carried over onto the new theme rather than replaced by
    * whichever preset it (or its `extends`) happens to resolve to.
    */
-  #applyExplicitSize(theme: ThemeName | ThemeInput): void {
+  #applyExplicitSize(theme: ThemePalette | ThemeInput): void {
     if (typeof theme !== 'object') {
       this.#explicitWidth = null
       this.#explicitHeight = null

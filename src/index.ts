@@ -17,6 +17,7 @@ export type {
   ConversationThemeName,
   EncodeOptions,
   FontSource,
+  LayoutMode,
   MentionOptions,
   MessageLike,
   MessageSourceOptions,
@@ -30,7 +31,7 @@ export type {
   Segment,
   Theme,
   ThemeInput,
-  ThemeName,
+  ThemePalette,
   TweetLike,
 } from './core/types'
 export type { EmojiCacheOptions } from './emoji/cache'
