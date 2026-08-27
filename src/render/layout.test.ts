@@ -65,23 +65,23 @@ describe('computeLayout · side', () => {
   })
 })
 
-describe('computeLayout · stacked', () => {
+describe('computeLayout · new', () => {
   it('fills the canvas with the avatar', () => {
-    const theme = defineTheme('portrait')
+    const theme = defineTheme({ layout: 'new' })
     const { avatar } = computeLayout(theme)
 
     expect(avatar).toEqual({ x: 0, y: 0, width: theme.width, height: theme.height })
   })
 
   it('ignores the avatar side', () => {
-    const left = computeLayout(defineTheme({ extends: 'portrait', avatar: { position: 'left' } }))
-    const right = computeLayout(defineTheme({ extends: 'portrait', avatar: { position: 'right' } }))
+    const left = computeLayout(defineTheme({ layout: 'new', avatar: { position: 'left' } }))
+    const right = computeLayout(defineTheme({ layout: 'new', avatar: { position: 'right' } }))
 
     expect(left.avatar).toEqual(right.avatar)
   })
 
   it('puts the quote across the lower half', () => {
-    const theme = defineTheme('portrait')
+    const theme = defineTheme({ layout: 'new' })
     const { text } = computeLayout(theme)
 
     expect(text.y).toBeGreaterThan(theme.height * 0.5)
@@ -89,7 +89,7 @@ describe('computeLayout · stacked', () => {
   })
 
   it('centres the quote horizontally', () => {
-    const theme = defineTheme('portrait')
+    const theme = defineTheme({ layout: 'new' })
     const { centreX } = computeLayout(theme)
 
     expect(centreX).toBeCloseTo(theme.width / 2)
@@ -122,7 +122,7 @@ describe('gradientLine', () => {
   })
 
   it('runs top to bottom when vertical', () => {
-    const [x0, y0, x1, y1] = gradientLine(defineTheme('portrait'))
+    const [x0, y0, x1, y1] = gradientLine(defineTheme({ layout: 'new' }))
 
     expect(x0).toBe(0)
     expect(x1).toBe(0)
@@ -130,7 +130,7 @@ describe('gradientLine', () => {
   })
 
   it('does not mirror a vertical gradient for a right avatar', () => {
-    const theme = defineTheme({ extends: 'portrait', avatar: { position: 'right' } })
+    const theme = defineTheme({ layout: 'new', avatar: { position: 'right' } })
     const [, y0, , y1] = gradientLine(theme)
 
     expect(y0).toBeLessThan(y1)

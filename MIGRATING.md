@@ -1,5 +1,28 @@
 # Migrating
 
+## From v10
+
+### Theme presets: `portrait`/`portrait-light`/`color` are gone
+
+`ThemeName` (`'dark' | 'light' | 'color' | 'portrait' | 'portrait-light' | 'custom'`) is now `ThemePalette` (`'dark' | 'light' | 'custom'`) — layout and color are independent settings now, not baked into one string per combination.
+
+```diff
+- .setTheme('portrait')
++ .setTheme({ layout: 'new' })
+
+- .setTheme('portrait-light')
++ .setTheme({ extends: 'light', layout: 'new' })
+
+- .setTheme('color')
++ .setTheme({ avatar: { grayscale: false } })
+```
+
+`layout` was already a `Theme` field (`'side' | 'new'`) — it just could not be combined freely with a palette before. `extends` now only accepts `'dark' | 'light' | 'custom'`.
+
+`setFromObject({ color: true })` and the CLI's `--color` flag are unaffected. The CLI's `--theme` flag lost `color`/`portrait`/`portrait-light`; use `--theme dark|light|custom` with the new `--layout side|new` flag instead.
+
+`themes`, exported from the package root, changed shape to match: it used to be one `Theme` per name, now it is `themes[palette][layout]` — `themes['portrait-light']` is `themes.light.new`.
+
 ## From v9
 
 No API changes — everything that worked in v9 still works the same way. The breaking part is where downloaded fonts live by default.
@@ -44,7 +67,7 @@ v9 is a rewrite. The API changed, and images are now rendered locally by default
 -     .setDisplayname('音猫｡')
 +     .setDisplayName('音猫｡')
 -     .setColor(true)
-+     .setTheme('color')
++     .setTheme({ avatar: { grayscale: false } })
 -     .generate(true)
 +     .toBuffer('png')
 ```
@@ -53,7 +76,7 @@ v9 is a rewrite. The API changed, and images are now rendered locally by default
 | --- | --- | --- |
 | `new MiQ()` | `new MiQ()` | `new VoidsMiQ()` |
 | `.setDisplayname(v)` | `.setDisplayName(v)` | `.setDisplayName(v)` |
-| `.setColor(true)` | `.setTheme('color')` | `.setColor(true)` |
+| `.setColor(true)` | `.setTheme({ avatar: { grayscale: false } })` | `.setColor(true)` |
 | `.setText(v, true)` | `.setText(stripDiscordMarkdown(v))` | same |
 | `.generate()` | — local rendering has no URL | `.toURL()` |
 | `.generate(true)` | `.toBuffer('png')` | `.toBuffer({ hosted: true })` |

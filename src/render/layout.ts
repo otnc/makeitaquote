@@ -28,7 +28,7 @@ const SIDE_GAP = 0.04
  * overlapping the avatar.
  */
 export function autoArea(theme: Theme): Area {
-  if (theme.layout === 'stacked') {
+  if (theme.layout === 'new') {
     // The quote sits over the faded lower part of the avatar. Leaving the
     // bottom fifth free gives the divider and attribution somewhere to go.
     return { x: 0.08, y: 0.56, width: 0.84, height: 0.18 }
@@ -71,9 +71,9 @@ export function sizeToAvatar(
 export function computeLayout(theme: Theme): Layout {
   const { width, height } = theme
 
-  const avatarWidth = theme.layout === 'stacked' ? width : width * theme.avatar.widthRatio
+  const avatarWidth = theme.layout === 'new' ? width : width * theme.avatar.widthRatio
   const avatarX =
-    theme.layout === 'stacked' || theme.avatar.position === 'left' ? 0 : width - avatarWidth
+    theme.layout === 'new' || theme.avatar.position === 'left' ? 0 : width - avatarWidth
 
   const area = theme.text.area === 'auto' ? autoArea(theme) : theme.text.area
 
@@ -119,7 +119,7 @@ export function gradientLine(theme: Theme): [number, number, number, number] {
  */
 export function watermarkCorner(theme: Theme): 'bottom-right' | 'bottom-left' | 'bottom-center' {
   if (theme.watermark.position !== 'auto') return theme.watermark.position
-  if (theme.layout === 'stacked') return 'bottom-right'
+  if (theme.layout === 'new') return 'bottom-right'
   return theme.avatar.position === 'right' ? 'bottom-left' : 'bottom-right'
 }
 

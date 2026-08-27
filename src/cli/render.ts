@@ -4,13 +4,15 @@ import { MiQ } from '../core/MiQ'
 import type {
   AvatarSource,
   EncodeOptions,
+  LayoutMode,
   OutputFormat,
   QuoteInput,
-  ThemeName,
+  ThemePalette,
 } from '../core/types'
 
 export interface RenderInput extends QuoteInput {
-  theme?: ThemeName
+  theme?: ThemePalette
+  layout?: LayoutMode
   scale?: number
   offline?: boolean
   format: OutputFormat
@@ -29,8 +31,16 @@ export async function resolveAvatar(value: string): Promise<AvatarSource> {
  * can inject a fake here instead of actually drawing a canvas.
  */
 export async function renderToBuffer(input: RenderInput): Promise<Buffer> {
+  const theme =
+    input.theme === undefined && input.layout === undefined
+      ? undefined
+      : {
+          ...(input.theme !== undefined ? { extends: input.theme } : {}),
+          ...(input.layout !== undefined ? { layout: input.layout } : {}),
+        }
+
   const miq = new MiQ({
-    ...(input.theme !== undefined ? { theme: input.theme } : {}),
+    ...(theme !== undefined ? { theme } : {}),
     ...(input.offline ? { autoFont: false } : {}),
   })
 

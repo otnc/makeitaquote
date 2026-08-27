@@ -208,11 +208,15 @@ export async function run(
         watermark: { type: String, description: 'Small corner text' },
         color: {
           type: Boolean,
-          description: 'Keep the avatar in color (shortcut for --theme color)',
+          description: 'Keep the avatar in color instead of desaturating it',
         },
         theme: {
-          type: oneOf('dark', 'light', 'color', 'portrait', 'portrait-light', 'custom'),
-          description: 'A built-in theme preset (default: dark)',
+          type: oneOf('dark', 'light', 'custom'),
+          description: 'A built-in color palette (default: dark)',
+        },
+        layout: {
+          type: oneOf('side', 'new'),
+          description: 'Side-by-side or full-bleed stacked avatar (default: side)',
         },
         scale: { type: Number, description: 'Resize the whole image, keeping its layout (max 8)' },
         format: {
@@ -229,6 +233,7 @@ export async function run(
         examples: [
           'miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png --out quote.png',
           'miq generate --text "Hello" --theme light --format webp',
+          'miq generate --text "Hello" --layout new',
         ],
       },
     },

@@ -1,7 +1,13 @@
 import { ValidationError } from '../core/errors'
 import { resolveFontStack } from '../font/catalogue'
-import { clone, isThemeName, themes } from './presets'
-import type { BackgroundGradientDirection, Theme, ThemeInput, ThemeName } from './types'
+import { clone, isThemePalette, presetFor } from './presets'
+import type {
+  BackgroundGradientDirection,
+  LayoutMode,
+  Theme,
+  ThemeInput,
+  ThemePalette,
+} from './types'
 
 const BACKGROUND_GRADIENT_DIRECTIONS = new Set<BackgroundGradientDirection>([
   'horizontal',
@@ -17,31 +23,34 @@ const BACKGROUND_GRADIENT_DIRECTIONS = new Set<BackgroundGradientDirection>([
  * so `{ text: { color: 'red' } }` changes the color and leaves the rest of the
  * text settings alone.
  */
-export function defineTheme(input: ThemeName | ThemeInput = 'dark'): Theme {
+export function defineTheme(input: ThemePalette | ThemeInput = 'dark'): Theme {
   if (typeof input === 'string') {
-    if (!isThemeName(input)) {
-      throw new ValidationError(`Unknown theme "${input}". Expected dark, light or color.`, {
+    if (!isThemePalette(input)) {
+      throw new ValidationError(`Unknown theme "${input}". Expected dark, light or custom.`, {
         field: 'theme',
       })
     }
-    return clone(themes[input])
+    return clone(presetFor(input, 'side'))
   }
 
   if (input === null || typeof input !== 'object') {
-    throw new ValidationError('theme must be a preset name or an object', { field: 'theme' })
+    throw new ValidationError('theme must be a palette name or an object', { field: 'theme' })
   }
 
-  const base = input.extends ?? 'dark'
-  if (!isThemeName(base)) {
+  const palette = input.extends ?? 'dark'
+  if (!isThemePalette(palette)) {
     throw new ValidationError(
-      `Unknown theme "${base}" in extends. Expected dark, light or color.`,
-      {
-        field: 'theme.extends',
-      },
+      `Unknown theme "${palette}" in extends. Expected dark, light or custom.`,
+      { field: 'theme.extends' },
     )
   }
 
-  const theme = clone(themes[base])
+  // Picked before merging, since it decides which base preset's own
+  // gradient/quoteMark/sizes to start from; validate() still catches a
+  // bad theme.layout on the final merged result.
+  const layout: LayoutMode = input.layout === 'new' ? 'new' : 'side'
+
+  const theme = clone(presetFor(palette, layout))
   merge(theme as unknown as Record<string, unknown>, input as Record<string, unknown>, 'theme')
   resolveFontAliases(theme)
   validate(theme)
@@ -99,8 +108,8 @@ function validate(theme: Theme): void {
   assertRatio(theme.avatar.widthRatio, 'theme.avatar.widthRatio')
   assertPositive(theme.text.lineHeight, 'theme.text.lineHeight')
 
-  if (theme.layout !== 'side' && theme.layout !== 'stacked') {
-    throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or stacked.`, {
+  if (theme.layout !== 'side' && theme.layout !== 'new') {
+    throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or new.`, {
       field: 'theme.layout',
     })
   }

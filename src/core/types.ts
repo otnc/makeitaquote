@@ -1,6 +1,6 @@
-import type { Theme, ThemeInput, ThemeName } from '../theme/types'
+import type { LayoutMode, Theme, ThemeInput, ThemePalette } from '../theme/types'
 
-export type { Theme, ThemeInput, ThemeName }
+export type { LayoutMode, Theme, ThemeInput, ThemePalette }
 
 /** Anything that can stand in for an avatar image. */
 export type AvatarSource = string | URL | Buffer | Uint8Array
@@ -29,8 +29,9 @@ export interface QuoteInput {
   /**
    * Keeps the avatar in color instead of desaturating it.
    *
-   * On the local renderer this is a shortcut for `setTheme('color')`; the API
-   * client sends it verbatim.
+   * On the local renderer this is a shortcut for
+   * `setTheme({ avatar: { grayscale: false } })`; the API client sends it
+   * verbatim.
    */
   color?: boolean
 }
@@ -286,7 +287,7 @@ export interface AutoFontOptions {
 }
 
 export interface MiQOptions {
-  theme?: ThemeName | ThemeInput
+  theme?: ThemePalette | ThemeInput
   /**
    * The Misskey instance bare `:name:` shortcodes belong to.
    *
