@@ -66,6 +66,7 @@ const {
   MiQConversation,
   FONT_CATALOGUE,
   COLOR_THEME_CATALOGUE,
+  CUSTOM_COLOR_THEME_CATALOGUE,
   colorThemeGradient,
   colorThemeTextBase,
   stripMarkdown,
@@ -415,6 +416,22 @@ for (const colorTheme of COLOR_THEME_CATALOGUE) {
         extends: colorThemeTextBase(colorTheme.key),
         backgroundGradient: colorThemeGradient(colorTheme.key),
       }),
+  )
+}
+
+for (const colorTheme of CUSTOM_COLOR_THEME_CATALOGUE) {
+  add(
+    '17-all-themes',
+    colorTheme.label,
+    () =>
+      base()
+        .setText(text.short)
+        .setAvatar(avatars.illustration)
+        .setTheme({
+          extends: colorThemeTextBase(colorTheme.key),
+          backgroundGradient: colorThemeGradient(colorTheme.key),
+        }),
+    { note: 'CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21' },
   )
 }
 

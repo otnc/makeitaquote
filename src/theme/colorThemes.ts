@@ -14,8 +14,11 @@ import type { BackgroundGradientTheme } from './types'
  *
  * Plain black/white aren't here: they're flat colors, not gradients, and
  * this package already has them as the `dark`/`light` presets themselves.
+ *
+ * See `CUSTOM_COLOR_THEMES` below for this package's own additions, kept
+ * as a separate list rather than appended here.
  */
-const COLOR_THEMES = [
+const OFFICIAL_COLOR_THEMES = [
   {
     key: 'sunset',
     label: 'Sunset',
@@ -145,13 +148,156 @@ const COLOR_THEMES = [
     textBase: 'light',
     alias: 'dk',
   },
-] as const satisfies readonly {
+] as const satisfies readonly ColorThemeRow[]
+
+/**
+ * This package's own additions, on top of `OFFICIAL_COLOR_THEMES` — kept as a
+ * separate list (and separate export, `CUSTOM_COLOR_THEME_CATALOGUE`) rather
+ * than merged into the catalogue above, since a Discord select menu tops out
+ * at 25 options: 21 + 18 would not fit in one, so a consumer building a menu
+ * needs to choose which list (or a subset) to offer rather than have that
+ * decision made for them.
+ *
+ * Same shape and rules as `OFFICIAL_COLOR_THEMES`, but every alias here is at
+ * least 4 characters — the 2-3 letter aliases above were already a tight fit
+ * for 21 entries, and this list is expected to grow.
+ */
+const CUSTOM_COLOR_THEMES = [
+  {
+    key: 'tokyo_night',
+    label: 'Tokyo Night',
+    gradient: ['#1A1B26', '#565F89'],
+    textBase: 'dark',
+    alias: 'tokyo',
+  },
+  {
+    key: 'emerald_depths',
+    label: 'Emerald Depths',
+    gradient: ['#012A1E', '#00B378'],
+    textBase: 'dark',
+    alias: 'emerald',
+  },
+  {
+    key: 'ruby_noir',
+    label: 'Ruby Noir',
+    gradient: ['#2B0010', '#E0115F'],
+    textBase: 'dark',
+    alias: 'ruby',
+  },
+  {
+    key: 'sapphire',
+    label: 'Sapphire',
+    gradient: ['#001F54', '#3A86FF'],
+    textBase: 'dark',
+    alias: null,
+  },
+  {
+    key: 'golden_hour',
+    label: 'Golden Hour',
+    gradient: ['#3D2400', '#FFB703'],
+    textBase: 'dark',
+    alias: 'golden',
+  },
+  {
+    key: 'acid_lime',
+    label: 'Acid Lime',
+    gradient: ['#1A2E05', '#B6FF00'],
+    textBase: 'dark',
+    alias: 'acid',
+  },
+  {
+    key: 'graphite',
+    label: 'Graphite',
+    gradient: ['#1C1C1E', '#6E6E73'],
+    textBase: 'dark',
+    alias: null,
+  },
+  {
+    key: 'volcanic_ash',
+    label: 'Volcanic Ash',
+    gradient: ['#1C1C1C', '#FF4500'],
+    textBase: 'dark',
+    alias: 'volcanic',
+  },
+  {
+    key: 'deep_space',
+    label: 'Deep Space',
+    gradient: ['#00010D', '#7209B7'],
+    textBase: 'dark',
+    alias: 'space',
+  },
+  {
+    key: 'ink_wash',
+    label: 'Ink Wash',
+    gradient: ['#05070A', '#2C3E50'],
+    textBase: 'dark',
+    alias: 'inkwash',
+  },
+  {
+    key: 'mystic_teal',
+    label: 'Mystic Teal',
+    gradient: ['#062B2B', '#1FA2A2'],
+    textBase: 'dark',
+    alias: 'mystic',
+  },
+  {
+    key: 'arctic_blue',
+    label: 'Arctic Blue',
+    gradient: ['#E8F6FF', '#A2D9F7'],
+    textBase: 'light',
+    alias: 'arctic',
+  },
+  {
+    key: 'lavender_fields',
+    label: 'Lavender Fields',
+    gradient: ['#E9DFFF', '#B39DDB'],
+    textBase: 'light',
+    alias: 'lavender',
+  },
+  {
+    key: 'rose_gold',
+    label: 'Rose Gold',
+    gradient: ['#FFE3E3', '#D9A491'],
+    textBase: 'light',
+    alias: 'rose',
+  },
+  {
+    key: 'honeydew',
+    label: 'Honeydew',
+    gradient: ['#F2FFE9', '#C9F2C7'],
+    textBase: 'light',
+    alias: null,
+  },
+  {
+    key: 'butter',
+    label: 'Butter',
+    gradient: ['#FFFDE7', '#FFF176'],
+    textBase: 'light',
+    alias: null,
+  },
+  {
+    key: 'frostbite',
+    label: 'Frostbite',
+    gradient: ['#E3FDFD', '#7BE0D6'],
+    textBase: 'light',
+    alias: null,
+  },
+  {
+    key: 'steel_grey',
+    label: 'Steel Grey',
+    gradient: ['#E4E6EB', '#A9B1BD'],
+    textBase: 'light',
+    alias: 'steel',
+  },
+] as const satisfies readonly ColorThemeRow[]
+
+interface ColorThemeRow {
   key: string
   label: string
   gradient: readonly [string, string]
   textBase: 'dark' | 'light'
   alias: string | null
-}[]
+}
 
 export interface CataloguedColorTheme {
   key: string
@@ -164,27 +310,47 @@ export interface CataloguedColorTheme {
   alias: string | null
 }
 
-/** Every named color theme this package knows, in the order listed above. */
-export const COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = COLOR_THEMES
+/** The named color themes this package's own presets mirror, in the order listed above. */
+export const COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = OFFICIAL_COLOR_THEMES
 
-/**
- * Short option names for the catalogue above, built from `COLOR_THEMES` —
- * the same relationship `FONT_ALIASES` has to `FONT_CATALOGUE`.
- */
-export const COLOR_THEME_ALIASES: Readonly<Record<string, string>> = (() => {
+/** This package's own additions — see `CUSTOM_COLOR_THEMES` above for why they're separate. */
+export const CUSTOM_COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = CUSTOM_COLOR_THEMES
+
+/** Both catalogues, official first — more than a Discord select menu (25 options) can hold. */
+export const ALL_COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = [
+  ...COLOR_THEME_CATALOGUE,
+  ...CUSTOM_COLOR_THEME_CATALOGUE,
+]
+
+function aliasMap(themes: readonly ColorThemeRow[]): Readonly<Record<string, string>> {
   const aliases: Record<string, string> = {}
-  for (const entry of COLOR_THEMES) {
+  for (const entry of themes) {
     if (entry.alias !== null) aliases[entry.alias] = entry.key
   }
   return aliases
-})()
+}
+
+/** Short option names for `COLOR_THEME_CATALOGUE`, the same relationship `FONT_ALIASES` has to `FONT_CATALOGUE`. */
+export const COLOR_THEME_ALIASES: Readonly<Record<string, string>> = aliasMap(OFFICIAL_COLOR_THEMES)
+
+/** Short option names for `CUSTOM_COLOR_THEME_CATALOGUE`. */
+export const CUSTOM_COLOR_THEME_ALIASES: Readonly<Record<string, string>> =
+  aliasMap(CUSTOM_COLOR_THEMES)
+
+/** Both alias tables merged — official first, so a name collision would favor it (there are none today). */
+export const ALL_COLOR_THEME_ALIASES: Readonly<Record<string, string>> = {
+  ...COLOR_THEME_ALIASES,
+  ...CUSTOM_COLOR_THEME_ALIASES,
+}
+
+const ALL_COLOR_THEMES = [...OFFICIAL_COLOR_THEMES, ...CUSTOM_COLOR_THEMES]
 
 const KEYS_BY_NORMALIZED = new Map<string, string>(
-  COLOR_THEMES.map((entry) => [normalize(entry.key), entry.key]),
+  ALL_COLOR_THEMES.map((entry) => [normalize(entry.key), entry.key]),
 )
 
 const BY_KEY = new Map<string, CataloguedColorTheme>(
-  COLOR_THEME_CATALOGUE.map((entry) => [entry.key, entry]),
+  ALL_COLOR_THEME_CATALOGUE.map((entry) => [entry.key, entry]),
 )
 
 /** Lower-cased, with underscores and spacing removed, so only the letters compare. */
@@ -210,7 +376,7 @@ function normalize(token: string): string {
 export function resolveColorTheme(token: string): string | undefined {
   const key = token.trim().toLowerCase()
   if (key.length === 0) return undefined
-  if (COLOR_THEME_ALIASES[key]) return COLOR_THEME_ALIASES[key]
+  if (ALL_COLOR_THEME_ALIASES[key]) return ALL_COLOR_THEME_ALIASES[key]
   return KEYS_BY_NORMALIZED.get(normalize(token))
 }
 
