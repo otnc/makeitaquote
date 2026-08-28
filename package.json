@@ -1,6 +1,6 @@
 {
   "name": "makeitaquote",
-  "version": "11.1.0",
+  "version": "11.2.0",
   "description": "Generate \"Make it a Quote\" images locally, or via an external API.",
   "keywords": [
     "img",
