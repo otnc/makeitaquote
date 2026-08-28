@@ -5,10 +5,12 @@ import type { MisskeyOptions, Segment } from '../core/types'
 /**
  * Discord custom emoji: `<:name:id>`, or `<a:name:id>` when animated.
  *
- * Names are 2–32 characters and IDs are snowflakes, so the bounds keep this
- * from matching arbitrary angle-bracketed text.
+ * The `<...>` delimiters plus the numeric ID already make this unambiguous,
+ * unlike a bare Misskey `:name:` floating in plain text — so unlike that one,
+ * a single-character name is still matched. The upper bound and the ID's
+ * length still keep this from matching arbitrary angle-bracketed text.
  */
-const DISCORD_EMOJI = /<(a)?:(\w{2,32}):(\d{17,20})>/g
+const DISCORD_EMOJI = /<(a)?:(\w{1,32}):(\d{17,20})>/g
 
 /**
  * Misskey custom emoji: `:name:` locally, `:name@host:` for a remote instance.
