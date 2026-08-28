@@ -683,6 +683,12 @@ Japanese wraps at phrase boundaries using [BudouX](https://github.com/google/bud
 
 `overflow` defaults to `'ellipsis'`. Long unbreakable runs — URLs, for instance — are split at grapheme boundaries rather than allowed to overflow.
 
+Line count has a hard cap too, regardless of how much room shrinking would free up — 13 for `side`, 5 for `new` — past which it truncates instead of shrinking further:
+
+```ts
+.setTheme({ text: { maxLines: 20 } })
+```
+
 ---
 
 ## Output

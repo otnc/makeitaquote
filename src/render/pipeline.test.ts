@@ -285,6 +285,28 @@ describe('render', () => {
     },
   )
 
+  it.skipIf(!hasDrawableFont())(
+    'caps the side layout at 13 lines before it would otherwise fit',
+    async () => {
+      const miq = new MiQ({ autoFont: false })
+        .setText(Array.from({ length: 20 }, (_, i) => `Line ${i}`).join('\n'))
+        .setTheme({ height: 4000, text: { overflow: 'error' } })
+
+      await expect(miq.toBuffer()).rejects.toThrow(/only 13 fit/)
+    },
+  )
+
+  it.skipIf(!hasDrawableFont())(
+    'caps the new layout at 5 lines before it would otherwise fit',
+    async () => {
+      const miq = new MiQ({ autoFont: false })
+        .setText(Array.from({ length: 20 }, (_, i) => `Line ${i}`).join('\n'))
+        .setTheme({ layout: 'new', text: { overflow: 'error', minSize: 0.005 } })
+
+      await expect(miq.toBuffer()).rejects.toThrow(/only 5 fit/)
+    },
+  )
+
   it('requires text', async () => {
     await expect(new MiQ({ autoFont: false }).toBuffer()).rejects.toThrow(ValidationError)
   })

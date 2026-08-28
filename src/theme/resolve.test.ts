@@ -32,6 +32,11 @@ describe('defineTheme', () => {
     expect(theme.avatar.widthRatio).toBe(1)
   })
 
+  it('caps lines at 13 for side and 5 for new', () => {
+    expect(defineTheme('dark').text.maxLines).toBe(13)
+    expect(defineTheme({ layout: 'new' }).text.maxLines).toBe(5)
+  })
+
   it('has a new-layout custom preset too', () => {
     const theme = defineTheme({ extends: 'custom', layout: 'new' })
 
@@ -137,6 +142,11 @@ describe('defineTheme', () => {
 
     it('rejects a minimum font size above the maximum', () => {
       expect(() => defineTheme({ text: { size: 0.05, minSize: 0.06 } })).toThrow(ValidationError)
+    })
+
+    it('rejects a non-integer or non-positive maxLines', () => {
+      expect(() => defineTheme({ text: { maxLines: 0 } })).toThrow(ValidationError)
+      expect(() => defineTheme({ text: { maxLines: 2.5 } })).toThrow(ValidationError)
     })
 
     it('rejects a malformed quote pair', () => {

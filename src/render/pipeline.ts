@@ -192,6 +192,7 @@ function drawQuote(
     maxFontSize: toPixels(theme.text.size, theme.height),
     minFontSize: toPixels(theme.text.minSize, theme.height),
     lineHeight: theme.text.lineHeight,
+    maxLines: theme.text.maxLines,
     overflow: theme.text.overflow,
     phraseBreak: theme.text.phraseBreak,
     locale: theme.text.locale,

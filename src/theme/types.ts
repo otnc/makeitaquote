@@ -99,6 +99,8 @@ export interface TextTheme {
   /** Lower bound for the auto-fit search, same units as `size`. */
   minSize: number
   lineHeight: number
+  /** Hard cap on the number of lines, independent of the box height. */
+  maxLines: number
   align: 'left' | 'center' | 'right'
   overflow: TextOverflow
   area: AreaSetting

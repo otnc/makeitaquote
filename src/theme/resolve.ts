@@ -107,6 +107,7 @@ function validate(theme: Theme): void {
   assertPositive(theme.height, 'theme.height')
   assertRatio(theme.avatar.widthRatio, 'theme.avatar.widthRatio')
   assertPositive(theme.text.lineHeight, 'theme.text.lineHeight')
+  assertPositiveInteger(theme.text.maxLines, 'theme.text.maxLines')
 
   if (theme.layout !== 'side' && theme.layout !== 'new') {
     throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or new.`, {
@@ -194,6 +195,12 @@ function validate(theme: Theme): void {
 function assertPositive(value: number, field: string): void {
   if (!Number.isFinite(value) || value <= 0) {
     throw new ValidationError(`${field} must be a positive number`, { field })
+  }
+}
+
+function assertPositiveInteger(value: number, field: string): void {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new ValidationError(`${field} must be a positive integer`, { field })
   }
 }
 
