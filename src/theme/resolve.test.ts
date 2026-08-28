@@ -149,6 +149,16 @@ describe('defineTheme', () => {
       expect(() => defineTheme({ text: { maxLines: 2.5 } })).toThrow(ValidationError)
     })
 
+    it('allows raising maxLines up to the ceiling for each layout', () => {
+      expect(defineTheme({ text: { maxLines: 20 } }).text.maxLines).toBe(20)
+      expect(defineTheme({ layout: 'new', text: { maxLines: 10 } }).text.maxLines).toBe(10)
+    })
+
+    it('rejects maxLines above the ceiling for each layout', () => {
+      expect(() => defineTheme({ text: { maxLines: 21 } })).toThrow(ValidationError)
+      expect(() => defineTheme({ layout: 'new', text: { maxLines: 11 } })).toThrow(ValidationError)
+    })
+
     it('rejects a malformed quote pair', () => {
       expect(() => defineTheme({ text: { quotes: ['“'] } as object })).toThrow(ValidationError)
     })

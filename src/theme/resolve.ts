@@ -16,6 +16,9 @@ const BACKGROUND_GRADIENT_DIRECTIONS = new Set<BackgroundGradientDirection>([
   'diagonal-reverse',
 ])
 
+/** Upper bound a caller can raise `text.maxLines` to, per layout. */
+const MAX_LINES_CEILING: Record<LayoutMode, number> = { side: 20, new: 10 }
+
 /**
  * Turns a partial theme into a complete one.
  *
@@ -113,6 +116,14 @@ function validate(theme: Theme): void {
     throw new ValidationError(`Unknown layout "${theme.layout}". Expected side or new.`, {
       field: 'theme.layout',
     })
+  }
+
+  const maxLinesCeiling = MAX_LINES_CEILING[theme.layout]
+  if (theme.text.maxLines > maxLinesCeiling) {
+    throw new ValidationError(
+      `theme.text.maxLines must not exceed ${maxLinesCeiling} for the ${theme.layout} layout`,
+      { field: 'theme.text.maxLines' },
+    )
   }
 
   if (theme.gradient.direction !== 'horizontal' && theme.gradient.direction !== 'vertical') {
