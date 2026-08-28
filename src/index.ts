@@ -72,8 +72,12 @@ export type { ColorInput, RGBA } from './theme/color'
 export { isTransparent, parseColor, toCSS, toHex } from './theme/color'
 export type { CataloguedColorTheme } from './theme/colorThemes'
 export {
+  ALL_COLOR_THEME_ALIASES,
+  ALL_COLOR_THEME_CATALOGUE,
   COLOR_THEME_ALIASES,
   COLOR_THEME_CATALOGUE,
+  CUSTOM_COLOR_THEME_ALIASES,
+  CUSTOM_COLOR_THEME_CATALOGUE,
   colorThemeGradient,
   colorThemeTextBase,
   resolveColorTheme,

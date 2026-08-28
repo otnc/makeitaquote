@@ -298,6 +298,204 @@
       "bytes": 212427,
       "ok": true,
       "error": null
+    },
+    {
+      "name": "Tokyo Night",
+      "file": "17-all-themes/tokyo-night.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 276231,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Emerald Depths",
+      "file": "17-all-themes/emerald-depths.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249684,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Ruby Noir",
+      "file": "17-all-themes/ruby-noir.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 269215,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Sapphire",
+      "file": "17-all-themes/sapphire.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 283185,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Golden Hour",
+      "file": "17-all-themes/golden-hour.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 277405,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Acid Lime",
+      "file": "17-all-themes/acid-lime.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 284476,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Graphite",
+      "file": "17-all-themes/graphite.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 229322,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Volcanic Ash",
+      "file": "17-all-themes/volcanic-ash.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 264144,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Deep Space",
+      "file": "17-all-themes/deep-space.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 249112,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Ink Wash",
+      "file": "17-all-themes/ink-wash.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 237363,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Mystic Teal",
+      "file": "17-all-themes/mystic-teal.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 231489,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Arctic Blue",
+      "file": "17-all-themes/arctic-blue.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 229679,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Lavender Fields",
+      "file": "17-all-themes/lavender-fields.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 238125,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Rose Gold",
+      "file": "17-all-themes/rose-gold.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 254081,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Honeydew",
+      "file": "17-all-themes/honeydew.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 227498,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Butter",
+      "file": "17-all-themes/butter.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 226963,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Frostbite",
+      "file": "17-all-themes/frostbite.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 246709,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "Steel Grey",
+      "file": "17-all-themes/steel-grey.png",
+      "note": "CUSTOM_COLOR_THEME_CATALOGUE — not in the official 21",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 243610,
+      "ok": true,
+      "error": null
     }
   ]
 }

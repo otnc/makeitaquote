@@ -452,7 +452,7 @@ The avatar-fade gradient (`theme.gradient`) composites correctly with either one
 
 ### Named color themes
 
-21 named background presets. `COLOR_THEME_CATALOGUE` gives you each one's gradient and which text palette it needs for contrast; `resolveColorTheme()` turns a short alias, a full key, or a key without underscores into the key the other two expect:
+39 named background presets, in two catalogues: `COLOR_THEME_CATALOGUE` (21) and `CUSTOM_COLOR_THEME_CATALOGUE` (18, this package's own — every alias here is 4+ characters, since the 21 above already use most short ones). Kept apart rather than merged because a Discord select menu holds at most 25 options — pick one catalogue, a subset, or `ALL_COLOR_THEME_CATALOGUE` (both, concatenated) depending on how much room you have. Each entry gives its gradient and which text palette it needs for contrast; `resolveColorTheme()` turns a short alias, a full key, or a key without underscores into the key `colorThemeGradient()`/`colorThemeTextBase()` expect, checking every catalogue:
 
 ```ts
 import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from 'makeitaquote'
@@ -469,7 +469,7 @@ if (key) {
 }
 ```
 
-`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'new'` alongside it for a [new layout](#new-layout). Plain black/white backgrounds aren't in the catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
+`extends` picks this package's own `light`/`dark` text palette, fixed per theme rather than left to a toggle of your own — a gradient needs a specific text color for contrast. Add `layout: 'new'` alongside it for a [new layout](#new-layout). Plain black/white backgrounds aren't in either catalogue: they're flat colors, already this package's own `dark`/`light` presets with no `backgroundGradient` needed.
 
 ---
 

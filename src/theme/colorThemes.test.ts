@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ALL_COLOR_THEME_ALIASES,
+  ALL_COLOR_THEME_CATALOGUE,
   COLOR_THEME_ALIASES,
   COLOR_THEME_CATALOGUE,
+  CUSTOM_COLOR_THEME_ALIASES,
+  CUSTOM_COLOR_THEME_CATALOGUE,
   colorThemeGradient,
   colorThemeTextBase,
   resolveColorTheme,
@@ -51,6 +55,81 @@ describe('COLOR_THEME_ALIASES', () => {
   })
 })
 
+describe('CUSTOM_COLOR_THEME_CATALOGUE', () => {
+  it('lists 18 color themes', () => {
+    expect(CUSTOM_COLOR_THEME_CATALOGUE).toHaveLength(18)
+  })
+
+  it('has no duplicate keys, and none shared with COLOR_THEME_CATALOGUE', () => {
+    const officialKeys = new Set(COLOR_THEME_CATALOGUE.map((theme) => theme.key))
+    const customKeys = CUSTOM_COLOR_THEME_CATALOGUE.map((theme) => theme.key)
+
+    expect(new Set(customKeys).size).toBe(customKeys.length)
+    for (const key of customKeys) {
+      expect(officialKeys.has(key)).toBe(false)
+    }
+  })
+
+  it('carries the exact gradient and text base for a known theme', () => {
+    const tokyoNight = CUSTOM_COLOR_THEME_CATALOGUE.find((theme) => theme.key === 'tokyo_night')
+    expect(tokyoNight).toMatchObject({
+      label: 'Tokyo Night',
+      gradient: ['#1A1B26', '#565F89'],
+      textBase: 'dark',
+      alias: 'tokyo',
+    })
+  })
+
+  it('gives every alias at least 4 characters', () => {
+    for (const theme of CUSTOM_COLOR_THEME_CATALOGUE) {
+      if (theme.alias !== null) expect(theme.alias.length).toBeGreaterThanOrEqual(4)
+    }
+  })
+})
+
+describe('ALL_COLOR_THEME_CATALOGUE', () => {
+  it('is COLOR_THEME_CATALOGUE followed by CUSTOM_COLOR_THEME_CATALOGUE', () => {
+    expect(ALL_COLOR_THEME_CATALOGUE).toEqual([
+      ...COLOR_THEME_CATALOGUE,
+      ...CUSTOM_COLOR_THEME_CATALOGUE,
+    ])
+  })
+
+  it('has no duplicate keys across both catalogues', () => {
+    const keys = ALL_COLOR_THEME_CATALOGUE.map((theme) => theme.key)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+})
+
+describe('CUSTOM_COLOR_THEME_ALIASES', () => {
+  it('maps every alias to a custom catalogue key', () => {
+    const keys = new Set(CUSTOM_COLOR_THEME_CATALOGUE.map((theme) => theme.key))
+    for (const key of Object.values(CUSTOM_COLOR_THEME_ALIASES)) {
+      expect(keys.has(key)).toBe(true)
+    }
+  })
+
+  it('has the expected short name', () => {
+    expect(CUSTOM_COLOR_THEME_ALIASES.tokyo).toBe('tokyo_night')
+  })
+
+  it('shares no alias with COLOR_THEME_ALIASES', () => {
+    const officialAliases = new Set(Object.keys(COLOR_THEME_ALIASES))
+    for (const alias of Object.keys(CUSTOM_COLOR_THEME_ALIASES)) {
+      expect(officialAliases.has(alias)).toBe(false)
+    }
+  })
+})
+
+describe('ALL_COLOR_THEME_ALIASES', () => {
+  it('merges both alias tables', () => {
+    expect(ALL_COLOR_THEME_ALIASES).toEqual({
+      ...COLOR_THEME_ALIASES,
+      ...CUSTOM_COLOR_THEME_ALIASES,
+    })
+  })
+})
+
 describe('resolveColorTheme', () => {
   it('resolves an alias', () => {
     expect(resolveColorTheme('mb')).toBe('midnight_blurple')
@@ -76,6 +155,11 @@ describe('resolveColorTheme', () => {
     expect(resolveColorTheme('not-a-theme')).toBeUndefined()
     expect(resolveColorTheme('')).toBeUndefined()
   })
+
+  it('resolves a custom catalogue alias and key too', () => {
+    expect(resolveColorTheme('tokyo')).toBe('tokyo_night')
+    expect(resolveColorTheme('tokyo_night')).toBe('tokyo_night')
+  })
 })
 
 describe('colorThemeGradient', () => {
@@ -93,6 +177,17 @@ describe('colorThemeGradient', () => {
   it('is undefined for an unresolved key', () => {
     expect(colorThemeGradient('not-a-theme')).toBeUndefined()
   })
+
+  it('works for a custom catalogue key too', () => {
+    expect(colorThemeGradient('tokyo_night')).toEqual({
+      type: 'linear',
+      direction: 'diagonal',
+      stops: [
+        ['#1A1B26', 0],
+        ['#565F89', 1],
+      ],
+    })
+  })
 })
 
 describe('colorThemeTextBase', () => {
@@ -106,5 +201,10 @@ describe('colorThemeTextBase', () => {
 
   it('is undefined for an unresolved key', () => {
     expect(colorThemeTextBase('not-a-theme')).toBeUndefined()
+  })
+
+  it('works for a custom catalogue key too', () => {
+    expect(colorThemeTextBase('tokyo_night')).toBe('dark')
+    expect(colorThemeTextBase('arctic_blue')).toBe('light')
   })
 })
