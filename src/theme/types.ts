@@ -99,6 +99,13 @@ export interface TextTheme {
   /** Lower bound for the auto-fit search, same units as `size`. */
   minSize: number
   lineHeight: number
+  /**
+   * Hard cap on the number of lines, independent of the box height.
+   *
+   * Defaults to 13 for `side`, 5 for `new`; can be raised up to 20 for `side`
+   * or 10 for `new`.
+   */
+  maxLines: number
   align: 'left' | 'center' | 'right'
   overflow: TextOverflow
   area: AreaSetting

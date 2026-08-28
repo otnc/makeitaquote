@@ -14,6 +14,8 @@ export interface FitOptions extends BreakpointOptions {
   /** Smallest font size to try, in pixels. */
   minFontSize: number
   lineHeight: number
+  /** Hard cap on line count, independent of `maxHeight`. `undefined`: no cap. */
+  maxLines?: number
   overflow: TextOverflow
   /** Built for a given font size; the search re-asks for one per step. */
   measurerFor: (fontSize: number) => TextMeasurer
@@ -86,11 +88,12 @@ function wrapAt(segments: readonly Segment[], fontSize: number, options: FitOpti
 }
 
 function maxLines(fontSize: number, options: FitOptions): number {
-  return Math.max(1, Math.floor(options.maxHeight / (fontSize * options.lineHeight)))
+  const geometric = Math.max(1, Math.floor(options.maxHeight / (fontSize * options.lineHeight)))
+  return options.maxLines === undefined ? geometric : Math.min(geometric, options.maxLines)
 }
 
 function fits(lines: Line[], fontSize: number, options: FitOptions): boolean {
-  return lines.length * fontSize * options.lineHeight <= options.maxHeight
+  return lines.length <= maxLines(fontSize, options)
 }
 
 /**

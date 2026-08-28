@@ -95,6 +95,25 @@ describe('fitText', () => {
     expect(result.fontSize).toBe(20)
   })
 
+  it('truncates at the line cap even though shrinking further would fit', () => {
+    // Every line still fits geometrically at the minimum size (10 lines at
+    // 10px in a 200-tall box), but the cap should stop it at 5 anyway.
+    const result = fitText(
+      segmentText('a\nb\nc\nd\ne\nf\ng\nh\ni\nj'),
+      options({ maxHeight: 200, maxLines: 5 }),
+    )
+
+    expect(result.lines).toHaveLength(5)
+    expect(result.truncated).toBe(true)
+  })
+
+  it('ignores the cap once the text already fits under it', () => {
+    const result = fitText(segmentText('a\nb\nc'), options({ maxLines: 5 }))
+
+    expect(result.lines).toHaveLength(3)
+    expect(result.truncated).toBe(false)
+  })
+
   it('wraps Japanese and shrinks it to fit', () => {
     const result = fitText(
       segmentText('今日はとてもいい天気ですね。散歩に行きましょう。'),
