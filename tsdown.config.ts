@@ -8,6 +8,7 @@ export default defineConfig({
   // Node >= 22 supports ES2024
   target: 'node22',
   platform: 'node',
+  minify: true,
   deps: {
     // Every runtime dependency ships a real CJS build (a `require` export
     // condition, not just a `"type": "module"` package `require()` would
