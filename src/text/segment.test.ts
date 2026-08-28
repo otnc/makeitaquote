@@ -79,7 +79,6 @@ describe('Discord custom emoji', () => {
   it('leaves text that only looks like the syntax alone', () => {
     const notEmoji = [
       '<:cat:1>', // id too short to be a snowflake
-      '<:x:123456789012345678>', // name shorter than Discord allows
       '<:toolongofanamethatkeepsgoingandgoingandgoing:123456789012345678>',
       '<::123456789012345678>',
     ]
@@ -87,6 +86,22 @@ describe('Discord custom emoji', () => {
     for (const text of notEmoji) {
       expect(segmentText(text)).toEqual([{ kind: 'text', value: text }])
     }
+  })
+
+  it('recognises a single-character name', () => {
+    const segments = segmentText('<:e:1263720914583949393>')
+
+    expect(segments).toEqual([
+      {
+        kind: 'emoji',
+        source: 'discord',
+        url: 'https://cdn.discordapp.com/emojis/1263720914583949393.png?size=64',
+        raw: '<:e:1263720914583949393>',
+        id: '1263720914583949393',
+        name: 'e',
+        animated: false,
+      },
+    ])
   })
 
   it('honours the requested CDN size', () => {
