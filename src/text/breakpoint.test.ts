@@ -78,6 +78,23 @@ describe('findBreakpoints', () => {
     }
   })
 
+  describe('RTL scripts (Arabic)', () => {
+    it('breaks after a space, the same as any other space-delimited script', () => {
+      // "مرحبا بالعالم" — "hello world", two space-separated words. Arabic
+      // reads right to left, but findBreakpoints works on logical (storage)
+      // order, so this is exactly the space rule already covered for Latin.
+      const text = 'مرحبا بالعالم'
+      expect(phrasePoints(text)).toEqual([text.indexOf(' ') + 1])
+    })
+
+    it('offers no fallback break inside a single unspaced word', () => {
+      // Arabic uses spaces between words, unlike CJK — so a single word
+      // with no space gets no break at all, the same as a Latin one.
+      const priorities = findBreakpoints('اختبار')
+      expect(priorities.every((p) => p === BreakPriority.none)).toBe(true)
+    })
+  })
+
   describe('kinsoku', () => {
     it('does not let a full stop start a line', () => {
       const priorities = findBreakpoints('です。ます')

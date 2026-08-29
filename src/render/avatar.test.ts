@@ -3,6 +3,8 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { AvatarFetcher } from './avatar'
 import {
+  containRect,
+  coverRect,
   drawAvatar,
   loadAvatar,
   resetFilterDetectionForTests,
@@ -151,6 +153,87 @@ describe('loadAvatar', () => {
     await loadAvatar('https://cdn.test/a.png', { fetcher })
 
     expect(fetcher.calls).toHaveLength(2)
+  })
+})
+
+describe('coverRect', () => {
+  it('crops a wide image down to match a square box', () => {
+    const rect = coverRect(200, 100, { x: 0, y: 0, width: 100, height: 100 })
+    expect(rect).toEqual({ sx: 50, sy: 0, sw: 100, sh: 100 })
+  })
+
+  it('crops a tall image down to match a square box', () => {
+    const rect = coverRect(100, 200, { x: 0, y: 0, width: 100, height: 100 })
+    expect(rect).toEqual({ sx: 0, sy: 50, sw: 100, sh: 100 })
+  })
+
+  it('uses the whole image when its aspect ratio already matches the box', () => {
+    const rect = coverRect(100, 100, { x: 0, y: 0, width: 50, height: 50 })
+    expect(rect).toEqual({ sx: 0, sy: 0, sw: 100, sh: 100 })
+  })
+})
+
+describe('containRect', () => {
+  it('letterboxes a wide image top and bottom in a square box', () => {
+    const rect = containRect(200, 100, { x: 0, y: 0, width: 100, height: 100 })
+    expect(rect).toEqual({ x: 0, y: 25, width: 100, height: 50 })
+  })
+
+  it('letterboxes a tall image left and right in a square box', () => {
+    const rect = containRect(100, 200, { x: 0, y: 0, width: 100, height: 100 })
+    expect(rect).toEqual({ x: 25, y: 0, width: 50, height: 100 })
+  })
+
+  it('fits exactly, offset with the box, when the aspect ratio already matches', () => {
+    const rect = containRect(100, 100, { x: 10, y: 20, width: 50, height: 50 })
+    expect(rect).toEqual({ x: 10, y: 20, width: 50, height: 50 })
+  })
+})
+
+describe('drawAvatar', () => {
+  it('clips to a circle when shape is circle, leaving the box corners untouched', async () => {
+    const canvas = createCanvas(10, 10)
+    const ctx = canvas.getContext('2d')
+    const image = await loadAvatar(redSquare())
+
+    drawAvatar(ctx, image, {
+      theme: {
+        grayscale: false,
+        position: 'left',
+        widthRatio: 1,
+        fit: 'cover',
+        shape: 'circle',
+        fallback: null,
+      },
+      box: { x: 0, y: 0, width: 10, height: 10 },
+    })
+
+    const corner = ctx.getImageData(0, 0, 1, 1).data
+    const center = ctx.getImageData(5, 5, 1, 1).data
+
+    expect(corner[3]).toBe(0)
+    expect(center[3]).toBe(255)
+  })
+
+  it('does not clip when shape is rectangle', async () => {
+    const canvas = createCanvas(10, 10)
+    const ctx = canvas.getContext('2d')
+    const image = await loadAvatar(redSquare())
+
+    drawAvatar(ctx, image, {
+      theme: {
+        grayscale: false,
+        position: 'left',
+        widthRatio: 1,
+        fit: 'cover',
+        shape: 'rectangle',
+        fallback: null,
+      },
+      box: { x: 0, y: 0, width: 10, height: 10 },
+    })
+
+    const corner = ctx.getImageData(0, 0, 1, 1).data
+    expect(corner[3]).toBe(255)
   })
 })
 
