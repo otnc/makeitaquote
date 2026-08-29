@@ -3,7 +3,7 @@ import type { Segment } from '../core/types'
 import type { TextOverflow } from '../theme/types'
 import { graphemes } from '../util/grapheme'
 import type { BreakpointOptions } from './breakpoint'
-import type { EmojiMetrics, TextMeasurer } from './measure'
+import { type EmojiMetrics, measureSegments, type TextMeasurer } from './measure'
 import { type Line, lineToString, wrapSegments } from './wrap'
 
 export interface FitOptions extends BreakpointOptions {
@@ -38,6 +38,13 @@ export interface FitResult {
  * smaller size can occasionally need *more* lines, so "fits" is not perfectly
  * monotonic and a binary search can settle on the wrong side of a boundary.
  * With measurement memoized this is a handful of microseconds either way.
+ *
+ * Before doing a full wrap at each size, `mayFit` checks a cheap lower bound:
+ * no wrapping algorithm can pack the segments' total width into fewer lines
+ * than `total / maxWidth`, so once even that best case already exceeds the
+ * line budget, the real wrap is guaranteed to fail too and can be skipped.
+ * This never changes which font size wins — it only skips sizes that were
+ * always going to fail — so it's safe alongside the non-monotonicity above.
  */
 export function fitText(segments: readonly Segment[], options: FitOptions): FitResult {
   const step = options.step ?? 1
@@ -47,7 +54,15 @@ export function fitText(segments: readonly Segment[], options: FitOptions): FitR
   let smallest: { lines: Line[]; fontSize: number } | null = null
 
   for (let fontSize = max; fontSize >= min; fontSize -= step) {
-    const lines = wrapAt(segments, fontSize, options)
+    const measurer = options.measurerFor(fontSize)
+    const metrics = options.metricsFor(fontSize)
+
+    // The last candidate must always be fully computed: if nothing fits,
+    // `smallest` needs real lines from it for the shrink/truncate fallback.
+    const isLastCandidate = fontSize - step < min
+    if (!isLastCandidate && !mayFit(segments, measurer, metrics, fontSize, options)) continue
+
+    const lines = wrapAt(segments, measurer, metrics, options)
     if (fits(lines, fontSize, options)) {
       return { lines, fontSize, truncated: false }
     }
@@ -55,7 +70,9 @@ export function fitText(segments: readonly Segment[], options: FitOptions): FitR
   }
 
   if (!smallest) {
-    const lines = wrapAt(segments, min, options)
+    const measurer = options.measurerFor(min)
+    const metrics = options.metricsFor(min)
+    const lines = wrapAt(segments, measurer, metrics, options)
     smallest = { lines, fontSize: min }
   }
 
@@ -77,14 +94,38 @@ export function fitText(segments: readonly Segment[], options: FitOptions): FitR
   }
 }
 
-function wrapAt(segments: readonly Segment[], fontSize: number, options: FitOptions): Line[] {
+function wrapAt(
+  segments: readonly Segment[],
+  measurer: TextMeasurer,
+  metrics: EmojiMetrics,
+  options: FitOptions,
+): Line[] {
   return wrapSegments(segments, {
     maxWidth: options.maxWidth,
-    measurer: options.measurerFor(fontSize),
-    metrics: options.metricsFor(fontSize),
+    measurer,
+    metrics,
     ...(options.phraseBreak === undefined ? {} : { phraseBreak: options.phraseBreak }),
     ...(options.locale === undefined ? {} : { locale: options.locale }),
   })
+}
+
+/**
+ * A lower bound on the lines `wrapAt` could possibly need: no wrapping
+ * algorithm can fit more than `maxWidth` of content per line, so packing the
+ * segments' total width that tightly is the best case. Kinsoku, forced
+ * breaks and word boundaries can only need as many or more lines than this,
+ * never fewer.
+ */
+function mayFit(
+  segments: readonly Segment[],
+  measurer: TextMeasurer,
+  metrics: EmojiMetrics,
+  fontSize: number,
+  options: FitOptions,
+): boolean {
+  const totalWidth = measureSegments(segments, measurer, metrics)
+  const bestCaseLines = Math.max(1, Math.ceil(totalWidth / options.maxWidth))
+  return bestCaseLines <= maxLines(fontSize, options)
 }
 
 function maxLines(fontSize: number, options: FitOptions): number {

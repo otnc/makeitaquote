@@ -125,4 +125,39 @@ describe('fitText', () => {
       expect(line.startsWith('。')).toBe(false)
     }
   })
+
+  it('skips tokenizing and measuring per-character for sizes a width lower bound already rules out', () => {
+    // With no spaces, CJK text without a phrase break gets a fallback break
+    // candidate at every character — so a real wrap of this 500-character
+    // run measures on the order of 500 tokens. At font sizes the width check
+    // can already rule out, none of that tokenizing should happen: only the
+    // single whole-segment measurement `mayFit` itself needs.
+    let measureCalls = 0
+    const source = '猫'.repeat(500)
+    const result = fitText(
+      segmentText(source),
+      options({
+        maxFontSize: 1000,
+        minFontSize: 10,
+        maxHeight: 100,
+        phraseBreak: false,
+        measurerFor: (fontSize) => {
+          const measurer = fakeMeasurer(fontSize / 2)
+          return {
+            measureText: (text) => {
+              measureCalls++
+              return measurer.measureText(text)
+            },
+          }
+        },
+      }),
+    )
+
+    expect(result.truncated).toBe(true)
+    expect(result.fontSize).toBe(10)
+    // ~990 candidate sizes, each needing only the one `mayFit` measurement,
+    // versus ~500 per size (one per character) if every size were fully
+    // wrapped — the total should land near the former, nowhere near the latter.
+    expect(measureCalls).toBeLessThan(2000)
+  })
 })
