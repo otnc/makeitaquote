@@ -1,7 +1,9 @@
 name: regen-lock (temporary)
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [v8]
+    paths: ['.github/workflows/_regen-lock.yml']
 
 jobs:
   regen:
