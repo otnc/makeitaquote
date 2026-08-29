@@ -19,8 +19,8 @@ With discord.js: [miq-with-discordjs.md](https://github.com/otnc/makeitaquote/tr
 
 With discord.js(beta): [beta-with-discordjs.md](https://github.com/otnc/makeitaquote/tree/legacy/examples/beta-with-discordjs.md)
 
-![MiQ](assets/readme/MiQ.png)
-![MiQ Color](assets/readme/MiQ-color.png)
+![Sample quote image, default dark theme](assets/readme/mono.png)
+![Sample quote image, color theme](assets/readme/color.png)
 
 ## Development
 This branch (`legacy`) is a long-term maintenance line for the legacy `axios`/`displus`-based
