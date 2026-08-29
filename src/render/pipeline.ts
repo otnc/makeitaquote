@@ -2,7 +2,7 @@ import { assertRenderable, effectiveDisplayName } from '../core/quote'
 import type { MiQOptions, QuoteData, Segment } from '../core/types'
 import { type EmojiImages, prefetchEmoji } from '../emoji/loader'
 import { ensureDefaultFonts, reportMissingFonts, useFont } from '../font/autoload'
-import { GENERIC_FONT_FAMILIES } from '../font/catalogue'
+import { GENERIC_FONT_FAMILIES, unquoteFontFamily } from '../font/catalogue'
 import { fonts, resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
 import { alignedX, type DrawLineOptions, drawLine, drawnLineWidth } from '../text/draw'
@@ -141,7 +141,7 @@ async function ensureStack(request: string, options: object): Promise<void> {
 function candidateFamilies(request: string): string[] {
   return request
     .split(',')
-    .map((part) => part.trim().replace(/^["']|["']$/g, ''))
+    .map(unquoteFontFamily)
     .filter((family) => family.length > 0 && !GENERIC_FONT_FAMILIES.has(family))
 }
 

@@ -1,6 +1,6 @@
 import { AssetFetchError } from '../core/errors'
 import { createClient } from '../http/client'
-import { resolveFontAlias, suggestionFor, unavailableReason } from './catalogue'
+import { normalizeFontFamily, suggestionFor, unavailableReason } from './catalogue'
 
 const CSS_ENDPOINT = 'https://fonts.googleapis.com/css2'
 
@@ -42,7 +42,7 @@ export async function resolveGoogleFont(
   requested: string,
   options: ResolveOptions = {},
 ): Promise<FontFace[]> {
-  const family = resolveFontAlias(requested) ?? requested
+  const family = normalizeFontFamily(requested)
   const weights = normalizeWeights(options.weights)
   const url = buildCssUrl(family, weights, options.italic ?? false)
 

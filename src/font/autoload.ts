@@ -4,7 +4,7 @@ import { FontNotAvailableError } from '../core/errors'
 import type { AutoFontOptions } from '../core/types'
 import { createClient } from '../http/client'
 import { errorMessage } from '../util/errorMessage'
-import { resolveFontAlias } from './catalogue'
+import { normalizeFontFamily } from './catalogue'
 import { cachedFontPath, isCached, resolveCacheDir, writeCachedFont } from './diskCache'
 import { type FontFace, fileNameFor, resolveGoogleFont, slugFor } from './googleFonts'
 import { fonts } from './registry'
@@ -71,7 +71,7 @@ function isOnline(options: EnsureOptions): boolean {
  * everything past this point agrees on the same real family.
  */
 export async function useFont(requested: string, options: EnsureOptions = {}): Promise<boolean> {
-  const family = resolveFontAlias(requested) ?? requested
+  const family = normalizeFontFamily(requested)
   if (ready.has(family) || fonts.has(family)) return true
 
   if (!isOnline(options)) {
@@ -127,7 +127,7 @@ export async function installFont(
   requested: string,
   options: EnsureOptions = {},
 ): Promise<boolean> {
-  const family = resolveFontAlias(requested) ?? requested
+  const family = normalizeFontFamily(requested)
   const weights = options.weights ?? [400, 700]
 
   if (!isOnline(options)) {

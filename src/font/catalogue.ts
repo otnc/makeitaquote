@@ -103,6 +103,16 @@ export function resolveFontAlias(input: string): string | undefined {
   return FONT_ALIASES[key] ?? CATALOGUE_BY_LOWERCASE.get(key)
 }
 
+/** `resolveFontAlias`, falling back to `input` itself when it isn't a known alias. */
+export function normalizeFontFamily(input: string): string {
+  return resolveFontAlias(input) ?? input
+}
+
+/** Trims a CSS font-family token and strips a matching pair of quotes, if any. */
+export function unquoteFontFamily(part: string): string {
+  return part.trim().replace(/^["']|["']$/g, '')
+}
+
 /**
  * Resolves every alias in a CSS-style, comma-separated font stack, so
  * `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end up identical.
@@ -114,9 +124,9 @@ export function resolveFontStack(stack: string): string {
   return stack
     .split(',')
     .map((part) => {
-      const family = part.trim().replace(/^["']|["']$/g, '')
+      const family = unquoteFontFamily(part)
       if (family.length === 0 || GENERIC_FONT_FAMILIES.has(family)) return family
-      return resolveFontAlias(family) ?? family
+      return normalizeFontFamily(family)
     })
     .join(', ')
 }
