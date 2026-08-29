@@ -3,6 +3,7 @@ import type { AvatarSource } from '../core/types'
 import { createClient } from '../http/client'
 import { parseColor, toCSS } from '../theme/color'
 import type { AvatarTheme } from '../theme/types'
+import type { AssetCache } from '../util/assetCache'
 import { avatarCache } from './avatarCache'
 import { createCanvas, type Image, loadImage, type SKRSContext2D } from './canvasFactory'
 
@@ -16,6 +17,8 @@ const defaultFetcher: AvatarFetcher = (url, signal) => http.getBuffer(url, signa
 export interface LoadAvatarOptions {
   signal?: AbortSignal
   fetcher?: AvatarFetcher
+  /** Which cache to dedupe through. Defaults to the shared avatar cache. */
+  cache?: AssetCache<Image>
 }
 
 /**
@@ -56,20 +59,21 @@ export async function loadAvatar(
 }
 
 async function loadCached(key: string, options: LoadAvatarOptions): Promise<Image | null> {
-  const cached = avatarCache.cached(key)
+  const cache = options.cache ?? avatarCache
+  const cached = cache.cached(key)
   if (cached) return cached
-  if (avatarCache.isKnownFailure(key)) return null
+  if (cache.isKnownFailure(key)) return null
 
-  return avatarCache.coalesce(key, async () => {
+  return cache.coalesce(key, async () => {
     try {
       const bytes = /^https?:\/\//i.test(key)
         ? await (options.fetcher ?? defaultFetcher)(key, options.signal)
         : await readFile(key)
       const image = await loadImage(bytes)
-      avatarCache.remember(key, image)
+      cache.remember(key, image)
       return image
     } catch {
-      avatarCache.rememberFailure(key)
+      cache.rememberFailure(key)
       return null
     }
   })
@@ -158,9 +162,21 @@ function luma(r: number, g: number, b: number): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
-/** Desaturates a region in place, for when `ctx.filter` isn't available. */
+/**
+ * Desaturates a region in place, for when `ctx.filter` isn't available.
+ *
+ * `box` comes from ratio-based layout math and is rarely integer-aligned;
+ * `getImageData`/`putImageData` need integer pixels, so this rounds outward
+ * (floor the origin, ceil the far edge) rather than truncating, to always
+ * cover the whole painted area instead of clipping a row or column of it.
+ */
 function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox): void {
-  const image = ctx.getImageData(box.x, box.y, box.width, box.height)
+  const x = Math.floor(box.x)
+  const y = Math.floor(box.y)
+  const width = Math.ceil(box.x + box.width) - x
+  const height = Math.ceil(box.y + box.height) - y
+
+  const image = ctx.getImageData(x, y, width, height)
   const { data } = image
   for (let i = 0; i < data.length; i += 4) {
     const value = luma(data[i] as number, data[i + 1] as number, data[i + 2] as number)
@@ -168,7 +184,7 @@ function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox): void {
     data[i + 1] = value
     data[i + 2] = value
   }
-  ctx.putImageData(image, box.x, box.y)
+  ctx.putImageData(image, x, y)
 }
 
 export interface DrawAvatarOptions {
@@ -243,4 +259,9 @@ export function drawAvatar(
 /** Test seam: forces the filter probe to run again. */
 export function resetFilterDetectionForTests(): void {
   filterSupported = null
+}
+
+/** Test seam: forces `supportsFilter()`'s result, to exercise the fallback path deterministically. */
+export function setFilterSupportedForTests(value: boolean): void {
+  filterSupported = value
 }

@@ -65,6 +65,12 @@ export { installFonts, listInstalledFonts, uninstallFonts } from './font/install
 export { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from './font/sources'
 export type { AvatarCacheOptions } from './render/avatarCache'
 export { avatarCacheInfo, clearAvatarCache, configureAvatarCache } from './render/avatarCache'
+export type { BackgroundImageCacheOptions } from './render/backgroundImageCache'
+export {
+  backgroundImageCacheInfo,
+  clearBackgroundImageCache,
+  configureBackgroundImageCache,
+} from './render/backgroundImageCache'
 export { stripDiscordMarkdown } from './text/discordMarkdown'
 export { stripMarkdown } from './text/markdown'
 export { stripMfm } from './text/mfm'
