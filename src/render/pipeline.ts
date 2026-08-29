@@ -11,7 +11,7 @@ import { memoizeMeasurer } from '../text/measure'
 import { resolveEmojiSegments, segmentText } from '../text/segment'
 import { isTransparent, parseColor, toCSS } from '../theme/color'
 import { toPixels } from '../theme/resolve'
-import type { FontWeight, Theme } from '../theme/types'
+import type { FontWeight, LabelTheme, Theme } from '../theme/types'
 import { avatarBox, loadAvatar } from './avatar'
 import { drawAvatarWithFade, drawBackground, loadBackgroundImage } from './background'
 import { type Canvas, createCanvas, type SKRSContext2D } from './canvasFactory'
@@ -302,6 +302,35 @@ function drawDivider(ctx: SKRSContext2D, theme: Theme, layout: Layout, top: numb
   return y + thickness + gap
 }
 
+/**
+ * Draws one centred, prefixed attribution line (display name or username) —
+ * both are a `LabelTheme`, styled and positioned identically — and returns
+ * the y position its own text baseline landed on, for the next line to
+ * stack under.
+ */
+function drawAttributionLine(
+  ctx: SKRSContext2D,
+  text: string,
+  style: LabelTheme,
+  field: string,
+  centreX: number,
+  y: number,
+  height: number,
+): number {
+  const size = toPixels(style.size, height)
+  ctx.font = font(style.weight, size, style.font)
+  ctx.fillStyle = toCSS(parseColor(style.color, field))
+  const baseline = y + size
+  fillText(
+    ctx,
+    `${style.prefix}${text}`,
+    centreX,
+    baseline,
+    syntheticBoldWidth(ctx, style.weight, familyFor(style.font), size),
+  )
+  return baseline
+}
+
 function drawAttribution(
   ctx: SKRSContext2D,
   data: QuoteData,
@@ -316,31 +345,27 @@ function drawAttribution(
 
   const displayName = effectiveDisplayName(data)
   if (displayName && !invisible(theme.displayName.color, 'theme.displayName.color')) {
-    const size = toPixels(theme.displayName.size, theme.height)
-    ctx.font = font(theme.displayName.weight, size, theme.displayName.font)
-    ctx.fillStyle = toCSS(parseColor(theme.displayName.color, 'theme.displayName.color'))
-    y += size
-    fillText(
+    y = drawAttributionLine(
       ctx,
-      `${theme.displayName.prefix}${displayName}`,
+      displayName,
+      theme.displayName,
+      'theme.displayName.color',
       layout.centreX,
       y,
-      syntheticBoldWidth(ctx, theme.displayName.weight, familyFor(theme.displayName.font), size),
+      theme.height,
     )
     y += theme.height * 0.012
   }
 
   if (data.username && !invisible(theme.username.color, 'theme.username.color')) {
-    const size = toPixels(theme.username.size, theme.height)
-    ctx.font = font(theme.username.weight, size, theme.username.font)
-    ctx.fillStyle = toCSS(parseColor(theme.username.color, 'theme.username.color'))
-    y += size
-    fillText(
+    drawAttributionLine(
       ctx,
-      `${theme.username.prefix}${data.username}`,
+      data.username,
+      theme.username,
+      'theme.username.color',
       layout.centreX,
       y,
-      syntheticBoldWidth(ctx, theme.username.weight, familyFor(theme.username.font), size),
+      theme.height,
     )
   }
 }
