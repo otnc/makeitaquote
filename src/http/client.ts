@@ -17,6 +17,8 @@ export interface RequestOptions {
 export interface HttpClient {
   get(url: string, options?: RequestOptions): Promise<Response>
   post(url: string, options?: RequestOptions): Promise<Response>
+  /** HEADs `url` — the same reachability signal as `get`, without downloading the body. */
+  head(url: string, options?: RequestOptions): Promise<Response>
   /** GETs `url` and reads the body into a `Buffer` — the shape every asset fetcher needs. */
   getBuffer(url: string, signal?: AbortSignal): Promise<Buffer>
 }
@@ -61,7 +63,7 @@ export function createClient(options: HttpOptions = {}): HttpClient {
   })
 
   async function request(
-    method: 'GET' | 'POST',
+    method: 'GET' | 'HEAD' | 'POST',
     url: string,
     options: RequestOptions,
   ): Promise<Response> {
@@ -105,6 +107,7 @@ export function createClient(options: HttpOptions = {}): HttpClient {
 
   return {
     get,
+    head: (url, options = {}) => request('HEAD', url, options),
     post: (url, options = {}) => request('POST', url, options),
     getBuffer: async (url, signal) => {
       const response = await get(url, signal ? { signal } : {})
