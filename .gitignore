@@ -1,4 +1,5 @@
-node_modules
-tests
-package-lock.json
-.npmignore
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store

@@ -1,0 +1,51 @@
+name: ci (v8)
+
+on:
+  push:
+    branches: [v8]
+  pull_request:
+    branches: [v8]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  # This branch targets consumers on older Node than main does (no native
+  # bindings here), so verify the built dist/ actually loads under each
+  # supported major, not just the Node 22 used to build/test it. No network
+  # calls — that's the point, examples/ hits the live Voids API and is
+  # deliberately not run here (see README's Development section).
+  compat:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - run: npm install --omit=dev
+      - run: node -e "require('./dist/index.cjs')"
+      - run: node --input-type=module -e "import('./dist/index.mjs')"

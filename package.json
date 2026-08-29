@@ -1,11 +1,43 @@
 {
   "name": "makeitaquote",
-  "version": "8.0.0",
+  "version": "8.2.0",
   "description": "Generate a quote.",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write",
+    "format:check": "biome format",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "check": "biome check --write",
+    "ci": "biome ci",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -27,15 +59,17 @@
   "bugs": {
     "url": "https://github.com/otoneko1102/makeitaquote/issues"
   },
-  "homepage": "https://github.com/otoneko1102/makeitaquote#readme",
+  "homepage": "https://github.com/otoneko1102/makeitaquote/tree/v8#readme",
   "dependencies": {
-    "axios": "^1.7.5",
-    "displus": "^2.0.2"
+    "axios": "^1.20.0",
+    "displus": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
-    "discord.js": "^13.17.1",
-    "discord.js-infer": "^3.3.0",
-    "discord.js-selfbot-v13": "^3.4.6"
+    "@biomejs/biome": "^2.5.11",
+    "@types/node": "^22.20.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "tsdown": "^0.22.14",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }

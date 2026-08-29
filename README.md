@@ -10,16 +10,38 @@ Powered by [Voids API](https://voids.top/).
 <a href="https://www.otoho.me/"><img src="https://www.otoho.me/img/logo.png" alt="Oto Home" style="display: block; width: auto; height: 100px;"/></a>
 
 ## Example
-Code: [miq.js](https://github.com/otoneko1102/makeitaquote/tree/main/examples/miq.js)<br>
-With discord.js: [miq-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/main/examples/miq-with-discordjs.md)
+Code (CommonJS): [miq.cjs](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq.cjs)<br>
+Code (ESM): [miq.mjs](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq.mjs)<br>
+With discord.js: [miq-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq-with-discordjs.md)
 
 
 > Note: If an API issue prevents you from using .generate(), you can use .generateBeta()
 
-With discord.js(beta): [beta-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/main/examples/beta-with-discordjs.md)
+With discord.js(beta): [beta-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/beta-with-discordjs.md)
 
 ![MiQ](https://cdn.otoneko.jp/makeitaquote/MiQ.png)
 ![MiQ Color](https://cdn.otoneko.jp/makeitaquote/MiQ-color.png)
+
+## Development
+This branch (`v8`) is a long-term maintenance line for the legacy `axios`/`displus`-based
+implementation and is published under the npm `legacy` dist-tag; it is never merged into `main`.
+
+```
+npm install
+npm run build
+npm run ci        # biome
+npm run typecheck
+npm run test       # vitest, with axios mocked — no network calls
+```
+
+`examples/miq.cjs` and `examples/miq.mjs` call the live Voids API and are not run in CI. Build
+first, then run them locally against the real API as a manual check before releasing:
+
+```
+npm run build
+node examples/miq.cjs
+node examples/miq.mjs
+```
 
 ## Get Support
 <a href="https://discord.gg/yKW8wWKCnS"><img src="https://discordapp.com/api/guilds/1005287561582878800/widget.png?style=banner4" alt="Discord Banner"/></a>

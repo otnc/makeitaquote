@@ -1,0 +1,72 @@
+name: release (v8)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 8.2.0)'
+        required: true
+        default: 8.2.0
+
+# Trusted publishing: npm authenticates this workflow via OIDC, so no
+# NPM_TOKEN secret is needed. Configure the link on npmjs.com first:
+#   package Settings -> Publishing access -> Trusted publishers -> GitHub
+permissions:
+  contents: write # push the version commit/tag and create the GitHub Release
+  id-token: write # npm trusted publishing (OIDC)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v8
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+      - name: Bump version
+        id: bump
+        run: |
+          OLD="$(node -p "require('./package.json').version")"
+          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
+          NEW="$(node -p "require('./package.json').version")"
+          echo "version=v${NEW}" >> "$GITHUB_OUTPUT"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Version is already ${NEW}; skipping the bump commit but still releasing."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Trusted publishing: no NODE_AUTH_TOKEN — npm exchanges the OIDC token
+      # issued by GitHub for a short-lived publish credential.
+      - run: npm install -g npm@11
+      # This is the legacy maintenance line, published separately from the
+      # current major under makeitaquote@latest — never drop --tag legacy.
+      - run: npm publish --access public --tag legacy --provenance
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ "${{ steps.bump.outputs.changed }}" = "true" ]; then
+            git commit -am "release: ${{ steps.bump.outputs.version }}"
+          fi
+          if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
+            git tag "${{ steps.bump.outputs.version }}"
+          fi
+          git push origin HEAD:v8 "${{ steps.bump.outputs.version }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ steps.bump.outputs.version }}" --target v8 --title "${{ steps.bump.outputs.version }}" --generate-notes
