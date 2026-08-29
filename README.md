@@ -43,3 +43,7 @@ npm run build
 node examples/miq.cjs
 node examples/miq.mjs
 ```
+
+## Licence
+
+ISC — see [LICENSE](LICENSE).
