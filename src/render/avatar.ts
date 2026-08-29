@@ -3,6 +3,7 @@ import type { AvatarSource } from '../core/types'
 import { createClient } from '../http/client'
 import { parseColor, toCSS } from '../theme/color'
 import type { AvatarTheme } from '../theme/types'
+import type { AssetCache } from '../util/assetCache'
 import { avatarCache } from './avatarCache'
 import { createCanvas, type Image, loadImage, type SKRSContext2D } from './canvasFactory'
 
@@ -16,6 +17,8 @@ const defaultFetcher: AvatarFetcher = (url, signal) => http.getBuffer(url, signa
 export interface LoadAvatarOptions {
   signal?: AbortSignal
   fetcher?: AvatarFetcher
+  /** Which cache to dedupe through. Defaults to the shared avatar cache. */
+  cache?: AssetCache<Image>
 }
 
 /**
@@ -56,20 +59,21 @@ export async function loadAvatar(
 }
 
 async function loadCached(key: string, options: LoadAvatarOptions): Promise<Image | null> {
-  const cached = avatarCache.cached(key)
+  const cache = options.cache ?? avatarCache
+  const cached = cache.cached(key)
   if (cached) return cached
-  if (avatarCache.isKnownFailure(key)) return null
+  if (cache.isKnownFailure(key)) return null
 
-  return avatarCache.coalesce(key, async () => {
+  return cache.coalesce(key, async () => {
     try {
       const bytes = /^https?:\/\//i.test(key)
         ? await (options.fetcher ?? defaultFetcher)(key, options.signal)
         : await readFile(key)
       const image = await loadImage(bytes)
-      avatarCache.remember(key, image)
+      cache.remember(key, image)
       return image
     } catch {
-      avatarCache.rememberFailure(key)
+      cache.rememberFailure(key)
       return null
     }
   })
