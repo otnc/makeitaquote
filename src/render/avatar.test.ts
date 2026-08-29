@@ -2,7 +2,12 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { AvatarFetcher } from './avatar'
-import { loadAvatar } from './avatar'
+import {
+  drawAvatar,
+  loadAvatar,
+  resetFilterDetectionForTests,
+  setFilterSupportedForTests,
+} from './avatar'
 import { avatarCacheInfo, clearAvatarCache, configureAvatarCache } from './avatarCache'
 import { createCanvas } from './canvasFactory'
 
@@ -146,5 +151,37 @@ describe('loadAvatar', () => {
     await loadAvatar('https://cdn.test/a.png', { fetcher })
 
     expect(fetcher.calls).toHaveLength(2)
+  })
+})
+
+describe('drawAvatar grayscale fallback (no ctx.filter support)', () => {
+  afterEach(() => {
+    resetFilterDetectionForTests()
+  })
+
+  it('desaturates the whole painted box, including its fractional far edge', async () => {
+    setFilterSupportedForTests(false)
+
+    const canvas = createCanvas(5, 5)
+    const ctx = canvas.getContext('2d')
+    const image = await loadAvatar(redSquare())
+
+    drawAvatar(ctx, image, {
+      theme: {
+        grayscale: true,
+        position: 'left',
+        widthRatio: 1,
+        fit: 'cover',
+        shape: 'rectangle',
+        fallback: null,
+      },
+      // A non-integer box: painting/desaturating must cover pixel (4, 4) too,
+      // not just the 4x4 region a truncated width/height would leave.
+      box: { x: 0, y: 0, width: 4.9, height: 4.9 },
+    })
+
+    const { data } = ctx.getImageData(4, 4, 1, 1)
+    expect(data[0]).toBe(data[1])
+    expect(data[1]).toBe(data[2])
   })
 })

@@ -290,13 +290,25 @@ export async function outdatedCommand(
   io: CliIo,
   options: OutputOptions = {},
 ): Promise<number> {
-  const packageStatus = await (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion())
-  const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
-  const twemojiLatest =
-    twemoji.version === null ? null : await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
-  const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
-  const fontStatuses =
-    fonts.length > 0 ? await (deps.checkFontUpdates ?? checkFontUpdates)(fonts) : []
+  // Each check is independent — only twemojiLatest depends on twemoji's own
+  // result — so they run concurrently instead of one round-trip at a time.
+  const [packageStatus, { twemoji, twemojiLatest }, { fonts, fontStatuses }] = await Promise.all([
+    (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion()),
+    (async () => {
+      const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
+      const twemojiLatest =
+        twemoji.version === null
+          ? null
+          : await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
+      return { twemoji, twemojiLatest }
+    })(),
+    (async () => {
+      const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
+      const fontStatuses =
+        fonts.length > 0 ? await (deps.checkFontUpdates ?? checkFontUpdates)(fonts) : []
+      return { fonts, fontStatuses }
+    })(),
+  ])
 
   const packageOutdated =
     packageStatus.latest !== null && isNewerVersion(packageStatus.current, packageStatus.latest)
@@ -354,7 +366,21 @@ export async function updateCommand(deps: CliDeps, io: CliIo): Promise<number> {
   let failed = false
   let didAnything = false
 
-  const packageStatus = await (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion())
+  // Gathering what needs updating is read-only and each check is
+  // independent, so it runs concurrently; the actual updates below stay
+  // sequential so their output keeps the same package → Twemoji → fonts order.
+  const [packageStatus, twemoji, fonts] = await Promise.all([
+    (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion()),
+    (deps.twemojiInfo ?? twemojiInfo)(),
+    Promise.resolve((deps.listInstalledFonts ?? listInstalledFonts)()),
+  ])
+  const [twemojiLatest, fontStatuses] = await Promise.all([
+    twemoji.version === null
+      ? Promise.resolve(null)
+      : (deps.latestTwemojiVersion ?? latestTwemojiVersion)(),
+    fonts.length > 0 ? (deps.checkFontUpdates ?? checkFontUpdates)(fonts) : Promise.resolve([]),
+  ])
+
   if (
     packageStatus.latest !== null &&
     isNewerVersion(packageStatus.current, packageStatus.latest)
@@ -365,43 +391,39 @@ export async function updateCommand(deps: CliDeps, io: CliIo): Promise<number> {
     )
   }
 
-  const twemoji = await (deps.twemojiInfo ?? twemojiInfo)()
-  if (twemoji.version !== null) {
-    const latest = await (deps.latestTwemojiVersion ?? latestTwemojiVersion)()
-    if (latest !== null && isNewerVersion(twemoji.version, latest)) {
-      didAnything = true
-      io.line('Twemoji')
-      try {
-        await (deps.uninstallTwemoji ?? uninstallTwemoji)()
-        const result = await (deps.installTwemoji ?? installTwemoji)()
-        io.line(`  ✓ updated to ${result.version}`)
-      } catch (cause) {
-        io.line(`  ✗ Twemoji — ${errorMessage(cause)}`)
-        failed = true
-      }
+  if (
+    twemoji.version !== null &&
+    twemojiLatest !== null &&
+    isNewerVersion(twemoji.version, twemojiLatest)
+  ) {
+    didAnything = true
+    io.line('Twemoji')
+    try {
+      await (deps.uninstallTwemoji ?? uninstallTwemoji)()
+      const result = await (deps.installTwemoji ?? installTwemoji)()
+      io.line(`  ✓ updated to ${result.version}`)
+    } catch (cause) {
+      io.line(`  ✗ Twemoji — ${errorMessage(cause)}`)
+      failed = true
     }
   }
 
-  const fonts = (deps.listInstalledFonts ?? listInstalledFonts)()
-  if (fonts.length > 0) {
-    const statuses = await (deps.checkFontUpdates ?? checkFontUpdates)(fonts)
-    const outdatedFamilies = statuses
-      .filter((status) => status.outdated)
-      .map((status) => status.family)
+  const outdatedFamilies = fontStatuses
+    .filter((status) => status.outdated)
+    .map((status) => status.family)
 
-    if (outdatedFamilies.length > 0) {
-      didAnything = true
-      io.line('Fonts')
-      const results = await (deps.installFonts ?? installFonts)(outdatedFamilies)
-      for (const result of results) {
-        if (result.ok) io.line(`  ✓ ${result.family}`)
-        else {
-          io.line(`  ✗ ${result.family} — not available (see the warning above)`)
-          failed = true
-        }
+  if (outdatedFamilies.length > 0) {
+    didAnything = true
+    io.line('Fonts')
+    const results = await (deps.installFonts ?? installFonts)(outdatedFamilies)
+    for (const result of results) {
+      if (result.ok) io.line(`  ✓ ${result.family}`)
+      else {
+        io.line(`  ✗ ${result.family} — not available (see the warning above)`)
+        failed = true
       }
-      await (deps.pruneFonts ?? pruneFonts)(outdatedFamilies)
     }
+    await (deps.pruneFonts ?? pruneFonts)(outdatedFamilies)
   }
 
   if (!didAnything) io.line('Nothing to update.')

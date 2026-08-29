@@ -21,8 +21,17 @@ export function isNewerVersion(current: string, latest: string): boolean {
 }
 
 function toSegments(version: string): number[] {
-  return version
-    .replace(/^v/, '')
+  // Drop any prerelease/build suffix (`-rc.1`, `+build5`) before splitting on
+  // `.`: left in, "12.0.0-rc.1" parsed as [12, 0, 0, 1] — parseInt truncates
+  // "0-rc" down to the digits it starts with, so the trailing ".1" became a
+  // real extra segment, making the prerelease compare as *newer* than the
+  // release it precedes. Comparing bare cores instead can't tell a
+  // prerelease apart from its release, but that's a smaller, safer
+  // imprecision than the reversal — and every real caller here (npm
+  // dist-tags, Twemoji/Google Fonts release tags) is a plain core version.
+  const core = version.replace(/^v/, '').split(/[-+]/)[0] as string
+
+  return core
     .split('.')
     .map((part) => Number.parseInt(part, 10))
     .map((n) => (Number.isFinite(n) ? n : 0))
