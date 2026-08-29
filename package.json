@@ -41,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/otoneko1102/makeitaquote.git"
+    "url": "git+https://github.com/otnc/makeitaquote.git"
   },
   "keywords": [
     "img",
@@ -57,9 +57,9 @@
   "author": "otoneko.",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/otoneko1102/makeitaquote/issues"
+    "url": "https://github.com/otnc/makeitaquote/issues"
   },
-  "homepage": "https://github.com/otoneko1102/makeitaquote/tree/legacy#readme",
+  "homepage": "https://github.com/otnc/makeitaquote/tree/legacy#readme",
   "dependencies": {
     "axios": "^1.20.0",
     "displus": "^2.2.1"
