@@ -6,6 +6,8 @@ import { clearEmojiCache } from '../emoji/cache'
 import { resetAutoloadForTests } from '../font/autoload'
 import { colorThemeGradient, colorThemeTextBase, resolveColorTheme } from '../theme/colorThemes'
 import { resetFilterDetectionForTests } from './avatar'
+import { avatarCacheInfo, clearAvatarCache, configureAvatarCache } from './avatarCache'
+import { backgroundImageCacheInfo, clearBackgroundImageCache } from './backgroundImageCache'
 import { createCanvas } from './canvasFactory'
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
@@ -148,6 +150,43 @@ describe('render', () => {
     const [r, g, b] = await pixelAt(miq, 1100, 5)
 
     expect([r, g, b]).toEqual([0, 0, 0])
+  })
+
+  describe('avatar/background image cache separation', () => {
+    afterEach(() => {
+      configureAvatarCache({})
+      clearAvatarCache()
+      clearBackgroundImageCache()
+    })
+
+    it('caches an avatar and a background image in their own caches', async () => {
+      await quote()
+        .setAvatar('https://cdn.test/avatar.png')
+        .setTheme({
+          backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 1 },
+        })
+        .render()
+
+      expect(avatarCacheInfo().images).toBe(1)
+      expect(backgroundImageCacheInfo().images).toBe(1)
+    })
+
+    it('a burst of distinct avatars does not evict a cached background image', async () => {
+      await quote()
+        .setTheme({
+          backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'cover', opacity: 1 },
+        })
+        .render()
+      expect(backgroundImageCacheInfo().images).toBe(1)
+
+      // A 1-entry avatar cache overflows on the second distinct avatar; if it
+      // shared storage with the background image, this would evict it too.
+      configureAvatarCache({ maxEntries: 1 })
+      await quote().setAvatar('https://cdn.test/avatar-a.png').render()
+      await quote().setAvatar('https://cdn.test/avatar-b.png').render()
+
+      expect(backgroundImageCacheInfo().images).toBe(1)
+    })
   })
 
   it('uses white for the light theme background', async () => {

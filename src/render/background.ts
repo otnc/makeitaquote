@@ -8,20 +8,21 @@ import {
   type LoadAvatarOptions,
   loadAvatar,
 } from './avatar'
+import { backgroundImageCache } from './backgroundImageCache'
 import { createCanvas, type Image, type SKRSContext2D } from './canvasFactory'
 import { gradientLine } from './layout'
 
 /**
- * Loads `theme.backgroundImage`'s source, going through the same cache and
- * fetch path an avatar uses — it is the same kind of asset, just drawn
- * somewhere else.
+ * Loads `theme.backgroundImage`'s source, going through the same fetch path
+ * an avatar uses but its own cache (`backgroundImageCache`) — it's the same
+ * kind of asset, just drawn somewhere else and reused very differently.
  */
 export function loadBackgroundImage(
   theme: Theme,
   options: LoadAvatarOptions = {},
 ): Promise<Image | null> {
   if (!theme.backgroundImage) return Promise.resolve(null)
-  return loadAvatar(theme.backgroundImage.source, options)
+  return loadAvatar(theme.backgroundImage.source, { ...options, cache: backgroundImageCache })
 }
 
 /**
