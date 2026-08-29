@@ -10,6 +10,7 @@ Powered by [Voids API](https://voids.top/).
 > The Voids API is not owned or operated by the developer of this package, so please do not contact us through GitHub Issues or other such inquiries about the API being down.
 
 ## Example
+
 Code (CommonJS): [miq.cjs](https://github.com/otnc/makeitaquote/tree/legacy/examples/miq.cjs)  
 Code (ESM): [miq.mjs](https://github.com/otnc/makeitaquote/tree/legacy/examples/miq.mjs)  
 With discord.js: [miq-with-discordjs.md](https://github.com/otnc/makeitaquote/tree/legacy/examples/miq-with-discordjs.md)
@@ -24,6 +25,7 @@ With discord.js(beta): [beta-with-discordjs.md](https://github.com/otnc/makeitaq
 ![Sample quote image, color theme](assets/readme/color.png)
 
 ## Development
+
 This branch (`legacy`) is a long-term maintenance line for the legacy `axios`/`displus`-based
 implementation and is published under the npm `legacy` dist-tag; it is never merged into `main`.
 
