@@ -15,7 +15,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install
+      # `npm install` (vs `npm ci`) has a known bug with optional platform
+      # deps (npm/cli#4828) when the lockfile was generated on a different
+      # OS than the runner — tsdown/rolldown ship a native binding per
+      # platform via optionalDependencies, so this must be a clean `npm ci`.
+      - run: npm ci
       - run: npm run ci
       - run: npm run typecheck
       - run: npm run test
@@ -46,6 +50,6 @@ jobs:
         with:
           name: dist
           path: dist
-      - run: npm install --omit=dev
+      - run: npm ci --omit=dev
       - run: node -e "require('./dist/index.cjs')"
       - run: node --input-type=module -e "import('./dist/index.mjs')"

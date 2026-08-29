@@ -27,7 +27,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install
+      # See ci.yml: `npm ci` avoids a known npm bug (npm/cli#4828) with
+      # optional platform deps when the lockfile was generated on another OS.
+      - run: npm ci
       - run: npm run ci
       - run: npm run typecheck
       - run: npm run test
