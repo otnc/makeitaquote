@@ -12,6 +12,7 @@ import {
 import { fromMessage } from '../core/source'
 import type { MessageLike, MessageSourceOptions, QuoteInput } from '../core/types'
 import { createClient, HTTPError, type HttpClient, TimeoutError } from '../http/client'
+import { errorMessage } from '../util/errorMessage'
 import { DEFAULT_BASE_URL, type EndpointPath, endpoints } from './endpoints'
 import { VoidsApiError, type VoidsOptions, type VoidsPayload, type VoidsQuoteData } from './types'
 
@@ -212,6 +213,5 @@ function toApiError(cause: unknown, endpoint: EndpointPath, prefix: string): Voi
     return new VoidsApiError(`${prefix}: request timed out`, { endpoint, cause })
   }
 
-  const message = cause instanceof Error ? cause.message : String(cause)
-  return new VoidsApiError(`${prefix}: ${message}`, { endpoint, cause })
+  return new VoidsApiError(`${prefix}: ${errorMessage(cause)}`, { endpoint, cause })
 }

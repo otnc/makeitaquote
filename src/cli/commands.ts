@@ -25,6 +25,7 @@ import {
 } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
 import { checkFontUpdates, type FontUpdateStatus } from '../font/updates'
+import { errorMessage } from '../util/errorMessage'
 import { isNewerVersion } from '../util/version'
 import { checkEnv, type EnvReport } from './env'
 import { currentVersion } from './packageVersion'
@@ -170,7 +171,7 @@ export async function uninstallCommand(
         info.images > 0 ? `Removed Twemoji (${info.images} images)` : 'Twemoji was not installed',
       )
     } catch (cause) {
-      io.line(`✗ Twemoji — ${cause instanceof Error ? cause.message : String(cause)}`)
+      io.line(`✗ Twemoji — ${errorMessage(cause)}`)
       failed = true
     }
   }
@@ -185,7 +186,7 @@ export async function uninstallCommand(
           : 'No fonts to remove',
       )
     } catch (cause) {
-      io.line(`✗ Fonts — ${cause instanceof Error ? cause.message : String(cause)}`)
+      io.line(`✗ Fonts — ${errorMessage(cause)}`)
       failed = true
     }
   }
@@ -402,7 +403,7 @@ export async function updateCommand(deps: CliDeps, io: CliIo): Promise<number> {
       const result = await (deps.installTwemoji ?? installTwemoji)()
       io.line(`  ✓ updated to ${result.version}`)
     } catch (cause) {
-      io.line(`  ✗ Twemoji — ${cause instanceof Error ? cause.message : String(cause)}`)
+      io.line(`  ✗ Twemoji — ${errorMessage(cause)}`)
       failed = true
     }
   }
@@ -544,7 +545,7 @@ export async function renderCommand(
     io.line(`✓ ${outPath} (${formatBytes(bytes.length)})`)
     return 0
   } catch (cause) {
-    io.line(`✗ ${cause instanceof Error ? cause.message : String(cause)}`)
+    io.line(`✗ ${errorMessage(cause)}`)
     return 1
   }
 }
@@ -610,7 +611,7 @@ async function installTwemojiStep(deps: CliDeps, io: CliIo): Promise<boolean> {
     return true
   } catch (cause) {
     if (progressed) io.line('')
-    io.line(`  ✗ Twemoji — ${cause instanceof Error ? cause.message : String(cause)}`)
+    io.line(`  ✗ Twemoji — ${errorMessage(cause)}`)
     return false
   }
 }

@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import { FontNotAvailableError } from '../core/errors'
 import type { AutoFontOptions } from '../core/types'
 import { createClient } from '../http/client'
-import { resolveFontAlias } from './catalogue'
+import { errorMessage } from '../util/errorMessage'
+import { normalizeFontFamily } from './catalogue'
 import { cachedFontPath, isCached, resolveCacheDir, writeCachedFont } from './diskCache'
 import { type FontFace, fileNameFor, resolveGoogleFont, slugFor } from './googleFonts'
 import { fonts } from './registry'
@@ -70,7 +71,7 @@ function isOnline(options: EnsureOptions): boolean {
  * everything past this point agrees on the same real family.
  */
 export async function useFont(requested: string, options: EnsureOptions = {}): Promise<boolean> {
-  const family = resolveFontAlias(requested) ?? requested
+  const family = normalizeFontFamily(requested)
   if (ready.has(family) || fonts.has(family)) return true
 
   if (!isOnline(options)) {
@@ -101,10 +102,7 @@ export async function useFont(requested: string, options: EnsureOptions = {}): P
       ready.add(family)
       return true
     }
-    warnOnce(
-      `resolve:${family}`,
-      `makeitaquote: ${cause instanceof Error ? cause.message : String(cause)}`,
-    )
+    warnOnce(`resolve:${family}`, `makeitaquote: ${errorMessage(cause)}`)
     return false
   }
 
@@ -129,7 +127,7 @@ export async function installFont(
   requested: string,
   options: EnsureOptions = {},
 ): Promise<boolean> {
-  const family = resolveFontAlias(requested) ?? requested
+  const family = normalizeFontFamily(requested)
   const weights = options.weights ?? [400, 700]
 
   if (!isOnline(options)) {
@@ -148,10 +146,7 @@ export async function installFont(
       ...(options.signal ? { signal: options.signal } : {}),
     })
   } catch (cause) {
-    warnOnce(
-      `resolve:${family}`,
-      `makeitaquote: ${cause instanceof Error ? cause.message : String(cause)}`,
-    )
+    warnOnce(`resolve:${family}`, `makeitaquote: ${errorMessage(cause)}`)
     return false
   }
 
@@ -230,7 +225,7 @@ async function ensureFace(
       warnOnce(
         `failed:${family}`,
         `makeitaquote: could not download ${family} ` +
-          `(${cause instanceof Error ? cause.message : String(cause)}). ` +
+          `(${errorMessage(cause)}). ` +
           'Falling back to system fonts; text may render as boxes. ' +
           'To fix this, register a font yourself with ' +
           `fonts.registerFromPath(path, family), or place the file at ${cachedFontPath(dir, fileName)}.`,

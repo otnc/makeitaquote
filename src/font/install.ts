@@ -3,7 +3,7 @@ import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { isNewerVersion } from '../util/version'
 import { type EnsureOptions, installFont } from './autoload'
-import { resolveFontAlias } from './catalogue'
+import { normalizeFontFamily } from './catalogue'
 import { resolveCacheDir } from './diskCache'
 import { slugFor } from './googleFonts'
 
@@ -45,7 +45,7 @@ export async function installFonts(
 ): Promise<FontInstallResult[]> {
   const results: FontInstallResult[] = []
   for (const requested of families) {
-    const family = resolveFontAlias(requested) ?? requested
+    const family = normalizeFontFamily(requested)
     results.push({ family, ok: await installFont(family, options) })
   }
   return results
@@ -76,7 +76,7 @@ export async function uninstallFonts(
 
   let removed = 0
   for (const requested of families) {
-    const family = resolveFontAlias(requested) ?? requested
+    const family = normalizeFontFamily(requested)
     const prefix = `${slugFor(family)}-`
     let names: string[]
     try {
@@ -125,7 +125,7 @@ export async function pruneFonts(
   }
 
   const wanted = families
-    ? new Set(families.map((family) => slugFor(resolveFontAlias(family) ?? family)))
+    ? new Set(families.map((family) => slugFor(normalizeFontFamily(family))))
     : null
 
   interface File {
