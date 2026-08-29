@@ -1,5 +1,10 @@
+.private/
 node_modules/
 dist/
 coverage/
+.makeitaquote/
 *.log
 .DS_Store
+.env
+.env.*
+!.env.example

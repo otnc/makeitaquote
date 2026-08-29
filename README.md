@@ -10,20 +10,20 @@ Powered by [Voids API](https://voids.top/).
 <a href="https://www.otoho.me/"><img src="https://www.otoho.me/img/logo.png" alt="Oto Home" style="display: block; width: auto; height: 100px;"/></a>
 
 ## Example
-Code (CommonJS): [miq.cjs](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq.cjs)<br>
-Code (ESM): [miq.mjs](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq.mjs)<br>
-With discord.js: [miq-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/miq-with-discordjs.md)
+Code (CommonJS): [miq.cjs](https://github.com/otoneko1102/makeitaquote/tree/legacy/examples/miq.cjs)<br>
+Code (ESM): [miq.mjs](https://github.com/otoneko1102/makeitaquote/tree/legacy/examples/miq.mjs)<br>
+With discord.js: [miq-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/legacy/examples/miq-with-discordjs.md)
 
 
 > Note: If an API issue prevents you from using .generate(), you can use .generateBeta()
 
-With discord.js(beta): [beta-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/v8/examples/beta-with-discordjs.md)
+With discord.js(beta): [beta-with-discordjs.md](https://github.com/otoneko1102/makeitaquote/tree/legacy/examples/beta-with-discordjs.md)
 
 ![MiQ](https://cdn.otoneko.jp/makeitaquote/MiQ.png)
 ![MiQ Color](https://cdn.otoneko.jp/makeitaquote/MiQ-color.png)
 
 ## Development
-This branch (`v8`) is a long-term maintenance line for the legacy `axios`/`displus`-based
+This branch (`legacy`) is a long-term maintenance line for the legacy `axios`/`displus`-based
 implementation and is published under the npm `legacy` dist-tag; it is never merged into `main`.
 
 ```

@@ -59,7 +59,7 @@
   "bugs": {
     "url": "https://github.com/otoneko1102/makeitaquote/issues"
   },
-  "homepage": "https://github.com/otoneko1102/makeitaquote/tree/v8#readme",
+  "homepage": "https://github.com/otoneko1102/makeitaquote/tree/legacy#readme",
   "dependencies": {
     "axios": "^1.20.0",
     "displus": "^2.2.1"
@@ -69,7 +69,7 @@
     "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "^4.1.11",
     "tsdown": "^0.22.14",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   }
 }

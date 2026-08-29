@@ -1,10 +1,10 @@
-name: ci (v8)
+name: ci (legacy)
 
 on:
   push:
-    branches: [v8]
+    branches: [legacy]
   pull_request:
-    branches: [v8]
+    branches: [legacy]
 
 jobs:
   test:

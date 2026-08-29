@@ -9,5 +9,4 @@ export default defineConfig({
   // branch keeps a broader Node floor than main's node22 target.
   target: 'node18',
   platform: 'node',
-  minify: 'dce-only',
 })
