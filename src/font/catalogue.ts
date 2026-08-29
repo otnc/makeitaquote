@@ -1,4 +1,5 @@
 import { distance } from 'fastest-levenshtein'
+import { buildAliasMap, buildNormalizedKeyMap } from '../util/aliasCatalogue'
 
 /**
  * Fonts this package can fetch by name, one row each — the single source
@@ -80,16 +81,16 @@ export function isCatalogued(family: string): boolean {
  * Keys are lower-cased; use `resolveFontAlias()` rather than indexing this
  * directly if the input isn't already normalized.
  */
-export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = (() => {
-  const aliases: Record<string, CataloguedFont> = {}
-  for (const entry of FONTS) {
-    if (entry.alias !== null) aliases[entry.alias] = entry.family
-  }
-  return aliases
-})()
+export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = buildAliasMap(
+  FONTS,
+  (entry) => entry.family,
+  (entry) => entry.alias,
+)
 
-const CATALOGUE_BY_LOWERCASE = new Map<string, CataloguedFont>(
-  FONT_CATALOGUE.map((family) => [family.toLowerCase(), family]),
+const CATALOGUE_BY_LOWERCASE = buildNormalizedKeyMap(
+  FONTS,
+  (entry) => entry.family,
+  (s) => s.trim().toLowerCase(),
 )
 
 /**

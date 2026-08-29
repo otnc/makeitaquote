@@ -1,3 +1,4 @@
+import { buildAliasMap, buildNormalizedKeyMap } from '../util/aliasCatalogue'
 import type { ColorInput } from './color'
 import type { BackgroundGradientTheme } from './types'
 
@@ -322,20 +323,22 @@ export const ALL_COLOR_THEME_CATALOGUE: readonly CataloguedColorTheme[] = [
   ...CUSTOM_COLOR_THEME_CATALOGUE,
 ]
 
-function aliasMap(themes: readonly ColorThemeRow[]): Readonly<Record<string, string>> {
-  const aliases: Record<string, string> = {}
-  for (const entry of themes) {
-    if (entry.alias !== null) aliases[entry.alias] = entry.key
-  }
-  return aliases
-}
+const aliasOf = (entry: ColorThemeRow) => entry.alias
+const keyOf = (entry: ColorThemeRow) => entry.key
 
 /** Short option names for `COLOR_THEME_CATALOGUE`, the same relationship `FONT_ALIASES` has to `FONT_CATALOGUE`. */
-export const COLOR_THEME_ALIASES: Readonly<Record<string, string>> = aliasMap(OFFICIAL_COLOR_THEMES)
+export const COLOR_THEME_ALIASES: Readonly<Record<string, string>> = buildAliasMap(
+  OFFICIAL_COLOR_THEMES,
+  keyOf,
+  aliasOf,
+)
 
 /** Short option names for `CUSTOM_COLOR_THEME_CATALOGUE`. */
-export const CUSTOM_COLOR_THEME_ALIASES: Readonly<Record<string, string>> =
-  aliasMap(CUSTOM_COLOR_THEMES)
+export const CUSTOM_COLOR_THEME_ALIASES: Readonly<Record<string, string>> = buildAliasMap(
+  CUSTOM_COLOR_THEMES,
+  keyOf,
+  aliasOf,
+)
 
 /** Both alias tables merged — official first, so a name collision would favor it (there are none today). */
 export const ALL_COLOR_THEME_ALIASES: Readonly<Record<string, string>> = {
@@ -345,9 +348,7 @@ export const ALL_COLOR_THEME_ALIASES: Readonly<Record<string, string>> = {
 
 const ALL_COLOR_THEMES = [...OFFICIAL_COLOR_THEMES, ...CUSTOM_COLOR_THEMES]
 
-const KEYS_BY_NORMALIZED = new Map<string, string>(
-  ALL_COLOR_THEMES.map((entry) => [normalize(entry.key), entry.key]),
-)
+const KEYS_BY_NORMALIZED = buildNormalizedKeyMap(ALL_COLOR_THEMES, keyOf, normalize)
 
 const BY_KEY = new Map<string, CataloguedColorTheme>(
   ALL_COLOR_THEME_CATALOGUE.map((entry) => [entry.key, entry]),
