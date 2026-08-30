@@ -8,6 +8,10 @@ Turn a message into a quote image.
 
 Renders locally — no API, no browser, no headless Chrome. Japanese line breaking, Twemoji, Discord and Misskey custom emoji, and fonts that download themselves are all built in.
 
+```sh
+npm install makeitaquote
+```
+
 | Default (`dark`) | `color` |
 | --- | --- |
 | ![Sample quote image, default dark theme](assets/readme/mono.png) | ![Sample quote image, color theme](assets/readme/color.png) |
@@ -17,9 +21,12 @@ Renders locally — no API, no browser, no headless Chrome. Japanese line breaki
 > The self-hosted Make it a Quote Bot is now open source:  
 > https://github.com/otnc/OpenMiQ
 
-```sh
-npm install makeitaquote
-```
+> [!Important]
+>   
+> `VoidsMiQ` (`makeitaquote/api`) has been removed and moved to another package: https://github.com/otnc/makeitaquote-voids
+> ```bash
+> npm install @makeitaquote/voids
+> ```
 
 ```ts
 import { writeFile } from 'node:fs/promises'
