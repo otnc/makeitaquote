@@ -78,7 +78,7 @@ Requires Node.js 22 or newer.
 - [Offline use](#offline-use) — the `miq` command, and installing assets ahead of time
 - [Errors](#errors) · [Platform support](#platform-support)
 - [Migrating](#migrating)
-- [Author](#author) · [Licence](#licence)
+- [Requirements](#requirements) · [Contributing](#contributing) · [Author](#author) · [Licence](#licence)
 
 ---
 
@@ -886,6 +886,18 @@ v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to it
 
 ---
 
+## Requirements
+
+- Node.js >= 22
+
+---
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+
+---
+
 ## Author
 
 otoneko. https://github.com/otnc
@@ -898,8 +910,6 @@ otoneko. https://github.com/otnc
 
 - Make it a Quote (Twitter) https://twitter.com/MakeItAQuote
 - Make it a Quote (Discord / Misskey / Bluesky) https://miq.moe/
-
----
 
 ## Licence
 
