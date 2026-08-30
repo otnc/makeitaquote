@@ -1,9 +1,9 @@
 /**
  * The single place `@napi-rs/canvas` is imported.
  *
- * Keeping it to one module means the `makeitaquote/api` entry can be checked
- * for the absence of this import, which is what guarantees that requiring the
- * API client never loads the native binding.
+ * Keeping it to one module means what pulls in the native binding — and what
+ * the built output must therefore keep external rather than bundle — is one
+ * import statement rather than a search.
  */
 export {
   Canvas,

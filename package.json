@@ -1,7 +1,7 @@
 {
   "name": "makeitaquote",
   "version": "11.4.0",
-  "description": "Generate \"Make it a Quote\" images locally, or via an external API.",
+  "description": "Generate \"Make it a Quote\" images locally.",
   "keywords": [
     "img",
     "image",
@@ -11,8 +11,7 @@
     "makeitaquote",
     "quote",
     "discord",
-    "canvas",
-    "api"
+    "canvas"
   ],
   "homepage": "https://github.com/otnc/makeitaquote#readme",
   "bugs": {
@@ -40,14 +39,6 @@
       },
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    },
-    "./api": {
-      "types": {
-        "import": "./dist/api/index.d.mts",
-        "require": "./dist/api/index.d.cts"
-      },
-      "import": "./dist/api/index.mjs",
-      "require": "./dist/api/index.cjs"
     },
     "./package.json": "./package.json"
   },

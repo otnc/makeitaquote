@@ -5,8 +5,7 @@ export interface MiQErrorOptions {
 /**
  * Base class for everything this package throws.
  *
- * Catching `MiQError` catches all of them, including the ones raised by the
- * `makeitaquote/api` subpath.
+ * Catching `MiQError` catches all of them, from the library and the CLI alike.
  */
 export class MiQError extends Error {
   constructor(message: string, options?: MiQErrorOptions) {
