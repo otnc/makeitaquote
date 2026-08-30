@@ -35,6 +35,7 @@ const FONTS = [
   { family: 'Castoro Titling', alias: 'castoro' },
   // Script fallback only, not selectable via font= — see font/sources.ts.
   { family: 'Noto Sans SC', alias: null },
+  { family: 'Chiron GoRound TC', alias: null },
   { family: 'Nanum Gothic', alias: null },
   { family: 'IBM Plex Sans Arabic', alias: null },
 ] as const

@@ -55,8 +55,9 @@ export async function run(
         noFallback: {
           type: Boolean,
           description:
-            'Skip the automatic script-fallback fonts (Nanum Gothic, Noto Sans SC, IBM Plex ' +
-            'Sans Arabic) — only fonts selectable with `font=`. No effect on a specific family.',
+            'Skip the automatic script-fallback fonts (Nanum Gothic, Chiron GoRound TC, Noto ' +
+            'Sans SC, IBM Plex Sans Arabic) — only fonts selectable with `font=`. No effect on ' +
+            'a specific family.',
         },
       },
       help: {

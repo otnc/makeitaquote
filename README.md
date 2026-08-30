@@ -508,7 +508,7 @@ For a different shape, set it on the theme:
 
 ## Fonts
 
-**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic behind that for Korean, Simplified Chinese and Arabic.
+**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic, Chiron GoRound TC, Noto Sans SC and IBM Plex Sans Arabic behind that for Korean, Traditional Chinese, Simplified Chinese and Arabic.
 
 Name any font and it is fetched on demand:
 
@@ -535,7 +535,7 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | --- | --- |
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
-| Script fallback | Nanum Gothic (Korean) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but fallback-only, so none of them has a `FONT_ALIASES` short name |
+| Script fallback | Nanum Gothic (Korean) · Chiron GoRound TC (Traditional Chinese) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but fallback-only, so none of them has a `FONT_ALIASES` short name |
 
 Short, typing-friendly names for the same list are in `FONT_ALIASES`:
 
@@ -723,6 +723,7 @@ Fonts
   ✓ M PLUS Rounded 1c
   ✓ Noto Sans JP
   ✓ Nanum Gothic
+  ✓ Chiron GoRound TC
   ✓ Noto Sans SC
   ✓ IBM Plex Sans Arabic
 ```
@@ -741,7 +742,7 @@ Fonts
 
 `all` only changes what `install` does — `uninstall all` and plain `uninstall` are identical, since removing everything doesn't care which fonts are catalogued. `outdated` takes no target; it always checks miq itself, Twemoji, and every installed font.
 
-`install --no-fallback` skips Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic — the fonts fetched automatically as script fallback (see [Fonts](#fonts)) but never selectable with `font=`. It only trims a broad target (no target, `all`, `fonts`); naming a family explicitly always installs it, fallback or not.
+`install --no-fallback` skips Nanum Gothic, Chiron GoRound TC, Noto Sans SC and IBM Plex Sans Arabic — the fonts fetched automatically as script fallback (see [Fonts](#fonts)) but never selectable with `font=`. It only trims a broad target (no target, `all`, `fonts`); naming a family explicitly always installs it, fallback or not.
 
 ### Commands
 

@@ -98,9 +98,10 @@ describe('FONT_ALIASES', () => {
 })
 
 describe('FONT_CATALOGUE_FALLBACK_ONLY', () => {
-  it('is exactly the three script-fallback fonts', () => {
+  it('is exactly the four script-fallback fonts', () => {
     expect(FONT_CATALOGUE_FALLBACK_ONLY).toEqual([
       'Noto Sans SC',
+      'Chiron GoRound TC',
       'Nanum Gothic',
       'IBM Plex Sans Arabic',
     ])
