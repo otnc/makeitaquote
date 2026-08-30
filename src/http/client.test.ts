@@ -34,17 +34,18 @@ describe('createClient', () => {
     expect(await response.text()).toBe('hello')
   })
 
-  it('POSTs a JSON body', async () => {
-    let seenBody: string | undefined
+  it('HEADs without downloading the body', async () => {
+    let seenMethod: string | undefined
     vi.stubGlobal('fetch', async (_input: unknown, init?: RequestInit) => {
-      seenBody = init?.body as string | undefined
+      seenMethod = init?.method
       return new Response('', { status: 200 })
     })
     const client = createClient()
 
-    await client.post('https://example.test/', { json: { a: 1 } })
+    const response = await client.head('https://example.test/')
 
-    expect(seenBody).toBe(JSON.stringify({ a: 1 }))
+    expect(seenMethod).toBe('HEAD')
+    expect(response.status).toBe(200)
   })
 
   it('throws HTTPError for a non-2xx status by default', async () => {

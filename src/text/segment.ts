@@ -1,5 +1,4 @@
 import { parse as parseTwemoji } from '@twemoji/parser'
-import { parseURL } from 'ufo'
 import type { MisskeyOptions, Segment } from '../core/types'
 
 /**
@@ -80,10 +79,16 @@ const HOSTNAME_LIKE = /^[a-z0-9.[\]:-]+$/i
 function hostOf(value: string): string | null {
   const trimmed = value.trim()
   if (trimmed.length === 0) return null
-  const { host } = parseURL(trimmed.includes('://') ? trimmed : `https://${trimmed}`)
-  // `parseURL` is lenient where `new URL` throws, so anything with characters
-  // a hostname cannot contain is rejected here rather than trusted.
-  return host && HOSTNAME_LIKE.test(host) ? host.toLowerCase() : null
+
+  let host: string
+  try {
+    host = new URL(trimmed.includes('://') ? trimmed : `https://${trimmed}`).host
+  } catch {
+    return null
+  }
+  // A URL can still parse with a host that isn't a hostname at all — reject
+  // anything with characters a hostname cannot contain rather than trust it.
+  return HOSTNAME_LIKE.test(host) ? host.toLowerCase() : null
 }
 
 /**

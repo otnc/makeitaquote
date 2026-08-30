@@ -1,8 +1,8 @@
+import { randomUUID } from 'node:crypto'
 import { existsSync, readdirSync, statSync } from 'node:fs'
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, open, rename, rm, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
-import writeFileAtomic from 'write-file-atomic'
 import { findProjectRoot } from '../util/projectRoot'
 
 /**
@@ -71,10 +71,12 @@ export function isCached(dir: string, fileName: string): boolean {
 /**
  * Writes a font to the cache atomically.
  *
- * `write-file-atomic` writes to a temporary file and renames it into place —
- * so an interrupted download can never leave a half-written font that the
- * next run would happily try to register. Two processes racing both write
- * the same content, so whichever rename lands last is still correct.
+ * Writes to a uniquely-named temp file in the same directory, fsyncs it, then
+ * renames it into place — an interrupted download can never leave a
+ * half-written font that the next run would happily try to register, and the
+ * rename is atomic on the same filesystem. Two writers racing for the same
+ * filename are both writing the same bytes (the content is a pure function of
+ * the filename), so whichever rename lands last is still correct.
  */
 export async function writeCachedFont(
   dir: string,
@@ -84,10 +86,20 @@ export async function writeCachedFont(
   await mkdir(dir, { recursive: true })
 
   const target = cachedFontPath(dir, fileName)
+  const tmp = `${target}.${randomUUID()}.tmp`
+
+  const handle = await open(tmp, 'w')
+  try {
+    await handle.write(bytes)
+    await handle.sync()
+  } finally {
+    await handle.close()
+  }
 
   try {
-    await writeFileAtomic(target, bytes)
+    await rename(tmp, target)
   } catch (cause) {
+    await unlink(tmp).catch(() => {})
     // On Windows a rename over a file another process just created can fail;
     // if the target is there and non-empty, that other process won the race.
     if (!isCached(dir, fileName)) throw cause

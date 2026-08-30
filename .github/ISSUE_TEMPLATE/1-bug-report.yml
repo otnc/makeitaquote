@@ -5,9 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: if the Voids API (`makeitaquote/api`) is down or
-        returning errors, that is not something this package can fix — the API
-        is operated by a third party.
+        Before filing: the Voids API client lives in its own package now (`@makeitaquote/voids`). Anything about `VoidsMiQ` belongs in https://github.com/otnc/makeitaquote-voids, not here.
 
   - type: textarea
     id: what-happened
@@ -29,10 +27,10 @@ body:
   - type: dropdown
     id: entry
     attributes:
-      label: Which entry point?
+      label: How are you using it?
       options:
-        - makeitaquote (local rendering)
-        - makeitaquote/api (Voids API)
+        - As a library (import/require)
+        - The miq CLI
         - both
     validations:
       required: true
@@ -59,8 +57,7 @@ body:
     attributes:
       label: OS and architecture
       description: |
-        `@napi-rs/canvas` loads a different binary per platform, so this
-        matters for anything rendering-related.
+        `@napi-rs/canvas` loads a different binary per platform, so this matters for anything rendering-related.
       placeholder: Ubuntu 24.04 x64 / macOS 15 arm64 / Windows 11 x64
     validations:
       required: true
@@ -83,8 +80,7 @@ body:
     attributes:
       label: Font setup
       description: |
-        Only if the problem is with how text looks. Did you register a font
-        yourself, or leave `autoFont` on? Is `MIQ_FONT_CACHE_DIR` set?
+        Only if the problem is with how text looks. Did you register a font yourself, or leave `autoFont` on? Is `MIQ_FONT_CACHE_DIR` set?
 
   - type: textarea
     id: logs

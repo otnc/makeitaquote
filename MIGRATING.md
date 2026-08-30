@@ -1,5 +1,26 @@
 # Migrating
 
+## From v11
+
+### The `makeitaquote/api` subpath is gone
+
+The Voids API client moved out of this package into its own, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids). Nothing about it changed except where it is installed from and what the import specifier says:
+
+```diff
+- import { VoidsMiQ } from 'makeitaquote/api'
++ import { VoidsMiQ } from '@makeitaquote/voids'
+```
+
+```sh
+npm install @makeitaquote/voids
+```
+
+`VoidsMiQ` (and its `MiQ` alias), `VoidsOptions`, `VoidsPayload`, `VoidsQuoteData`, `VoidsApiError`, `endpoints` and `DEFAULT_BASE_URL` all keep the same names and behaviour there. The method table below still applies.
+
+Why: the two halves never shared anything but input validation, and they fail for entirely different reasons — one when a native binary is missing, the other when someone else's server is down. Keeping them in one package meant every local-rendering release also re-published an HTTP client for a third-party service this project doesn't operate, and every bug report had to start by asking which entry point it came from.
+
+Nothing else changed. If you only ever imported `makeitaquote`, v12 is a no-op upgrade — `MiQError` and its subclasses are unaffected apart from `VoidsApiError`, which was only ever thrown by the subpath and now lives in the new package.
+
 ## From v10
 
 ### Theme presets: `portrait`/`portrait-light`/`color` are gone
@@ -56,6 +77,8 @@ See the [Offline use](README.md#offline-use) section of the README for the full 
 ## From v8
 
 v9 is a rewrite. The API changed, and images are now rendered locally by default.
+
+> Coming from v8 to v12 rather than to v9: `makeitaquote/api` below is now `@makeitaquote/voids`, a separate install. See [From v11](#from-v11).
 
 ```diff
 - const { MiQ } = require('makeitaquote')

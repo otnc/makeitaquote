@@ -10,13 +10,10 @@ export interface RequestOptions {
   signal?: AbortSignal
   /** Default true. `false` resolves with the response instead of throwing on a non-2xx status. */
   throwHttpErrors?: boolean
-  /** Serialized as the request body. */
-  json?: unknown
 }
 
 export interface HttpClient {
   get(url: string, options?: RequestOptions): Promise<Response>
-  post(url: string, options?: RequestOptions): Promise<Response>
   /** HEADs `url` — the same reachability signal as `get`, without downloading the body. */
   head(url: string, options?: RequestOptions): Promise<Response>
   /** GETs `url` and reads the body into a `Buffer` — the shape every asset fetcher needs. */
@@ -48,8 +45,8 @@ export class TimeoutError extends Error {
  * Shared `ofetch` factory.
  *
  * Callers create their own instance rather than sharing one, because the
- * sensible timeout for a 64px emoji, a 9MB font and a quote-rendering API call
- * are three different numbers.
+ * sensible timeout for a 64px emoji, a 9MB font and a reachability probe are
+ * three different numbers.
  */
 export function createClient(options: HttpOptions = {}): HttpClient {
   const instance = ofetch.create({
@@ -63,7 +60,7 @@ export function createClient(options: HttpOptions = {}): HttpClient {
   })
 
   async function request(
-    method: 'GET' | 'HEAD' | 'POST',
+    method: 'GET' | 'HEAD',
     url: string,
     options: RequestOptions,
   ): Promise<Response> {
@@ -72,7 +69,6 @@ export function createClient(options: HttpOptions = {}): HttpClient {
     try {
       const raw = await instance.raw(url, {
         method,
-        body: options.json as Record<string, unknown> | undefined,
         signal: options.signal,
         // Fetched as bytes regardless of content type, then rebuilt into a
         // real `Response` below — `ofetch` otherwise consumes the body to
@@ -108,7 +104,6 @@ export function createClient(options: HttpOptions = {}): HttpClient {
   return {
     get,
     head: (url, options = {}) => request('HEAD', url, options),
-    post: (url, options = {}) => request('POST', url, options),
     getBuffer: async (url, signal) => {
       const response = await get(url, signal ? { signal } : {})
       return Buffer.from(await response.arrayBuffer())

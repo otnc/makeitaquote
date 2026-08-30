@@ -38,10 +38,13 @@ src/
 ├─ theme/    presets and merging
 ├─ render/   the drawing pipeline
 ├─ output/   encoding
-└─ api/      the Voids API client
+├─ http/     the shared fetch wrapper
+└─ cli/      the `miq` command
 ```
 
-One structural rule is worth knowing about: **`src/render/canvasFactory.ts` is the only place `@napi-rs/canvas` is imported.** That keeps the native binding out of the `makeitaquote/api` entry point, so the API client works on platforms with no prebuilt binary. `check-build.js` enforces this both statically and by loading the built entry and looking at what it pulled in.
+One structural rule is worth knowing about: **`src/render/canvasFactory.ts` is the only place `@napi-rs/canvas` is imported.** Everything that touches the canvas goes through it, and `check-build.js` verifies the built output keeps the binding external rather than bundling a `.node` file that would not load.
+
+The external-API client that used to live in `src/api/` is now its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids). Bugs and features for it belong in that repository.
 
 ## Tests
 

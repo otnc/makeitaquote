@@ -8,8 +8,8 @@ export type AvatarSource = string | URL | Buffer | Uint8Array
 /**
  * The normalized quote, after validation.
  *
- * Shared between the local renderer and the `makeitaquote/api` client so a
- * quote built with one can be handed to the other.
+ * Every input path — a Discord message, a Misskey note, a tweet, a plain
+ * object — lands here before anything is drawn.
  */
 export interface QuoteData {
   text: string
@@ -29,9 +29,7 @@ export interface QuoteInput {
   /**
    * Keeps the avatar in color instead of desaturating it.
    *
-   * On the local renderer this is a shortcut for
-   * `setTheme({ avatar: { grayscale: false } })`; the API client sends it
-   * verbatim.
+   * A shortcut for `setTheme({ avatar: { grayscale: false } })`.
    */
   color?: boolean
 }

@@ -1,6 +1,20 @@
-# makeitaquote v9 詳細設計書
+# makeitaquote 設計書
 
-作成日: 2026-07-31対象バージョン: `makeitaquote@9.0.0`（v8 系との後方互換性は**持たない**）リポジトリ: https://github.com/otnc/makeitaquote リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
+最終更新: 2026-08-30／対象バージョン: `makeitaquote@12.0.0` までの設計判断を累積した記録
+リポジトリ: https://github.com/otnc/makeitaquote ／ リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
+
+> **この文書について**: §1〜§13 は 2026-07-31 に書いた v9 時点の詳細設計書で、当時の判断をそのまま残している（v8 との後方互換を持たない、という § 1.3 の決定を含め、事実として過去に確定した内容だから）。**v9 以降の変更は §14 以降に版ごとの節として追記**しており、本体の記述と矛盾する場合は番号の大きい節が優先する。今の姿を知りたいだけなら本体は読み飛ばし、下の一覧から該当する節に直接飛んでよい。
+>
+> | 版 | 節 | 何が変わったか |
+> | --- | --- | --- |
+> | v9.1 | §14 | 縦長レイアウト・反転・太字 |
+> | v9.2 | §15 | フォント名解決の API 経由化、Misskey カスタム絵文字 |
+> | v9.3 | §16 | 折り返しの実バグ修正、色システム、サイズ、字形フォールバック |
+> | v10 | — | フォント／Twemoji キャッシュがプロジェクトローカルに（README/MIGRATING 参照、本書に節なし） |
+> | v11 | — | 会話・ツイート取り込みなど（README 参照、本書に節なし） |
+> | v12 | §19 | `makeitaquote/api` サブパスを廃止し `@makeitaquote/voids` へ分離 |
+>
+> v10・v11 で本書に節がないのは、当時ここに追記する運用がまだ無かったため。README・MIGRATING.md の記載が一次情報になる。
 
 ---
 
@@ -242,6 +256,8 @@ discord.js v13 / v14 / discord.js-selfbot-v13 のいずれの `Message` もこ�
 ## 4. パッケージ構成
 
 ### 4.1 方針
+
+> **v12 で廃止**: `makeitaquote/api` サブパスは削除し、外部 API クライアントは別パッケージ `@makeitaquote/voids` へ切り出した。以下は v9〜v11 の設計記録として残す。経緯と現行構成は §19 を参照。
 
 **単一 npm パッケージ + subpath exports**。npm 上のパッケージ名は `makeitaquote` 1 つ。
 
@@ -937,6 +953,8 @@ const buffer = await new MiQ()
 ```
 
 ### 6.4 API サブパス（`makeitaquote/api`）
+
+> **v12 で廃止**: この節の内容はそのまま `@makeitaquote/voids` へ移設された。名前・挙動とも変更なし。§19 を参照。
 
 §2.1 で確認したエンドポイントの機能差を、そのまま API 形状に反映する。
 
@@ -1820,3 +1838,67 @@ Noto Sans JP               猫=100.0  A=57.4
 - [tsdown: Migrate from tsup](https://tsdown.dev/guide/migrate-from-tsup)（設定項目の対応。ただし実際の `DepsConfig` は §14-1 のとおり改名されている）
 - `tsdown@0.22.14` の `dist/types-*.d.mts` にある `DepsConfig`（`neverBundle` / `alwaysBundle`）
 - `ky@2.0.2` のフック引数とエラー時のレスポンス消費挙動（実測、§14-3〜5）
+
+---
+
+## 19. v12: Voids API クライアントの分離
+
+### 19.1 決定
+
+`makeitaquote/api` サブパスを **削除**し、Voids API クライアントを別リポジトリ・別パッケージ **`@makeitaquote/voids`** に切り出す。`makeitaquote` はローカル描画（＋ `miq` CLI）だけを持つパッケージになる。
+
+```
+require('makeitaquote')          →  ローカル画像生成（唯一のエントリ）
+require('@makeitaquote/voids')   →  Voids API クライアント（別パッケージ）
+```
+
+§4.1 で「サブパス名は `voids` ではなく `api`」とした判断は、**将来 Voids 以外の API 実装を足す**という前提に立っていた。3 年運用してその実装は 1 つも増えず、前提が成立しなかった。名前の抽象度だけが残り、中身は最初から最後まで Voids 専用だった。
+
+### 19.2 分離する理由
+
+| # | 理由 | 内容 |
+| --- | --- | --- |
+| 1 | 共有していたものが少ない | `src/api/*` が本体と共有していたのは入力正規化（`core/quote`）・`MessageLike` 系の型・`http/client` だけ。描画・フォント・絵文字・テーマ・出力とは一切の接点がない |
+| 2 | 壊れ方が違う | ローカル側はネイティブバイナリの有無で壊れ、API 側は他人のサーバの死活で壊れる。同居させると Issue が毎回「どちらのエントリか」の切り分けから始まる（§5.12 の Issue テンプレートに実際にその設問があった） |
+| 3 | リリースが連動してしまう | 描画側の修正を出すたび、無関係な HTTP クライアントを再 publish していた。逆に API 側の URL 変更ひとつで本体の版が上がる |
+| 4 | 運用主体が違う | Voids API は本パッケージの開発者の運用物ではない。同じパッケージに同梱すると、その責任分界が README の注記でしか表現できない |
+| 5 | ビルド境界の維持コスト | 「`makeitaquote/api` からネイティブスタックへ到達しない」保証のために `check-build.js` の検査 4・5 と `RENDERING_DEPS` を維持していた。パッケージを分ければ、この不変条件は「そもそも依存していない」という自明な事実になる |
+
+理由 5 が実質的に一番大きい。§17 の「設計どおりに機能したことの確認」に挙がっている `makeitaquote/api` の分離保証は、**パッケージが 1 つであることの帳尻を合わせるための仕掛け**であり、分離すれば検査ごと不要になる。
+
+### 19.3 本リポジトリから削除するもの
+
+| 対象 | 内容 |
+| --- | --- |
+| `src/api/` | `client.ts` / `client.test.ts` / `endpoints.ts` / `types.ts` / `index.ts` の 5 ファイル |
+| `examples/api.ts` | サブパスの使用例 |
+| `package.json` | `exports['./api']`、keywords の `"api"`、description の "or via an external API" |
+| `tsdown.config.ts` | entry から `src/api/index.ts` |
+| `scripts/check-build.js` | `RENDERING_DEPS`、検査 4（require 時のロード内容）、検査 5（到達可能チャンクの静的検査）、検査 1 の `api/*` パス。以降の番号を繰り上げ |
+| `src/http/client.ts` | `post()` と `RequestOptions.json`。Voids クライアント専用で、他の呼び出し元は `get` / `head` / `getBuffer` しか使っていない |
+
+`src/http/client.ts` 自体は残す。絵文字・フォント・アバター・`miq env` の 4 系統が使っている。
+
+### 19.4 残すもの
+
+- `src/theme/presets.ts` と `src/core/sizing.test.ts` にある `api.voids.top` への言及。これは**レイアウト定数の出自**を記録したコメントで、「その値を実際に API を叩いて確認した」という事実は分離後も変わらない
+- `DESIGN.md` の §2.1 / §4 / §6.4 など、v9 当時の設計記録。廃止の注記を付けたうえで残す
+
+### 19.5 `@makeitaquote/voids` 側
+
+移設先では名前と挙動を変えない。`VoidsMiQ`（および `MiQ` 別名）・`VoidsOptions` / `VoidsPayload` / `VoidsQuoteData`・`VoidsApiError`・`endpoints` / `DEFAULT_BASE_URL` はすべて同じ。利用者の差分が `import` 文 1 行で済むようにするため。
+
+本体と共有していたコード（入力正規化・`MessageLike` 系の型・`http/client`）は、`makeitaquote` に依存するのではなく**移設先へコピーする**。依存させると「API だけ使いたい人にネイティブバイナリを引かせない」という §4.2 の目的が振り出しに戻るうえ、正規化ロジックは 100 行に満たない。
+
+構築手順は `.private/stack/*.md` に置く。
+
+### 19.6 利用者への影響
+
+| 使い方 | v12 での影響 |
+| --- | --- |
+| `import { MiQ } from 'makeitaquote'` | なし |
+| `miq` CLI | なし |
+| `import { VoidsMiQ } from 'makeitaquote/api'` | `npm i @makeitaquote/voids` して import 元を差し替える。それ以外の変更なし |
+| `VoidsApiError` を root から catch | root からは元々 export していないため影響なし |
+
+破壊的変更はサブパスの削除 1 点のみ。MIGRATING.md の「From v11」に記載する。
