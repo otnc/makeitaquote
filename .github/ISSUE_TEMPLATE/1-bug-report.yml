@@ -5,9 +5,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing: if the Voids API (`makeitaquote/api`) is down or
-        returning errors, that is not something this package can fix — the API
-        is operated by a third party.
+        Before filing: the Voids API client lives in its own package now
+        (`@makeitaquote/voids`). Anything about `VoidsMiQ` or `api.voids.top`
+        belongs in https://github.com/otnc/makeitaquote-voids, not here.
 
   - type: textarea
     id: what-happened
@@ -29,10 +29,10 @@ body:
   - type: dropdown
     id: entry
     attributes:
-      label: Which entry point?
+      label: How are you using it?
       options:
-        - makeitaquote (local rendering)
-        - makeitaquote/api (Voids API)
+        - As a library (import/require)
+        - The miq CLI
         - both
     validations:
       required: true

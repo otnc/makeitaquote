@@ -69,7 +69,6 @@ Requires Node.js 22 or newer.
 - [Text](#text) — wrapping, kinsoku, overflow
 - [Output](#output) — formats and streams
 - [Offline use](#offline-use) — the `miq` command, and installing assets ahead of time
-- [Using an external API](#using-an-external-api) instead of rendering locally
 - [Errors](#errors) · [Platform support](#platform-support)
 - [Migrating](#migrating)
 - [Author](#author) · [Licence](#licence)
@@ -848,34 +847,6 @@ await twemojiInfo() // → { images, bytes, version }
 
 ---
 
-## Using an external API
-
-If you would rather not render locally at all:
-
-```ts
-import { VoidsMiQ } from 'makeitaquote/api'
-
-const url = await new VoidsMiQ().setText('Hello World!').toURL()
-const png = await new VoidsMiQ().setText('Hello World!').toBuffer()
-```
-
-The two endpoints do different things, so the method picks one:
-
-|                        | `toURL()`          | `toBuffer()`     |
-| ---------------------- | ------------------ | ---------------- |
-| Endpoint               | `/fakequote`       | `/fakequotebeta` |
-| Returns                | a hosted image URL | the image bytes  |
-| Round trips            | 1                  | 1                |
-| Stored on their server | **yes**            | no               |
-
-`toBuffer({ hosted: true })` uploads and then downloads it back — two round trips, only useful if you specifically want the bytes of the hosted image.
-
-Importing `makeitaquote/api` does not load the rendering stack, so it also works on platforms `@napi-rs/canvas` has no binary for.
-
-> The Voids API is not operated by this package's developer. Please don't open issues here about it being down.
-
----
-
 ## Errors
 
 Everything thrown extends `MiQError`:
@@ -885,8 +856,7 @@ MiQError
 ├─ ValidationError          bad input (carries .field)
 ├─ FontNotAvailableError    no font, with strictFonts or onAssetError: 'throw'
 ├─ AssetFetchError          an avatar, emoji or font could not be fetched
-├─ RenderError              drawing failed, or text could not be made to fit
-└─ VoidsApiError            the API refused or failed (.status, .body, .endpoint)
+└─ RenderError              drawing failed, or text could not be made to fit
 ```
 
 A missing emoji, avatar or font never throws by default — the image degrades instead. All three follow `onAssetError`; `strictFonts` is a font-specific override for it.
@@ -899,13 +869,13 @@ A missing emoji, avatar or font never throws by default — the image degrades i
 
 **Node.js** is the tested runtime (22+). **Bun** loads the native binding fine and both entry points (ESM and CJS) render correctly — it isn't part of CI, so treat it as working rather than officially supported. **Deno** hasn't been verified: its Node-API compatibility for native addons like this one is still maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font files besides.
 
-On a platform without a binary, use `makeitaquote/api`.
+On a platform without a binary, use [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — the external-API client that used to live here as `makeitaquote/api`.
 
 ---
 
 ## Migrating
 
-v10 keeps the same API as v9, but moves the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
+v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids). v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
 
 ---
 
