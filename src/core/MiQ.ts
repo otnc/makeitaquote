@@ -15,7 +15,7 @@ import {
   normalizeDisplayName,
   normalizeText,
   normalizeUsername,
-  normalizeWatermark,
+  normalizeWatermarkInput,
   resolveMarkdownMode,
   resolveQuoteText,
 } from './quote'
@@ -101,8 +101,14 @@ export class MiQ {
     return this
   }
 
-  setWatermark(watermark: string): this {
-    this.#data.watermark = normalizeWatermark(watermark)
+  /**
+   * A string is drawn as text; a URL/Buffer/Uint8Array (a logo, say) is
+   * drawn as an image instead, in the same spot.
+   */
+  setWatermark(watermark: string | AvatarSource): this {
+    const resolved = normalizeWatermarkInput(watermark)
+    this.#data.watermark = resolved.watermark
+    this.#data.watermarkImage = resolved.watermarkImage
     return this
   }
 

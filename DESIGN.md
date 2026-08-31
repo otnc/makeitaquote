@@ -14,6 +14,7 @@
 > | v11 | — | 会話・ツイート取り込みなど（README 参照、本書に節なし） |
 > | v12 | §19 | `makeitaquote/api` サブパスを廃止し `@makeitaquote/voids` へ分離 |
 > | v12 | §20 | `markdown` オプション追加 — 太字/斜体/下線/取り消し線を除去せず描画できるように |
+> | v12 | §21 | watermark の画像対応、`MiQConversation` を `MiQChain`（返信/引用チェーン画像）に置き換え |
 >
 > v10・v11 で本書に節がないのは、当時ここに追記する運用がまだ無かったため。README・MIGRATING.md の記載が一次情報になる。
 
@@ -1948,3 +1949,34 @@ X（Twitter）の投稿 API・FxTwitter のいずれも `text` はプレーン�
 - **`MiQConversation`**: 依頼・実例が単一の quote (`MiQ`) についてのものだったため、今回は対象外。`conversationPipeline.ts` への同形の追加実装は将来の課題として残す。
 - **文字サイズが変わる構文**（見出し、MFM の `small`/`center`）: スタイル（太字/斜体/下線/取り消し線）とサイズ変更は別種の変更であり、後者は保留。
 - **公開 API としての `parseX()`/`StyledRun`**: `stripX()` 3 関数は据え置きで公開のままだが、新設した `parseMarkdown`/`parseDiscordMarkdown`/`parseMfm`/`parseTwitterText` と `StyledRun` 型は非公開のまま。既存の `segmentText()` 等 `text/` 配下のヘルパーも同様に非公開であり、その慣例に合わせた。
+
+---
+
+## 21. v12: watermark の画像対応と `MiQChain`（`MiQConversation` の置き換え）
+
+### 21.1 決定
+
+2つの独立した追加:
+
+1. `WatermarkTheme` はテキストのみだったが、`MiQ#setWatermark()` が `string | URL | Buffer | Uint8Array` を受け取れるようにし、ロゴなどの画像を watermark 位置に描画できるようにした。
+2. `MiQConversation`（§20.5 で「今回はスコープ外」とした複数メッセージのチャットログ描画）を**即座に削除**し、代わりに新設 `MiQChain` を追加した。Discord・X・Misskey にはリプライ元・引用元があり、「元投稿＋返信」を1枚の画像にしたいという要望に対して、`MiQConversation` の延長（チャットログの行数を増やす）ではなく、**既存の横向き `MiQ` 画像を2枚そのまま上下にくっつける**という別の形で応えた。
+
+### 21.2 watermark の内部表現
+
+`QuoteData.watermark: string` と `QuoteData.watermarkImage: AvatarSource | null` の2フィールドに分け、互いに排他とした（`avatar` と違い、watermark では**文字列は常にテキスト**として扱う — `URL`/`Buffer`/`Uint8Array` だけが画像）。`normalizeWatermarkInput()`（`core/quote.ts`）が公開の union 入力をこの2フィールドへ振り分ける。
+
+描画側は `theme.watermark.size` を、テキストではフォントサイズとして、画像では**高さ**として流用する（テキスト⇔画像を差し替えても見た目のスケール感が変わらないようにするため）。`color`/`font`/`weight` は画像には適用されない。
+
+### 21.3 `MiQChain` の設計
+
+API は「既に個別に組み立てた2つの `MiQ` インスタンスを渡す」形 `new MiQChain(top, bottom, options?)` にした（ユーザー確認済み）。理由: 各 `MiQ` は既に theme・bold・color・`markdown` などを持っているので、`MiQChain` 自身がそれらのオプション体系を再発明する必要がない。`MiQChain` が扱うのは「どちらの半分の `avatar.position` をどちらの辺にするか」という、**2枚を組み合わせたときにだけ意味を持つ**関心事だけに絞った（`ChainOptions.flip`/`topFlip`/`bottomFlip`）。
+
+デフォルトのペアリングは 上=`'right'`、下=`'left'`（README「Flipping sides」でいう flip/unflip）。`flip: true` で反転、`topFlip`/`bottomFlip` で片側だけ明示的に上書きできる。
+
+**実装上の落とし穴**: 当初 `top.clone().setTheme({ avatar: { position } })` としていたが、`MiQ#setTheme()` は**インスタンスの現在のテーマにマージするのではなく、`defineTheme()` で毎回ゼロから組み立て直す**（`extends` パレット + 渡した入力のみから）。そのため部分オブジェクトを渡すと、呼び出し元が設定していた `layout: 'new'` を含む他のテーマ設定が黙って `'dark'`/`'side'` のデフォルトに巻き戻ってしまうバグがあった（`layout: 'new'` 禁止のテストを書いて実際に検出）。修正: `getTheme()`（`structuredClone` 済み）で完全なテーマのスナップショットを取り、`avatar.position` だけをそのオブジェクト上で書き換えてから `setTheme()` に丸ごと渡す — `defineTheme()` は渡された完全なテーマの全フィールド（`layout` を含む）で上書きするため、実質的に「1フィールドだけ変えたコピー」になる。
+
+`layout: 'new'` は左右のアバターボックスという概念自体が無いため、今回は非対応とし `ValidationError` を投げる。2枚の幅が一致しない場合も、暗黙のリサイズ/引き伸ばしはせず `ValidationError` で止める。
+
+### 21.4 `MiQConversation` 削除の範囲
+
+`src/core/MiQConversation.ts`・`src/core/conversation.ts`・`src/render/conversationPipeline.ts`（それぞれの `.test.ts` 含む）を削除。`ConversationMessage`/`ConversationOptions`/`ConversationThemeName` 型と `index.ts` からの export も削除。CLI・examples に参照は無かった。MIGRATING.md の「From v11」に破壊的変更として記載。

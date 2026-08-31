@@ -18,7 +18,7 @@ import { toPixels } from '../theme/resolve'
 import type { FontWeight, LabelTheme, Theme } from '../theme/types'
 import { avatarBox, loadAvatar } from './avatar'
 import { drawAvatarWithFade, drawBackground, loadBackgroundImage } from './background'
-import { type Canvas, createCanvas, type SKRSContext2D } from './canvasFactory'
+import { type Canvas, createCanvas, type Image, type SKRSContext2D } from './canvasFactory'
 import { coveringStack, needsGlyphFallback } from './glyphs'
 import { computeLayout, fontString, type Layout, sizeToAvatar, watermarkCorner } from './layout'
 import { boldAdvance, fillText, resolvedWeight, syntheticBoldWidth } from './textStyle'
@@ -66,13 +66,14 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
     ...(options.misskey ? { misskey: options.misskey } : {}),
   })
 
-  const [images, backgroundImage, , avatar] = await Promise.all([
+  const [images, backgroundImage, , avatar, watermarkImage] = await Promise.all([
     prefetchEmoji(segments, {
       ...(options.signal ? { signal: options.signal } : {}),
     }),
     loadBackgroundImage(requested, options.signal ? { signal: options.signal } : {}),
     prepareFonts(requested, data.text, options),
     loadAvatar(data.avatar, options.signal ? { signal: options.signal } : {}),
+    loadAvatar(data.watermarkImage, options.signal ? { signal: options.signal } : {}),
   ])
 
   // Emoji that could not be fetched become plain text now, so layout and
@@ -109,7 +110,7 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
   const quoteBottom = drawQuote(ctx, resolved, images, theme, layout, options)
   const afterDivider = drawDivider(ctx, theme, layout, quoteBottom)
   drawAttribution(ctx, data, theme, layout, afterDivider)
-  drawWatermark(ctx, data, theme)
+  drawWatermark(ctx, data, theme, watermarkImage)
 
   return canvas
 }
@@ -417,7 +418,17 @@ function drawAttribution(
   }
 }
 
-function drawWatermark(ctx: SKRSContext2D, data: QuoteData, theme: Theme): void {
+function drawWatermark(
+  ctx: SKRSContext2D,
+  data: QuoteData,
+  theme: Theme,
+  image: Image | null,
+): void {
+  if (image) {
+    drawWatermarkImage(ctx, image, theme)
+    return
+  }
+
   if (!data.watermark) return
   if (invisible(theme.watermark.color, 'theme.watermark.color')) return
 
@@ -447,4 +458,28 @@ function drawWatermark(ctx: SKRSContext2D, data: QuoteData, theme: Theme): void 
     ctx.textAlign = 'right'
     fillText(ctx, data.watermark, theme.width - margin, y, stroke)
   }
+}
+
+/**
+ * Draws a watermark image at the same corner/scale the text watermark would
+ * use — `theme.watermark.size` becomes the image's height (instead of a font
+ * size) so switching between text and image keeps the same visual scale;
+ * width follows from the image's own aspect ratio. `color`/`font`/`weight`
+ * don't apply to an image and are ignored.
+ */
+function drawWatermarkImage(ctx: SKRSContext2D, image: Image, theme: Theme): void {
+  const height = toPixels(theme.watermark.size, theme.height)
+  const width = height * (image.width / Math.max(1, image.height))
+  const margin = theme.width * 0.04
+  const y = theme.height * 0.96 - height
+  const corner = watermarkCorner(theme)
+
+  const x =
+    corner === 'bottom-left'
+      ? margin
+      : corner === 'bottom-center'
+        ? (theme.width - width) / 2
+        : theme.width - margin - width
+
+  ctx.drawImage(image, x, y, width, height)
 }

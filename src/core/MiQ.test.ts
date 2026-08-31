@@ -92,3 +92,30 @@ describe('MiQ#clone', () => {
     expect(cloned.getData().markdown).toBe('discord')
   })
 })
+
+describe('MiQ#setWatermark', () => {
+  it('draws a string as text', () => {
+    const data = new MiQ().setWatermark('Make it a Quote').getData()
+
+    expect(data.watermark).toBe('Make it a Quote')
+    expect(data.watermarkImage).toBeNull()
+  })
+
+  it('draws a URL/Buffer as an image instead, clearing the text', () => {
+    const url = new URL('https://example.test/logo.png')
+    const data = new MiQ().setWatermark(url).getData()
+
+    expect(data.watermark).toBe('')
+    expect(data.watermarkImage).toBe(url)
+  })
+
+  it('switching back to a string clears a previously-set image', () => {
+    const data = new MiQ()
+      .setWatermark(new URL('https://example.test/logo.png'))
+      .setWatermark('text again')
+      .getData()
+
+    expect(data.watermark).toBe('text again')
+    expect(data.watermarkImage).toBeNull()
+  })
+})

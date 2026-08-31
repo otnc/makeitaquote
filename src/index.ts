@@ -6,15 +6,13 @@ export {
   ValidationError,
 } from './core/errors'
 export { MiQ } from './core/MiQ'
-export { MiQConversation } from './core/MiQConversation'
+export { MiQChain } from './core/MiQChain'
 export type { FxTwitterStatusLike, TweetV2Like, UserV2Like } from './core/tweetAdapters'
 export { fromFxTwitterStatus, fromTwitterApiV2Tweet } from './core/tweetAdapters'
 export type {
   AutoFontOptions,
   AvatarSource,
-  ConversationMessage,
-  ConversationOptions,
-  ConversationThemeName,
+  ChainOptions,
   EncodeOptions,
   FontSource,
   LayoutMode,

@@ -16,7 +16,10 @@ export interface QuoteData {
   avatar: AvatarSource | null
   username: string
   displayName: string
+  /** Text watermark. Empty string when a `watermarkImage` is set instead. */
   watermark: string
+  /** Image watermark (a logo, say), drawn in place of the text one. */
+  watermarkImage: AvatarSource | null
   /** How `text` is interpreted at render time. See `MarkdownMode`. */
   markdown: RenderMarkdownMode
 }
@@ -27,7 +30,11 @@ export interface QuoteInput {
   avatar?: AvatarSource | null
   username?: string
   displayName?: string
-  watermark?: string
+  /**
+   * A string is drawn as text; a URL/Buffer/Uint8Array is drawn as an image
+   * (a logo, say) instead — the two are mutually exclusive, same as `avatar`.
+   */
+  watermark?: string | AvatarSource | null
   /** How `text` is treated. Default `'raw'`. See `MarkdownMode`. */
   markdown?: MarkdownMode
   /**
@@ -422,24 +429,27 @@ export interface MiQOptions {
   markdown?: MarkdownMode
 }
 
-/** One message in a `MiQConversation`. */
-export interface ConversationMessage {
-  text: string
-  username: string
-  displayName?: string
-  avatar?: AvatarSource | null
-}
-
-/** `MiQConversation` has two built-in looks, not the full `Theme` system. */
-export type ConversationThemeName = 'dark' | 'light'
-
-export interface ConversationOptions {
-  theme?: ConversationThemeName
-  /** Canvas width in pixels; height follows the content. Default 600. */
-  width?: number
-  misskey?: string | MisskeyOptions
-  autoFont?: boolean | AutoFontOptions
-  strictFonts?: boolean
-  onAssetError?: 'ignore' | 'text' | 'throw'
-  signal?: AbortSignal
+/**
+ * Options for `MiQChain` — stacking two already-built `MiQ` quotes into one
+ * image, a reply/quote pair the way Discord, X and Misskey all have one.
+ *
+ * Only the `avatar.position` ("which side the avatar sits on", see the
+ * README's "Flipping sides") pairing is `MiQChain`'s own concern — everything
+ * else (theme, bold, color, markdown, …) is already baked into each `MiQ`
+ * instance by the time it's passed in.
+ */
+export interface ChainOptions {
+  /**
+   * Swaps which half gets which side. Default `false`: the top quote's
+   * avatar goes on the right, the bottom's on the left. `true` inverts that
+   * pairing.
+   */
+  flip?: boolean
+  /**
+   * Forces the top quote's avatar to a specific side, overriding `flip`'s
+   * pairing for this half only.
+   */
+  topFlip?: boolean
+  /** Same as `topFlip`, for the bottom quote. */
+  bottomFlip?: boolean
 }

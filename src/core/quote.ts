@@ -13,6 +13,7 @@ export function emptyQuote(): QuoteData {
     username: '',
     displayName: '',
     watermark: '',
+    watermarkImage: null,
     markdown: 'raw',
   }
 }
@@ -117,6 +118,27 @@ export function normalizeAvatar(avatar: unknown): AvatarSource | null {
 }
 
 /**
+ * Splits a `watermark` input into its text/image halves — the two are
+ * mutually exclusive, unlike `avatar` where a string is itself an image
+ * source. Here a string is a text label; only a URL/Buffer/Uint8Array means
+ * an image.
+ */
+export function normalizeWatermarkInput(value: unknown): {
+  watermark: string
+  watermarkImage: AvatarSource | null
+} {
+  if (value === null) return { watermark: '', watermarkImage: null }
+  if (typeof value === 'string')
+    return { watermark: normalizeWatermark(value), watermarkImage: null }
+  if (value instanceof URL || value instanceof Uint8Array) {
+    return { watermark: '', watermarkImage: value }
+  }
+  throw new ValidationError('watermark must be a string, URL, Buffer, Uint8Array or null', {
+    field: 'watermark',
+  })
+}
+
+/**
  * Applies a partial input onto a quote, validating each provided field.
  *
  * Absent keys are left untouched; `undefined` is treated as absent so that
@@ -144,7 +166,11 @@ export function applyInput(
   if (input.avatar !== undefined) next.avatar = normalizeAvatar(input.avatar)
   if (input.username !== undefined) next.username = normalizeUsername(input.username)
   if (input.displayName !== undefined) next.displayName = normalizeDisplayName(input.displayName)
-  if (input.watermark !== undefined) next.watermark = normalizeWatermark(input.watermark)
+  if (input.watermark !== undefined) {
+    const resolved = normalizeWatermarkInput(input.watermark)
+    next.watermark = resolved.watermark
+    next.watermarkImage = resolved.watermarkImage
+  }
 
   return next
 }
