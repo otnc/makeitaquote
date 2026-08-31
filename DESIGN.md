@@ -13,6 +13,7 @@
 > | v10 | — | フォント／Twemoji キャッシュがプロジェクトローカルに（README/MIGRATING 参照、本書に節なし） |
 > | v11 | — | 会話・ツイート取り込みなど（README 参照、本書に節なし） |
 > | v12 | §19 | `makeitaquote/api` サブパスを廃止し `@makeitaquote/voids` へ分離 |
+> | v12 | §20 | `markdown` オプション追加 — 太字/斜体/下線/取り消し線を除去せず描画できるように |
 >
 > v10・v11 で本書に節がないのは、当時ここに追記する運用がまだ無かったため。README・MIGRATING.md の記載が一次情報になる。
 
@@ -95,6 +96,8 @@ return Buffer.from(response)                    // ← 画像バイナリを直�
 | `axios` | `ky` に置換（§3.5） |
 | `displus` | `setText(text, formatText)` の Markdown 除去のためだけに使われていた。整形は本パッケージの責務ではないため機能ごと廃止 |
 | `.github/dependabot.yml` | **廃止**。ベーステンプレートに存在せず、ネイティブバイナリを含む本パッケージでは自動 PR の検証コストに見合わない。依存更新は手動で行う |
+
+> **v12 で一部上書き**: 「整形は本パッケージの責務ではない」という上記の判断は、*除去*機能（`displus` の役割）についてのものであり、v12 の `markdown` オプションは除去に加えて**描画**という新しい種類の機能を追加するもの。当時 `displus` を切った理由（Markdown 除去のためだけの薄い依存を増やしたくない）は今回も踏襲しており、新規依存は追加していない。経緯は §20 を参照。
 
 ---
 
@@ -1902,3 +1905,46 @@ require('@makeitaquote/voids')   →  Voids API クライアント（別パッ�
 | `VoidsApiError` を root から catch | root からは元々 export していないため影響なし |
 
 破壊的変更はサブパスの削除 1 点のみ。MIGRATING.md の「From v11」に記載する。
+
+---
+
+## 20. v12: `markdown` オプション — 除去ではなく描画も選べるように
+
+### 20.1 決定
+
+`stripDiscordMarkdown()` / `stripMfm()` / `stripMarkdown()` は元々「除去して plain text にする」機能しか持たなかった（§2.2）。v12 では、除去ではなく**太字・斜体・下線・取り消し線を実際に画像へ描画する**選択肢を追加する。
+
+新設する `MarkdownMode` は方言を選ぶ 1 つのオプションで、`setFromMessage`/`setFromNote`/`setFromTweet`/`setText`/`setFromObject` の各呼び出しと、`new MiQ({ markdown })` のパッケージ全体デフォルトに置く:
+
+```ts
+type MarkdownMode = true | 'discord' | 'twitter' | 'misskey' | 'raw' | false
+```
+
+`false`＝除去（既存の `stripX()` と同じ挙動・同じタイミング）、`'raw'`＝無加工、`true`＝標準 CommonMark+GFM 描画、`'discord'`/`'misskey'`/`'twitter'`＝それぞれの方言の描画。デフォルトは各呼び出しの**歴史的デフォルトを完全に保つ**（Discord/Tweet/汎用は `'raw'`、Note は `false`）ため、オプトインしない限り既存ユーザーの見た目は一切変わらない。文字サイズが変わる系（見出し、MFM の `small`/`center`）は今回保留 — 構造だけ保持したプレーンテキストとして描画する。
+
+### 20.2 内部設計: stripX と描画用パーサーの統合
+
+除去用と描画用を方言ごとに別々の関数として持つと、木を歩くロジックが 2 重化する。そこで各方言につき常に `StyledRun[]`（`{ value, style? }` の配列）を返すパーサーを 1 つだけ持ち（`parseMarkdown` / `parseDiscordMarkdown` / `parseMfm` / `parseTwitterText`。いずれも非公開 — 公開 API は既存の `stripX()` 3 関数のみ据え置き）、除去はその出力からスタイルを捨てて文字列に潰すだけの薄い後処理（`plainTextOf()`）として表現した。`stripMarkdown()` 等の公開シグネチャ・挙動は変えていない。
+
+`discomd` は `strip()`/`toHTML()` の他に位置ベースの `parse(): Token[]` を公開しており、これをそのままスタイル抽出に転用できた（Discord 方言が一番簡単だった理由）。`mfm-js` は `<b>`/`<i>`/`<s>` タグを元々 `bold`/`italic`/`strike` ノードとしてパースするため、markdown-it 側のような自前の HTML タグ対応は不要だった。
+
+### 20.3 生 HTML タグ対応と依存の選定
+
+標準 Markdown モード（`true`）では `<u>`（CommonMark に対応構文が無い）・`<b>`/`<strong>`・`<i>`/`<em>`・`<s>`/`<del>` も装飾として解釈する。`markdown-it` は生 HTML を `html_inline` という**フラットな**トークンとしてしか出さない（`strong_open`/`strong_close` のように木として入れ子にしない）ため、対になる開始・終了タグを自前でペアリングする小さな変換（`pairHtmlTags`、`text/markdown.ts`）を追加した。
+
+検討したが不採用にしたもの:
+
+- **turndown**（HTML→Markdown 変換）: 今回の入力は「Markdown 本文にところどころ生 HTML タグが混ざったもの」であり、turndown は「HTML 全体を Markdown に変換する」ためのツールなので形が合わない。
+- **`rehype-raw`**（unified/remark-rehype 系）: markdown 内の生 HTML を `parse5` で正式に HTML5 仕様通りパースし直す、最も「正しい」選択肢。ただし公式ドキュメント自身が「パフォーマンス/バンドルサイズ的に重い処理」と明言しており、`unified`+`remark-parse`+`remark-rehype`+`rehype-raw` の最低 4 パッケージが必要になる。`<u>`/`<b>`/`<i>`/`<s>` の 6 タグの単純な開閉ペアリングのためだけに導入するには不釣り合いに重い。
+
+結論として、新規依存を追加しない自前の小さなペアリング処理を採用した（§2.2 で `displus` を切った「除去のためだけの薄い依存を増やしたくない」という判断と同じ理由）。
+
+### 20.4 Twitter モード: 実体は Unicode 数学英数記号
+
+X（Twitter）の投稿 API・FxTwitter のいずれも `text` はプレーンな文字列のみを返し、太字/斜体を表す構造化フィールドは存在しない（Web 検索で確認）。「Twitter の太字」は実際には Unicode の数学英数記号ブロック（U+1D400–U+1D7FF）をクライアント側またはツールが文字単位で置換しているだけで、構造化されたマークではない。そのため `'twitter'` モードは独自のパーサー（`text/twitterText.ts`）としてこれらのコードポイント範囲を検出し、ASCII に正規化しつつスタイルを付与する。範囲は連続したオフセット計算数個で実装しており、ルックアップテーブルは持たない。
+
+### 20.5 スコープ外にしたもの
+
+- **`MiQConversation`**: 依頼・実例が単一の quote (`MiQ`) についてのものだったため、今回は対象外。`conversationPipeline.ts` への同形の追加実装は将来の課題として残す。
+- **文字サイズが変わる構文**（見出し、MFM の `small`/`center`）: スタイル（太字/斜体/下線/取り消し線）とサイズ変更は別種の変更であり、後者は保留。
+- **公開 API としての `parseX()`/`StyledRun`**: `stripX()` 3 関数は据え置きで公開のままだが、新設した `parseMarkdown`/`parseDiscordMarkdown`/`parseMfm`/`parseTwitterText` と `StyledRun` 型は非公開のまま。既存の `segmentText()` 等 `text/` 配下のヘルパーも同様に非公開であり、その慣例に合わせた。

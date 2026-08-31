@@ -17,6 +17,8 @@ export interface QuoteData {
   username: string
   displayName: string
   watermark: string
+  /** How `text` is interpreted at render time. See `MarkdownMode`. */
+  markdown: RenderMarkdownMode
 }
 
 /** A partial quote, as accepted by `setFromObject()`. */
@@ -26,6 +28,8 @@ export interface QuoteInput {
   username?: string
   displayName?: string
   watermark?: string
+  /** How `text` is treated. Default `'raw'`. See `MarkdownMode`. */
+  markdown?: MarkdownMode
   /**
    * Keeps the avatar in color instead of desaturating it.
    *
@@ -116,8 +120,18 @@ export interface MessageSourceOptions {
    * Runs `message.content` through `stripDiscordMarkdown()` before quoting
    * it. Default false — the content is quoted exactly as written unless you
    * opt in.
+   *
+   * @deprecated Use `markdown: false` (equivalent to `true` here) or
+   * `markdown: 'discord'` (render the formatting instead of stripping it).
+   * Ignored when `markdown` is set.
    */
   stripDiscordMarkdown?: boolean
+  /**
+   * How Discord-flavoured markup in `message.content` is treated. Default
+   * `'raw'` — quoted exactly as written, matching the historical default.
+   * See `MarkdownMode`.
+   */
+  markdown?: MarkdownMode
   /**
    * Expands Discord's raw tokens into the text a reader saw: user, role and
    * channel mentions, slash commands, `<t:…>` timestamps and guild
@@ -160,8 +174,17 @@ export interface NoteSourceOptions {
    * own text with the asterisks left in; `$[jelly ぷりん]` does not — the
    * function name and brackets are scaffolding that was never meant to be
    * read, so leaving them in a picture is just noise.
+   *
+   * @deprecated Use `markdown: false` (the default, equivalent to `true`
+   * here) or `markdown: 'misskey'` (render the formatting instead of
+   * stripping it). Ignored when `markdown` is set.
    */
   stripMfm?: boolean
+  /**
+   * How MFM in the note's text is treated. Default `false` (stripped),
+   * matching `stripMfm`'s historical default. See `MarkdownMode`.
+   */
+  markdown?: MarkdownMode
   /**
    * Quote the content warning instead of the text it hides. Default false.
    *
@@ -194,9 +217,68 @@ export interface TweetLike {
   }
 }
 
+export interface TweetSourceOptions {
+  /**
+   * How the tweet's text is treated. Default `'raw'` — a tweet has no markup
+   * syntax of its own, so it is quoted exactly as written unless you opt in
+   * to `'twitter'` (render Unicode bold/italic as real bold/italic) or
+   * `false` (normalize those Unicode characters back to plain ASCII). See
+   * `MarkdownMode`.
+   */
+  markdown?: MarkdownMode
+}
+
+/** Bold/italic/underline/strikethrough flags for one run of text. */
+export interface TextStyle {
+  bold?: boolean
+  italic?: boolean
+  underline?: boolean
+  strikethrough?: boolean
+}
+
+/**
+ * One run of same-styled text, before emoji segmentation.
+ *
+ * The common currency between a dialect parser (`parseMarkdown()`,
+ * `parseDiscordMarkdown()`, `parseMfm()`, `parseTwitterText()`) and
+ * `segmentStyledText()`: concatenating every run's `.value` reproduces the
+ * same plain text the matching `stripX()` returns.
+ */
+export interface StyledRun {
+  value: string
+  style?: TextStyle
+}
+
+/**
+ * How markup in quoted text is treated.
+ *
+ * - `false` — stripped to plain text with the dialect-appropriate parser
+ *   (what `stripDiscordMarkdown()`/`stripMfm()`/`stripMarkdown()` already do).
+ * - `'raw'` — left completely untouched; markup characters are drawn as
+ *   literal text.
+ * - `true` — rendered as standard CommonMark+GFM: bold, italic, strikethrough,
+ *   plus the `<u>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<s>`/`<del>` raw HTML tags.
+ * - `'discord'` / `'misskey'` / `'twitter'` — rendered using that dialect's
+ *   own bold/italic/underline/strikethrough.
+ *
+ * Constructs that change font size (headings, MFM `small`/`center`) are not
+ * covered — they draw as structural plain text, same as the stripped modes.
+ */
+export type MarkdownMode = true | 'discord' | 'twitter' | 'misskey' | 'raw' | false
+
+/**
+ * `QuoteData.markdown` after a `false` request has been resolved away.
+ *
+ * `false` is handled entirely at the point a quote is built — it strips with
+ * the right dialect's parser immediately, and stores `'raw'` here, since the
+ * dialect that would strip it is no longer recoverable from the mode alone
+ * once the text has left that call.
+ */
+export type RenderMarkdownMode = Exclude<MarkdownMode, false>
+
 /** One run of text, or one emoji to be drawn as an image. */
 export type Segment =
-  | { kind: 'text'; value: string }
+  | { kind: 'text'; value: string; style?: TextStyle }
   | { kind: 'emoji'; source: 'twemoji'; url: string; raw: string }
   | {
       kind: 'emoji'
@@ -331,6 +413,13 @@ export interface MiQOptions {
    */
   onAssetError?: 'ignore' | 'text' | 'throw'
   signal?: AbortSignal
+  /**
+   * Default `markdown` for every `setFromMessage()`/`setFromNote()`/
+   * `setFromTweet()`/`setText()`/`setFromObject()` call that doesn't specify
+   * its own. Falls back to each call's own historical default when this is
+   * unset too. See `MarkdownMode`.
+   */
+  markdown?: MarkdownMode
 }
 
 /** One message in a `MiQConversation`. */

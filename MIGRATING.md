@@ -19,7 +19,21 @@ npm install @makeitaquote/voids
 
 Why: the two halves never shared anything but input validation, and they fail for entirely different reasons — one when a native binary is missing, the other when someone else's server is down. Keeping them in one package meant every local-rendering release also re-published an HTTP client for a third-party service this project doesn't operate, and every bug report had to start by asking which entry point it came from.
 
-Nothing else changed. If you only ever imported `makeitaquote`, v12 is a no-op upgrade — `MiQError` and its subclasses are unaffected apart from `VoidsApiError`, which was only ever thrown by the subpath and now lives in the new package.
+Nothing else is breaking. If you only ever imported `makeitaquote`, v12 is a no-op upgrade — `MiQError` and its subclasses are unaffected apart from `VoidsApiError`, which was only ever thrown by the subpath and now lives in the new package.
+
+### New: render markdown instead of just stripping it
+
+`markdown` is a new option on `setFromMessage()`, `setFromNote()`, `setFromTweet()`, `setText()`, `setFromObject()` and `new MiQ({ markdown })` — bold, italic, underline and strikethrough can now be drawn onto the image instead of only ever being stripped or left as literal asterisks. Entirely additive and off by default (`'raw'`, or `false` for `setFromNote()` — both match what already happened before this existed); see the [Markdown](README.md#markdown) section of the README for the full `MarkdownMode` table.
+
+`stripDiscordMarkdown`/`stripMfm` (`setFromMessage`/`setFromNote`'s old per-source booleans) still work exactly as before, but are deprecated:
+
+```diff
+- .setFromMessage(message, { stripDiscordMarkdown: true })
++ .setFromMessage(message, { markdown: false })
+
+- .setFromNote(note, { stripMfm: false })
++ .setFromNote(note, { markdown: 'raw' })
+```
 
 ## From v10
 

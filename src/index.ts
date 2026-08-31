@@ -18,6 +18,7 @@ export type {
   EncodeOptions,
   FontSource,
   LayoutMode,
+  MarkdownMode,
   MentionOptions,
   MessageLike,
   MessageSourceOptions,
@@ -28,11 +29,14 @@ export type {
   OutputFormat,
   QuoteData,
   QuoteInput,
+  RenderMarkdownMode,
   Segment,
+  TextStyle,
   Theme,
   ThemeInput,
   ThemePalette,
   TweetLike,
+  TweetSourceOptions,
 } from './core/types'
 export type { EmojiCacheOptions } from './emoji/cache'
 export { clearEmojiCache, configureEmojiCache, emojiCacheInfo } from './emoji/cache'

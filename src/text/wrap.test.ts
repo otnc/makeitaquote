@@ -219,3 +219,71 @@ describe('wrapSegments', () => {
     expect(lines[0]).toEqual([{ kind: 'text', value: 'ab cd' }])
   })
 })
+
+describe('wrapSegments with styled segments', () => {
+  /** Bold is twice as wide as regular, so a style-blind wrap would disagree with this. */
+  function styleAwareMeasurer() {
+    return {
+      measureText(text: string, style?: { bold?: boolean }) {
+        return { width: text.length * (style?.bold ? 20 : 10) }
+      },
+    }
+  }
+
+  it('measures each segment in its own style rather than one shared font', () => {
+    const segments: Segment[] = [
+      { kind: 'text', value: 'ab', style: { bold: true } }, // 2 * 20 = 40
+      { kind: 'text', value: 'cd' }, // 2 * 10 = 20
+    ]
+
+    // 40 + 20 = 60 fits; a style-blind measurer using the regular width for
+    // both (20 + 20 = 40) would also fit, so this only proves something if
+    // the bold segment is actually measured wider — assert that directly too.
+    const lines = wrapSegments(segments, {
+      maxWidth: 60,
+      measurer: styleAwareMeasurer(),
+      metrics: fakeMetrics(20, 0),
+    })
+    expect(lines).toEqual([segments])
+
+    const wrapped = wrapSegments(segments, {
+      maxWidth: 50,
+      measurer: styleAwareMeasurer(),
+      metrics: fakeMetrics(20, 0),
+    })
+    // Now the bold "ab" (40) alone fits under 50, but adding "cd" (20) would
+    // not (60 > 50) — so it must wrap, which only happens if bold is really
+    // measured at double width.
+    expect(wrapped).toEqual([[segments[0]], [segments[1]]])
+  })
+
+  it('keeps a style boundary from being merged into one run', () => {
+    const segments: Segment[] = [
+      { kind: 'text', value: 'bold', style: { bold: true } },
+      { kind: 'text', value: 'plain' },
+    ]
+
+    const lines = wrapSegments(segments, {
+      maxWidth: 1000,
+      measurer: fakeMeasurer(10),
+      metrics: fakeMetrics(20, 0),
+    })
+
+    expect(lines[0]).toEqual(segments)
+  })
+
+  it('still merges adjacent runs that share the same style', () => {
+    const segments: Segment[] = [
+      { kind: 'text', value: 'a', style: { bold: true } },
+      { kind: 'text', value: 'b', style: { bold: true } },
+    ]
+
+    const lines = wrapSegments(segments, {
+      maxWidth: 1000,
+      measurer: fakeMeasurer(10),
+      metrics: fakeMetrics(20, 0),
+    })
+
+    expect(lines[0]).toEqual([{ kind: 'text', value: 'ab', style: { bold: true } }])
+  })
+})

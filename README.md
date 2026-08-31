@@ -66,7 +66,7 @@ Requires Node.js 22 or newer.
 - [Discord bots](#discord-bots) — the one thing most people are here for
 - [Misskey notes](#misskey-notes) — quoting a note, and MFM
 - [X (Twitter)](#x-twitter) — quoting a tweet, via FxTwitter or the official API
-- [Markdown](#markdown) — plain CommonMark, for anything else
+- [Markdown](#markdown) — strip it, leave it raw, or render bold/italic/underline/strikethrough
 - [Conversations](#conversations) — several messages as one image
 - [Themes](#themes) — palettes, layouts, and how to change them
 - [Colors](#colors) — every notation, including transparency
@@ -117,12 +117,12 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | --- | --- | --- |
 | `avatar` | `'guild'` — per-server avatar | `'global'` — account avatar |
 | `name` | `'nickname'` — server nickname | `'global'` — account name |
-| `stripDiscordMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
+| `markdown` | `'raw'` — quoted exactly as written | `false` strips it, `'discord'` renders it — see [Markdown](#markdown) |
 | `resolveMentions` | `true` — `<@id>` becomes `@name` | `false` — quoted as the raw token |
 
 Whichever avatar or name you choose, the other is still the fallback, so a message with only one of them always renders.
 
-`message.content` normally comes through untouched — `**bold**` is quoted with its asterisks and all, since that is what was actually typed. Opt into plain text with `stripDiscordMarkdown: true`, or call the exported `stripDiscordMarkdown()` yourself on any text:
+`message.content` normally comes through untouched — `**bold**` is quoted with its asterisks and all, since that is what was actually typed. Opt into plain text with `markdown: false`, actually draw the bold/italic/underline/strikethrough with `markdown: 'discord'` (see [Markdown](#markdown)), or call the exported `stripDiscordMarkdown()` yourself on any text:
 
 ```ts
 import { stripDiscordMarkdown } from 'makeitaquote'
@@ -133,6 +133,9 @@ stripDiscordMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, ita
 It handles what Discord message content actually renders — bold, italic, underline, strikethrough, spoilers, code (inline and fenced), block quotes (`>` at the start of a line, same as Discord), headers, subtext (`-# `), list markers (`-`, `*`, `1.`) and masked links (`[text](url)` reduces to `text`) — and honours a backslash escape. A code span keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks (a backslash escape is the one exception — `` `\*x\*` `` still resolves to `*x*`, since Discord's own client is the only thing that treats a code span's contents as fully inert).
 
 This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's own dialect rather than CommonMark. A generic Markdown stripper gets real things wrong here, like reading `__x__` as bold instead of underline.
+
+> [!NOTE]
+> `stripDiscordMarkdown: true`/`false` still works, but is deprecated — `markdown: false`/`'raw'` says the same thing and also lets you ask for `'discord'` rendering instead of stripping. See [Markdown](#markdown).
 
 ### Tokens
 
@@ -177,14 +180,17 @@ const png = await new MiQ({ misskey: 'https://misskey.example' })
 
 The display name goes over the handle, which is written `@user` locally and `@user@host` for a remote author — exactly as Misskey writes it.
 
-| Option     | Default                                            |
-| ---------- | -------------------------------------------------- |
-| `stripMfm` | `true` — `$[jelly x]` becomes `x`                  |
-| `preferCw` | `false` — quotes the note, not the content warning |
+| Option     | Default                                                                 |
+| ---------- | ------------------------------------------------------------------------ |
+| `markdown` | `false` — strips it, `$[jelly x]` becomes `x` — see [Markdown](#markdown) |
+| `preferCw` | `false` — quotes the note, not the content warning                       |
 
-MFM is stripped by default, unlike Discord's markdown, because the markup differs: `**bold**` still reads as its own text with the asterisks left in, while `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read.
+MFM is stripped by default, unlike Discord's markdown, because the markup differs: `**bold**` still reads as its own text with the asterisks left in, while `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read. Pass `markdown: 'misskey'` to actually draw the bold/italic/strikethrough instead of stripping it.
 
 `stripMfm()` is exported on its own too, and handles decoration functions (including nested ones), `<b>`/`<i>`/`<s>`/`<small>`, `<center>`, quotes, code, maths and links. Custom emoji, mentions and hashtags are deliberately left alone — the emoji layer draws the first, and unlike Discord, a Misskey mention is written `@user@host` in the note already, so there is no id to resolve.
+
+> [!NOTE]
+> `stripMfm: true`/`false` still works, but is deprecated — `markdown: false`/`'raw'` says the same thing and also lets you ask for `'misskey'` rendering instead of stripping. See [Markdown](#markdown).
 
 `MiQConversation` has `setFromNotes()` for the same thing across several notes.
 
@@ -221,26 +227,53 @@ const png = await new MiQ()
 
 Neither library is a dependency of this package — both adapters take a structural subset of the real response shape, the same as `MessageLike`, so any object with those fields works, whether or not the library that produced it is actually installed.
 
-There is nothing here for either adapter to strip: X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline, so the text goes through exactly as written, the same way a Discord `@everyone` needs no resolving.
+There is no markup for either adapter to strip: X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline, so the text goes through exactly as written by default, the same way a Discord `@everyone` needs no resolving. `setFromTweet()` still takes a `markdown` option, though — a tweet has no real syntax, but "Twitter bold/italic" (the Unicode Mathematical Alphanumeric Symbols some clients paste in place of real formatting) is common enough to be worth acting on:
+
+```ts
+new MiQ().setFromTweet(tweet, { markdown: 'twitter' }) // renders 𝗕𝗼𝗹𝗱/𝘪𝘵𝘢𝘭𝘪𝘤 as real bold/italic
+new MiQ().setFromTweet(tweet, { markdown: false }) // normalizes it back to plain ASCII instead
+```
+
+See [Markdown](#markdown).
 
 ---
 
 ## Markdown
 
-For a source that is neither Discord, Misskey nor X — a blog post, a GitHub comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus the common GFM extras: strikethrough, tables, task lists). `.setText()` has no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it takes a bare string with no source to opt out of stripping _from_:
+Quoted text can be stripped, left exactly as written, or actually rendered — bold, italic, underline and strikethrough drawn onto the image instead of just having their markup removed. One option controls all of it: `markdown`, settable per call on `setFromMessage()`, `setFromNote()`, `setFromTweet()`, `setText()` and `setFromObject()`, and as a package-wide default via `new MiQ({ markdown })`:
+
+| `markdown` | Effect |
+| --- | --- |
+| `false` | Strip to plain text immediately, with whichever parser fits the source (`stripDiscordMarkdown()`/`stripMfm()`/`stripMarkdown()` for `setFromMessage()`/`setFromNote()`/everything else; for `setFromTweet()`, normalizes Unicode "Twitter bold/italic" back to plain ASCII) |
+| `'raw'` | Leave the text exactly as written — markup characters are drawn as literal text |
+| `true` | Render standard CommonMark+GFM: **bold**, *italic*, ~~strikethrough~~, plus the `<u>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<s>`/`<del>` raw HTML tags |
+| `'discord'` | Render Discord's own dialect: bold, italic, underline, strikethrough |
+| `'misskey'` | Render MFM's bold, italic, strikethrough |
+| `'twitter'` | Render Unicode "Twitter bold/italic" as real bold/italic |
+
+```ts
+new MiQ().setText('**bold**, _italic_, and <u>underline</u>', { markdown: true }).toBuffer('png')
+```
+
+Default is off — `'raw'` for `setFromMessage()`/`setFromTweet()`/`setText()`/`setFromObject()` (matching each one's behaviour before this option existed), `false` for `setFromNote()` (matching `stripMfm`'s old default). Nothing changes unless you opt in.
+
+Headings, MFM's `<small>`/`<center>`, and anything else that would change font size or layout are drawn as plain structural text rather than picking up a size — only the four style flags are actually rendered.
+
+For a source that is neither Discord, Misskey nor X — a blog post, a GitHub comment, a Mastodon toot — `setText()`/`setFromObject()` treat `markdown` as standard CommonMark, the same as `true` above. `stripMarkdown()` is also exported on its own, for anywhere you just want the plain-text version of some CommonMark:
 
 ```ts
 import { stripMarkdown } from 'makeitaquote'
-
-new MiQ().setText(stripMarkdown(text))
 
 stripMarkdown('**bold**, *italic*, ~~strike~~, [a link](url)')
 // → 'bold, italic, strike, a link'
 ```
 
-A link or image keeps its label/alt text and drops the URL — that is what a reader saw, not the address behind it — and raw inline/block HTML is dropped rather than rendered or left as literal tag text. A list item becomes one line, a table becomes tab-separated cells, and a hard line break (two trailing spaces) becomes a real one.
+A link or image keeps its label/alt text and drops the URL — that is what a reader saw, not the address behind it — and raw inline/block HTML that isn't one of the four style tags above is dropped rather than rendered or left as literal tag text. A list item becomes one line, a table becomes tab-separated cells, and a hard line break (two trailing spaces) becomes a real one.
 
 This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it) rather than a local approximation, the same reasoning as `stripDiscordMarkdown()` and `stripMfm()`: CommonMark has enough corners — reference-style `[label][ref]` links, loose vs. tight lists, a fenced code block's language tag — that matching a real implementation is worth the dependency.
+
+> [!NOTE]
+> `stripDiscordMarkdown`/`stripMfm` (the two old per-source booleans) still work, but are deprecated: `markdown` says the same thing they did, plus lets you render instead of just stripping.
 
 ---
 

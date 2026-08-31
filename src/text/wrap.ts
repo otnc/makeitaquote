@@ -1,7 +1,7 @@
 import type { Segment } from '../core/types'
 import { graphemeBoundaries } from '../util/grapheme'
 import { BreakPriority, type BreakpointOptions, findBreakpoints } from './breakpoint'
-import { type EmojiMetrics, segmentWidth, type TextMeasurer } from './measure'
+import { type EmojiMetrics, segmentWidth, styleKey, type TextMeasurer } from './measure'
 
 export type Line = Segment[]
 
@@ -50,7 +50,13 @@ function splitParagraphs(segments: readonly Segment[]): Segment[][] {
     const parts = segment.value.split('\n')
     parts.forEach((part, index) => {
       if (index > 0) paragraphs.push([])
-      if (part.length > 0) paragraphs[paragraphs.length - 1]?.push({ kind: 'text', value: part })
+      if (part.length > 0) {
+        paragraphs[paragraphs.length - 1]?.push(
+          segment.style
+            ? { kind: 'text', value: part, style: segment.style }
+            : { kind: 'text', value: part },
+        )
+      }
     })
   }
 
@@ -166,8 +172,10 @@ function tokenize(segments: readonly Segment[], options: WrapOptions): Token[] {
 
       const value = segment.value.slice(start, i)
       tokens.push({
-        segment: { kind: 'text', value },
-        width: options.measurer.measureText(value).width,
+        segment: segment.style
+          ? { kind: 'text', value, style: segment.style }
+          : { kind: 'text', value },
+        width: options.measurer.measureText(value, segment.style).width,
         priority,
       })
       start = i
@@ -183,6 +191,7 @@ function splitOversized(token: Token, options: WrapOptions): Token[] {
   if (token.segment.kind !== 'text') return [token]
 
   const text = token.segment.value
+  const style = token.segment.style
   const boundaries = graphemeBoundaries(text, options.locale === 'none' ? 'ja' : options.locale)
   const pieces: Token[] = []
 
@@ -192,14 +201,14 @@ function splitOversized(token: Token, options: WrapOptions): Token[] {
   for (let b = 1; b < boundaries.length; b++) {
     const end = boundaries[b] as number
     const candidate = text.slice(start, end)
-    const candidateWidth = options.measurer.measureText(candidate).width
+    const candidateWidth = options.measurer.measureText(candidate, style).width
 
     if (candidateWidth > options.maxWidth && end - start > 1) {
       const cut = boundaries[b - 1] as number
       const value = text.slice(start, cut)
       pieces.push({
-        segment: { kind: 'text', value },
-        width: options.measurer.measureText(value).width,
+        segment: style ? { kind: 'text', value, style } : { kind: 'text', value },
+        width: options.measurer.measureText(value, style).width,
         priority: token.priority,
       })
       start = cut
@@ -212,8 +221,8 @@ function splitOversized(token: Token, options: WrapOptions): Token[] {
   if (start < text.length) {
     const value = text.slice(start)
     pieces.push({
-      segment: { kind: 'text', value },
-      width: width || options.measurer.measureText(value).width,
+      segment: style ? { kind: 'text', value, style } : { kind: 'text', value },
+      width: width || options.measurer.measureText(value, style).width,
       priority: pieces.length === 0 ? token.priority : BreakPriority.char,
     })
   }
@@ -221,14 +230,20 @@ function splitOversized(token: Token, options: WrapOptions): Token[] {
   return pieces.length > 0 ? pieces : [token]
 }
 
-/** Rejoins adjacent text tokens so drawing issues one `fillText` per run. */
+/** Rejoins adjacent same-styled text tokens so drawing issues one `fillText` per run. */
 function mergeTokens(tokens: readonly Token[]): Line {
   const line: Line = []
 
   for (const token of tokens) {
     const previous = line[line.length - 1]
-    if (token.segment.kind === 'text' && previous?.kind === 'text') {
-      line[line.length - 1] = { kind: 'text', value: previous.value + token.segment.value }
+    if (
+      token.segment.kind === 'text' &&
+      previous?.kind === 'text' &&
+      styleKey(previous.style) === styleKey(token.segment.style)
+    ) {
+      line[line.length - 1] = token.segment.style
+        ? { kind: 'text', value: previous.value + token.segment.value, style: token.segment.style }
+        : { kind: 'text', value: previous.value + token.segment.value }
     } else {
       line.push(token.segment)
     }

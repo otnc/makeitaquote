@@ -53,3 +53,35 @@ describe('fromTweet', () => {
     expect(() => fromTweet({ author: {} })).toThrow(ValidationError)
   })
 })
+
+describe('the markdown option', () => {
+  it('defaults to raw — nothing to strip, nothing rendered', () => {
+    const quote = fromTweet(tweet({ text: '𝗕𝗼𝗹𝗱 text' }))
+
+    expect(quote.text).toBe('𝗕𝗼𝗹𝗱 text')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('normalizes Unicode bold/italic back to ASCII when set to false', () => {
+    const quote = fromTweet(tweet({ text: '𝗕𝗼𝗹𝗱 text' }))
+    const stripped = fromTweet(tweet({ text: '𝗕𝗼𝗹𝗱 text' }), { markdown: false })
+
+    expect(quote.text).not.toBe(stripped.text)
+    expect(stripped.text).toBe('Bold text')
+    expect(stripped.markdown).toBe('raw')
+  })
+
+  it('keeps the text untouched and defers "twitter" rendering to render time', () => {
+    const quote = fromTweet(tweet({ text: '𝗕𝗼𝗹𝗱 text' }), { markdown: 'twitter' })
+
+    expect(quote.text).toBe('𝗕𝗼𝗹𝗱 text')
+    expect(quote.markdown).toBe('twitter')
+  })
+
+  it('falls back to the global default when markdown is not set', () => {
+    const quote = fromTweet(tweet({ text: '𝗕𝗼𝗹𝗱 text' }), {}, 'twitter')
+
+    expect(quote.text).toBe('𝗕𝗼𝗹𝗱 text')
+    expect(quote.markdown).toBe('twitter')
+  })
+})

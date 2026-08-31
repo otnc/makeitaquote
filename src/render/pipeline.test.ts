@@ -304,6 +304,53 @@ describe('render', () => {
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
 
+  it('renders standard markdown — bold, italic, strikethrough and <u> — without throwing', async () => {
+    const buffer = await new MiQ({ autoFont: false })
+      .setText('**bold** and *italic* and ~~strike~~ and <u>underline</u>, mixed with plain text', {
+        markdown: true,
+      })
+      .setUsername('otoneko.')
+      .toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+
+  it('renders Discord-flavoured markdown without throwing', async () => {
+    const buffer = await new MiQ({ autoFont: false })
+      .setText('**bold** *italic* __underline__ ~~strike~~ plain', { markdown: 'discord' })
+      .setUsername('otoneko.')
+      .toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+
+  it('renders MFM without throwing', async () => {
+    const buffer = await new MiQ({ autoFont: false })
+      .setText('**bold** *italic* ~~strike~~ plain', { markdown: 'misskey' })
+      .setUsername('otoneko.')
+      .toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+
+  it('renders Unicode "Twitter bold/italic" without throwing', async () => {
+    const buffer = await new MiQ({ autoFont: false })
+      .setText('𝗕𝗼𝗹𝗱 and 𝘪𝘵𝘢𝘭𝘪𝘤 mixed with plain text', { markdown: 'twitter' })
+      .setUsername('otoneko.')
+      .toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+
+  it('renders raw markdown syntax literally when markdown is left at the default', async () => {
+    const buffer = await new MiQ({ autoFont: false })
+      .setText('**not actually bold**')
+      .setUsername('otoneko.')
+      .toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
+
   it('renders a very long quote by shrinking it', async () => {
     const buffer = await new MiQ({ autoFont: false })
       .setText('あ'.repeat(400))
