@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { hasDrawableFont } from '../__fixtures__/fonts'
 import { type Canvas, createCanvas } from './canvasFactory'
-import { fillText, isBold, resetBoldDetectionForTests, syntheticBoldWidth } from './textStyle'
+import {
+  fillText,
+  isBold,
+  resetBoldDetectionForTests,
+  resolvedWeight,
+  syntheticBoldWidth,
+} from './textStyle'
 
 function context() {
   return createCanvas(100, 100).getContext('2d')
@@ -23,6 +29,24 @@ describe('isBold', () => {
     expect(isBold(500)).toBe(false)
     expect(isBold(600)).toBe(true)
     expect(isBold(900)).toBe(true)
+  })
+})
+
+describe('resolvedWeight', () => {
+  it('leaves the base weight alone when not asked for bold', () => {
+    expect(resolvedWeight('normal', false)).toBe('normal')
+    expect(resolvedWeight('normal', undefined)).toBe('normal')
+    expect(resolvedWeight(900, false)).toBe(900)
+  })
+
+  it('bumps a regular weight to 700 when asked for bold', () => {
+    expect(resolvedWeight('normal', true)).toBe(700)
+    expect(resolvedWeight(400, true)).toBe(700)
+  })
+
+  it('keeps an already-bold base weight, rather than pulling it down to 700', () => {
+    expect(resolvedWeight(900, true)).toBe(900)
+    expect(resolvedWeight('bold', true)).toBe('bold')
   })
 })
 

@@ -1,7 +1,10 @@
+import type { TextStyle } from '../core/types'
 import type { EmojiImages } from '../emoji/loader'
 import type { Image, SKRSContext2D } from '../render/canvasFactory'
-import { fillText } from '../render/textStyle'
-import { emojiWidth, type MissingEmojiBehaviour, segmentWidth } from './measure'
+import { fontString } from '../render/layout'
+import { boldAdvance, fillText, resolvedWeight, syntheticBoldWidth } from '../render/textStyle'
+import type { FontWeight } from '../theme/types'
+import { emojiWidth, type MissingEmojiBehaviour } from './measure'
 import type { Line } from './wrap'
 
 export interface DrawLineOptions {
@@ -11,20 +14,46 @@ export interface DrawLineOptions {
   images: EmojiImages
   /** What to do with an emoji whose image is missing. */
   onMissing: MissingEmojiBehaviour
-  /** Stroke width used to fake bold, from `syntheticBoldWidth`. */
-  boldStroke?: number
+  /** The theme's own weight for this text, before any markdown-requested bold. */
+  baseWeight: FontWeight
+  /** Resolved font family stack, already picked for glyph coverage. */
+  family: string
+}
+
+/**
+ * Sets `ctx.font` for a run in the given style and returns the
+ * synthetic-bold stroke width to draw it with, via `syntheticBoldWidth()`
+ * (`0` when none is needed).
+ *
+ * Shared by `drawnLineWidth()` and `drawLine()`, and used with `style:
+ * undefined` for the plain fallback text of a missing emoji, so a line is
+ * never measured with one font and drawn with another.
+ */
+function applyFont(
+  ctx: SKRSContext2D,
+  style: TextStyle | undefined,
+  options: DrawLineOptions,
+): number {
+  const weight = resolvedWeight(options.baseWeight, style?.bold)
+  ctx.font = fontString(weight, options.fontSize, options.family, style?.italic ?? false)
+  return syntheticBoldWidth(ctx, weight, options.family, options.fontSize)
 }
 
 /**
  * Width of a line as it will actually be drawn.
  *
- * Deliberately the same `segmentWidth` the wrapper used, so a line can never
- * be laid out at one width and drawn at another.
+ * Deliberately resolves font/stroke the same way `drawLine()` does for each
+ * segment, so a line can never be laid out at one width and drawn at another.
  */
 export function drawnLineWidth(ctx: SKRSContext2D, line: Line, options: DrawLineOptions): number {
   let width = 0
   for (const segment of line) {
-    width += segmentWidth(segment, ctx, options)
+    if (segment.kind === 'text') {
+      const stroke = applyFont(ctx, segment.style, options)
+      width += ctx.measureText(segment.value).width + boldAdvance(stroke)
+    } else {
+      width += emojiWidth(options)
+    }
   }
   return width
 }
@@ -47,12 +76,16 @@ export function drawLine(
   const topMargin = fontSize * options.topMarginRatio
   let cursor = x
 
-  const stroke = options.boldStroke ?? 0
-
   for (const segment of line) {
     if (segment.kind === 'text') {
+      const stroke = applyFont(ctx, segment.style, options)
       fillText(ctx, segment.value, cursor, y, stroke)
-      cursor += ctx.measureText(segment.value).width
+      const width = ctx.measureText(segment.value).width
+      if (segment.style?.underline) drawDecoration(ctx, cursor, y, width, fontSize, 'underline')
+      if (segment.style?.strikethrough) {
+        drawDecoration(ctx, cursor, y, width, fontSize, 'strikethrough')
+      }
+      cursor += width + boldAdvance(stroke)
       continue
     }
 
@@ -62,10 +95,33 @@ export function drawLine(
       cursor += emojiWidth(options)
     } else if (options.onMissing === 'text') {
       // Better to show `<:blobcat:123…>` than a gap where an emoji should be.
+      // Unstyled: this is fallback text, not the markdown source's own run.
+      const stroke = applyFont(ctx, undefined, options)
       fillText(ctx, segment.raw, cursor, y, stroke)
-      cursor += ctx.measureText(segment.raw).width
+      cursor += ctx.measureText(segment.raw).width + boldAdvance(stroke)
     }
   }
+}
+
+/**
+ * Draws an underline or strikethrough band under/through a run.
+ *
+ * A filled rectangle in the already-set `fillStyle` rather than a stroked
+ * line: `strokeText`'s stroke state is already in play for synthetic bold
+ * (see `fillText()`'s own comment on this canvas build not restoring
+ * `strokeStyle`), so this avoids touching stroke state at all.
+ */
+function drawDecoration(
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  width: number,
+  fontSize: number,
+  kind: 'underline' | 'strikethrough',
+): void {
+  const thickness = Math.max(1, fontSize * 0.06)
+  const offset = kind === 'underline' ? fontSize * 0.08 : -fontSize * 0.32
+  ctx.fillRect(x, y + offset, width, thickness)
 }
 
 function drawEmoji(ctx: SKRSContext2D, image: Image, x: number, y: number, size: number): void {

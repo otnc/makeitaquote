@@ -1,8 +1,8 @@
 import { stripDiscordMarkdown } from '../text/discordMarkdown'
 import { ValidationError } from './errors'
 import { resolveMentions } from './mentions'
-import { emptyQuote } from './quote'
-import type { MessageLike, MessageSourceOptions, QuoteData } from './types'
+import { emptyQuote, resolveMarkdownMode, resolveQuoteText, translateLegacyStrip } from './quote'
+import type { MarkdownMode, MessageLike, MessageSourceOptions, QuoteData } from './types'
 
 /**
  * Ask discord.js for a PNG avatar at a sane size.
@@ -77,7 +77,11 @@ function isMessageLike(value: unknown): value is MessageLike {
  * Whichever is chosen, the other is still the fallback: asking for a guild
  * avatar on a message with none gets the global one rather than nothing.
  */
-export function fromMessage(message: unknown, options: MessageSourceOptions = {}): QuoteData {
+export function fromMessage(
+  message: unknown,
+  options: MessageSourceOptions = {},
+  globalMarkdown?: MarkdownMode,
+): QuoteData {
   if (!isMessageLike(message)) {
     throw new ValidationError(
       'setFromMessage expects a message with `content` and `author.username`',
@@ -100,7 +104,15 @@ export function fromMessage(message: unknown, options: MessageSourceOptions = {}
           message,
           typeof options.resolveMentions === 'object' ? options.resolveMentions : {},
         )
-  quote.text = options.stripDiscordMarkdown ? stripDiscordMarkdown(withMentions) : withMentions
+  const mode = resolveMarkdownMode(
+    [options.markdown, translateLegacyStrip(options.stripDiscordMarkdown), globalMarkdown],
+    'raw',
+  )
+  const resolvedText = resolveQuoteText(withMentions, mode, () =>
+    stripDiscordMarkdown(withMentions),
+  )
+  quote.text = resolvedText.text
+  quote.markdown = resolvedText.markdown
   quote.username = formatUsername(message.author)
   quote.displayName = preferGlobalName
     ? (globalName(message) ?? guildName(message) ?? message.author.username)

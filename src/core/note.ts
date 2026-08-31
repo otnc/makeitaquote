@@ -1,7 +1,7 @@
 import { stripMfm } from '../text/mfm'
 import { ValidationError } from './errors'
-import { emptyQuote } from './quote'
-import type { NoteLike, NoteSourceOptions, QuoteData } from './types'
+import { emptyQuote, resolveMarkdownMode, resolveQuoteText, translateLegacyStrip } from './quote'
+import type { MarkdownMode, NoteLike, NoteSourceOptions, QuoteData } from './types'
 
 function isNoteLike(value: unknown): value is NoteLike {
   if (value === null || typeof value !== 'object') return false
@@ -34,7 +34,11 @@ function handle(user: NoteLike['user']): string {
  * is written `@user@host` in the note text already, so it is readable as it
  * stands and is left exactly alone.
  */
-export function fromNote(note: unknown, options: NoteSourceOptions = {}): QuoteData {
+export function fromNote(
+  note: unknown,
+  options: NoteSourceOptions = {},
+  globalMarkdown?: MarkdownMode,
+): QuoteData {
   if (!isNoteLike(note)) {
     throw new ValidationError('setFromNote expects a note with `user.username`', { field: 'note' })
   }
@@ -42,7 +46,13 @@ export function fromNote(note: unknown, options: NoteSourceOptions = {}): QuoteD
   const source = options.preferCw ? (note.cw ?? note.text ?? '') : (note.text ?? note.cw ?? '')
 
   const quote = emptyQuote()
-  quote.text = options.stripMfm === false ? source : stripMfm(source)
+  const mode = resolveMarkdownMode(
+    [options.markdown, translateLegacyStrip(options.stripMfm), globalMarkdown],
+    false,
+  )
+  const resolvedText = resolveQuoteText(source, mode, () => stripMfm(source))
+  quote.text = resolvedText.text
+  quote.markdown = resolvedText.markdown
   quote.username = handle(note.user)
   quote.displayName = note.user.name || note.user.username
   quote.avatar = note.user.avatarUrl ?? null

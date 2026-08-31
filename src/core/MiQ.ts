@@ -2,6 +2,7 @@ import type { Readable } from 'node:stream'
 import { encode, encodeDataURL, encodeStream } from '../output/encode'
 import type { Canvas } from '../render/canvasFactory'
 import { renderQuote } from '../render/pipeline'
+import { stripMarkdown } from '../text/markdown'
 import { defineTheme } from '../theme/resolve'
 import type { Theme, ThemeInput, ThemePalette } from '../theme/types'
 import { deprecate } from './deprecate'
@@ -15,6 +16,8 @@ import {
   normalizeText,
   normalizeUsername,
   normalizeWatermark,
+  resolveMarkdownMode,
+  resolveQuoteText,
 } from './quote'
 import { fromMessage } from './source'
 import { fromTweet } from './tweet'
@@ -25,6 +28,7 @@ const MAX_SCALE = 8
 import type {
   AvatarSource,
   EncodeOptions,
+  MarkdownMode,
   MessageLike,
   MessageSourceOptions,
   MiQOptions,
@@ -34,6 +38,7 @@ import type {
   QuoteData,
   QuoteInput,
   TweetLike,
+  TweetSourceOptions,
 } from './types'
 
 /**
@@ -68,8 +73,16 @@ export class MiQ {
     this.#applyExplicitSize(theme)
   }
 
-  setText(text: string): this {
-    this.#data.text = normalizeText(text)
+  /**
+   * `markdown` defaults to `MiQOptions.markdown`, falling back to `'raw'` —
+   * quoted exactly as written unless you opt in. See `MarkdownMode`.
+   */
+  setText(text: string, options?: { markdown?: MarkdownMode }): this {
+    const normalized = normalizeText(text)
+    const mode = resolveMarkdownMode([options?.markdown, this.#options.markdown], 'raw')
+    const resolved = resolveQuoteText(normalized, mode, () => stripMarkdown(normalized))
+    this.#data.text = resolved.text
+    this.#data.markdown = resolved.markdown
     return this
   }
 
@@ -94,7 +107,7 @@ export class MiQ {
   }
 
   setFromMessage(message: MessageLike, options?: MessageSourceOptions): this {
-    this.#data = fromMessage(message, options)
+    this.#data = fromMessage(message, options, this.#options.markdown)
     return this
   }
 
@@ -105,7 +118,7 @@ export class MiQ {
    * default — see `NoteSourceOptions`.
    */
   setFromNote(note: NoteLike, options?: NoteSourceOptions): this {
-    this.#data = fromNote(note, options)
+    this.#data = fromNote(note, options, this.#options.markdown)
     return this
   }
 
@@ -116,8 +129,8 @@ export class MiQ {
    * `fromTwitterApiV2Tweet()`/`fromFxTwitterStatus()` turn a real API
    * response into one first.
    */
-  setFromTweet(tweet: TweetLike): this {
-    this.#data = fromTweet(tweet)
+  setFromTweet(tweet: TweetLike, options?: TweetSourceOptions): this {
+    this.#data = fromTweet(tweet, options, this.#options.markdown)
     return this
   }
 
@@ -128,7 +141,7 @@ export class MiQ {
    * wire field; here it keeps the avatar in color instead of desaturating it.
    */
   setFromObject(input: QuoteInput): this {
-    this.#data = applyInput(this.#data, input)
+    this.#data = applyInput(this.#data, input, this.#options.markdown)
     if (input.color === true) this.setTheme({ avatar: { grayscale: false } })
     return this
   }

@@ -1,5 +1,6 @@
 import { parse as parseTwemoji } from '@twemoji/parser'
-import type { MisskeyOptions, Segment } from '../core/types'
+import type { MisskeyOptions, Segment, StyledRun, TextStyle } from '../core/types'
+import { styleKey } from './measure'
 
 /**
  * Discord custom emoji: `<:name:id>`, or `<a:name:id>` when animated.
@@ -99,22 +100,70 @@ function hostOf(value: string): string | null {
  * those runs is then scanned for the custom emoji syntaxes.
  */
 export function segmentText(text: string, options: SegmentOptions = {}): Segment[] {
+  return segmentRuns([{ value: text }], options)
+}
+
+/**
+ * Same as `segmentText()`, but for text that already carries style — the
+ * output of a dialect parser (`parseMarkdown()`, `parseDiscordMarkdown()`,
+ * `parseMfm()`, `parseTwitterText()`). Every text segment cut from a run
+ * inherits that run's style.
+ */
+export function segmentStyledText(
+  runs: readonly StyledRun[],
+  options: SegmentOptions = {},
+): Segment[] {
+  return segmentRuns(runs, options)
+}
+
+/**
+ * Flattens styled runs back to plain text, discarding style.
+ *
+ * The shared basis for every `stripX()`: stripping is rendering's styled
+ * parse with the style thrown away, not a separate implementation.
+ */
+export function plainTextOf(runs: readonly StyledRun[]): string {
+  return runs.map((run) => run.value).join('')
+}
+
+/**
+ * Appends a run, merging into the previous one when it is the same style.
+ *
+ * Shared by every dialect parser's tree walk (`parseMarkdown()`,
+ * `parseMfm()`, `parseTwitterText()`) so each produces compact, already-
+ * merged `StyledRun[]` rather than one run per leaf node.
+ */
+export function pushStyledRun(out: StyledRun[], value: string, style: TextStyle | undefined): void {
+  if (value.length === 0) return
+  const last = out[out.length - 1]
+  if (last && styleKey(last.style) === styleKey(style)) {
+    last.value += value
+    return
+  }
+  out.push(style ? { value, style } : { value })
+}
+
+function segmentRuns(runs: readonly StyledRun[], options: SegmentOptions): Segment[] {
   const out: Segment[] = []
   const misskey = resolveMisskey(options)
-  let cursor = 0
 
-  for (const entity of parseTwemoji(text, { assetType: 'png' })) {
-    const [start, end] = entity.indices
-    if (start > cursor) pushText(out, text.slice(cursor, start), options, misskey)
-    if (entity.url) {
-      out.push({ kind: 'emoji', source: 'twemoji', url: entity.url, raw: entity.text })
-    } else {
-      pushText(out, entity.text, options, misskey)
+  for (const run of runs) {
+    const text = run.value
+    let cursor = 0
+
+    for (const entity of parseTwemoji(text, { assetType: 'png' })) {
+      const [start, end] = entity.indices
+      if (start > cursor) pushText(out, text.slice(cursor, start), options, misskey, run.style)
+      if (entity.url) {
+        out.push({ kind: 'emoji', source: 'twemoji', url: entity.url, raw: entity.text })
+      } else {
+        pushText(out, entity.text, options, misskey, run.style)
+      }
+      cursor = end
     }
-    cursor = end
-  }
 
-  if (cursor < text.length) pushText(out, text.slice(cursor), options, misskey)
+    if (cursor < text.length) pushText(out, text.slice(cursor), options, misskey, run.style)
+  }
 
   return out
 }
@@ -124,11 +173,12 @@ function pushText(
   value: string,
   options: SegmentOptions,
   misskey: ResolvedMisskey,
+  style: TextStyle | undefined,
 ): void {
   if (value.length === 0) return
 
   for (const part of splitDiscord(value, options)) {
-    if (typeof part === 'string') pushMisskey(out, part, misskey)
+    if (typeof part === 'string') pushMisskey(out, part, misskey, style)
     else out.push(part)
   }
 }
@@ -170,7 +220,12 @@ function splitDiscord(value: string, options: SegmentOptions): Array<string | Se
  * instance configured, a federated one when `remote` is off — is left exactly
  * as written and drawn as text.
  */
-function pushMisskey(out: Segment[], value: string, misskey: ResolvedMisskey): void {
+function pushMisskey(
+  out: Segment[],
+  value: string,
+  misskey: ResolvedMisskey,
+  style: TextStyle | undefined,
+): void {
   if (value.length === 0) return
 
   let cursor = 0
@@ -190,7 +245,9 @@ function pushMisskey(out: Segment[], value: string, misskey: ResolvedMisskey): v
     if (NUMERIC_ONLY.test(name)) continue
 
     const index = match.index
-    if (index > cursor) out.push({ kind: 'text', value: value.slice(cursor, index) })
+    if (index > cursor) {
+      out.push({ kind: 'text', value: value.slice(cursor, index), ...(style ? { style } : {}) })
+    }
 
     // Several configured instances means the shortcode could belong to any of
     // them; the loader tries each in turn.
@@ -208,7 +265,9 @@ function pushMisskey(out: Segment[], value: string, misskey: ResolvedMisskey): v
     cursor = index + match[0].length
   }
 
-  if (cursor < value.length) out.push({ kind: 'text', value: value.slice(cursor) })
+  if (cursor < value.length) {
+    out.push({ kind: 'text', value: value.slice(cursor), ...(style ? { style } : {}) })
+  }
 }
 
 /**
@@ -264,11 +323,19 @@ export function resolveEmojiSegments(
   return out
 }
 
-/** Appends, merging with the previous run when both are text. */
+/** Appends, merging with the previous run when both are text in the same style. */
 function push(out: Segment[], segment: Segment): void {
   const previous = out[out.length - 1]
-  if (segment.kind === 'text' && previous?.kind === 'text') {
-    out[out.length - 1] = { kind: 'text', value: previous.value + segment.value }
+  if (
+    segment.kind === 'text' &&
+    previous?.kind === 'text' &&
+    styleKey(previous.style) === styleKey(segment.style)
+  ) {
+    out[out.length - 1] = {
+      kind: 'text',
+      value: previous.value + segment.value,
+      ...(segment.style ? { style: segment.style } : {}),
+    }
     return
   }
   out.push(segment)

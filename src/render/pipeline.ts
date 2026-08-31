@@ -1,14 +1,18 @@
 import { assertRenderable, effectiveDisplayName } from '../core/quote'
-import type { MiQOptions, QuoteData, Segment } from '../core/types'
+import type { MiQOptions, QuoteData, Segment, StyledRun } from '../core/types'
 import { type EmojiImages, prefetchEmoji } from '../emoji/loader'
 import { ensureDefaultFonts, reportMissingFonts, useFont } from '../font/autoload'
 import { GENERIC_FONT_FAMILIES, unquoteFontFamily } from '../font/catalogue'
 import { fonts, resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
+import { parseDiscordMarkdown } from '../text/discordMarkdown'
 import { alignedX, type DrawLineOptions, drawLine, drawnLineWidth } from '../text/draw'
 import { fitText } from '../text/fit'
+import { parseMarkdown } from '../text/markdown'
 import { memoizeMeasurer } from '../text/measure'
-import { resolveEmojiSegments, segmentText } from '../text/segment'
+import { parseMfm } from '../text/mfm'
+import { resolveEmojiSegments, segmentStyledText } from '../text/segment'
+import { parseTwitterText } from '../text/twitterText'
 import { isTransparent, parseColor, toCSS } from '../theme/color'
 import { toPixels } from '../theme/resolve'
 import type { FontWeight, LabelTheme, Theme } from '../theme/types'
@@ -17,7 +21,30 @@ import { drawAvatarWithFade, drawBackground, loadBackgroundImage } from './backg
 import { type Canvas, createCanvas, type SKRSContext2D } from './canvasFactory'
 import { coveringStack, needsGlyphFallback } from './glyphs'
 import { computeLayout, fontString, type Layout, sizeToAvatar, watermarkCorner } from './layout'
-import { fillText, syntheticBoldWidth } from './textStyle'
+import { boldAdvance, fillText, resolvedWeight, syntheticBoldWidth } from './textStyle'
+
+/**
+ * Turns `data.text` into styled runs per `data.markdown`.
+ *
+ * `'raw'` is the one case with nothing to parse — the text is drawn exactly
+ * as written, one unstyled run. Every other mode's dialect is picked by the
+ * mode itself, independent of how the quote was built (`setFromMessage()`
+ * and `setText()` can both ask for `'discord'` rendering, say).
+ */
+function styledRunsFor(data: QuoteData): StyledRun[] {
+  switch (data.markdown) {
+    case true:
+      return parseMarkdown(data.text)
+    case 'discord':
+      return parseDiscordMarkdown(data.text)
+    case 'misskey':
+      return parseMfm(data.text)
+    case 'twitter':
+      return parseTwitterText(data.text)
+    default:
+      return [{ value: data.text }]
+  }
+}
 
 export interface RenderOptions extends MiQOptions {
   theme: Theme
@@ -34,7 +61,7 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
   assertRenderable(data)
 
   const { theme: requested } = options
-  const segments = segmentText(data.text, {
+  const segments = segmentStyledText(styledRunsFor(data), {
     emojiSize: requested.emoji.size,
     ...(options.misskey ? { misskey: options.misskey } : {}),
   })
@@ -196,10 +223,15 @@ function drawQuote(
     overflow: theme.text.overflow,
     phraseBreak: theme.text.phraseBreak,
     locale: theme.text.locale,
-    measurerFor: (fontSize) => {
-      ctx.font = fontString(theme.text.weight, fontSize, stack)
-      return memoizeMeasurer({ measureText: (text) => ctx.measureText(text) })
-    },
+    measurerFor: (fontSize) =>
+      memoizeMeasurer({
+        measureText: (text, style) => {
+          const weight = resolvedWeight(theme.text.weight, style?.bold)
+          ctx.font = fontString(weight, fontSize, stack, style?.italic ?? false)
+          const stroke = syntheticBoldWidth(ctx, weight, stack, fontSize)
+          return { width: ctx.measureText(text).width + boldAdvance(stroke) }
+        },
+      }),
     metricsFor: (fontSize) => ({
       fontSize,
       sideMarginRatio: theme.emoji.sideMarginRatio,
@@ -226,7 +258,8 @@ function drawQuote(
     topMarginRatio: theme.emoji.topMarginRatio,
     images,
     onMissing: options.onAssetError ?? 'text',
-    boldStroke: syntheticBoldWidth(ctx, theme.text.weight, stack, result.fontSize),
+    baseWeight: theme.text.weight,
+    family: stack,
   }
 
   let y = top + result.fontSize
@@ -277,12 +310,26 @@ function applyInlineQuotes(segments: readonly Segment[], theme: Theme): Segment[
   const out: Segment[] = [...segments]
 
   const first = out[0]
-  if (first?.kind === 'text') out[0] = { kind: 'text', value: open + first.value }
-  else out.unshift({ kind: 'text', value: open })
+  if (first?.kind === 'text') {
+    out[0] = {
+      kind: 'text',
+      value: open + first.value,
+      ...(first.style ? { style: first.style } : {}),
+    }
+  } else {
+    out.unshift({ kind: 'text', value: open })
+  }
 
   const last = out[out.length - 1]
-  if (last?.kind === 'text') out[out.length - 1] = { kind: 'text', value: last.value + close }
-  else out.push({ kind: 'text', value: close })
+  if (last?.kind === 'text') {
+    out[out.length - 1] = {
+      kind: 'text',
+      value: last.value + close,
+      ...(last.style ? { style: last.style } : {}),
+    }
+  } else {
+    out.push({ kind: 'text', value: close })
+  }
 
   return out
 }

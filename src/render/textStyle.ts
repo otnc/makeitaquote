@@ -11,6 +11,19 @@ export function isBold(weight: FontWeight): boolean {
 }
 
 /**
+ * The weight to actually draw a run at, given the theme's base weight and
+ * whether markdown asked this particular run to be bold.
+ *
+ * Not bold: unchanged. Bold: `base` already, if it is already heavy enough
+ * (`isBold`) — a theme deliberately set to 900 stays 900 rather than being
+ * pulled down to 700 — otherwise bumped to `700`.
+ */
+export function resolvedWeight(base: FontWeight, bold: boolean | undefined): FontWeight {
+  if (!bold) return base
+  return isBold(base) ? base : 700
+}
+
+/**
  * Families whose bold is faked, keyed by family name.
  *
  * Variable fonts registered through `GlobalFonts` — including the Noto Sans JP

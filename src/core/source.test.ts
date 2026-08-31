@@ -128,6 +128,65 @@ describe('fromMessage', () => {
   })
 })
 
+describe('the markdown option', () => {
+  it('defaults to raw, matching the historical unstripped default', () => {
+    const quote = fromMessage(v14Message({ content: '**bold** message' }))
+
+    expect(quote.text).toBe('**bold** message')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('strips immediately and stores raw when set to false', () => {
+    const quote = fromMessage(v14Message({ content: '**bold** message' }), { markdown: false })
+
+    expect(quote.text).toBe('bold message')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('keeps the text untouched and defers a render mode to render time', () => {
+    const quote = fromMessage(v14Message({ content: '**bold** message' }), { markdown: 'discord' })
+
+    expect(quote.text).toBe('**bold** message')
+    expect(quote.markdown).toBe('discord')
+  })
+
+  it('accepts every render mode regardless of the source dialect', () => {
+    for (const mode of [true, 'discord', 'misskey', 'twitter'] as const) {
+      const quote = fromMessage(v14Message({ content: 'hi' }), { markdown: mode })
+      expect(quote.markdown).toBe(mode)
+      expect(quote.text).toBe('hi')
+    }
+  })
+
+  it('takes priority over the deprecated stripDiscordMarkdown boolean', () => {
+    const quote = fromMessage(v14Message({ content: '**bold**' }), {
+      markdown: 'raw',
+      stripDiscordMarkdown: true,
+    })
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('falls back to the global default when neither markdown nor the legacy boolean is set', () => {
+    const quote = fromMessage(v14Message({ content: '**bold**' }), {}, 'discord')
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('discord')
+  })
+
+  it('lets an explicit legacy boolean win over the global default', () => {
+    const quote = fromMessage(
+      v14Message({ content: '**bold**' }),
+      { stripDiscordMarkdown: false },
+      'discord',
+    )
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('raw')
+  })
+})
+
 describe('choosing which avatar', () => {
   it('prefers the guild avatar by default', () => {
     expect(fromMessage(v14Message()).avatar).toContain('member')

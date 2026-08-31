@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { stripDiscordMarkdown } from './discordMarkdown'
+import { parseDiscordMarkdown, stripDiscordMarkdown } from './discordMarkdown'
 
 describe('stripDiscordMarkdown', () => {
   it('leaves plain text alone', () => {
@@ -160,5 +160,58 @@ describe('stripDiscordMarkdown', () => {
 
   it('strips emphasis inline, keeping the surrounding text', () => {
     expect(stripDiscordMarkdown('normal *emphasis* here')).toBe('normal emphasis here')
+  })
+})
+
+describe('parseDiscordMarkdown', () => {
+  it('leaves plain text as one unstyled run', () => {
+    expect(parseDiscordMarkdown('nothing to style')).toEqual([{ value: 'nothing to style' }])
+  })
+
+  it('tags bold, italic, underline and strikethrough', () => {
+    expect(parseDiscordMarkdown('**bold**')).toEqual([{ value: 'bold', style: { bold: true } }])
+    expect(parseDiscordMarkdown('*italic*')).toEqual([{ value: 'italic', style: { italic: true } }])
+    expect(parseDiscordMarkdown('__underline__')).toEqual([
+      { value: 'underline', style: { underline: true } },
+    ])
+    expect(parseDiscordMarkdown('~~strike~~')).toEqual([
+      { value: 'strike', style: { strikethrough: true } },
+    ])
+  })
+
+  it('tags the combined bold-italic marker with both flags', () => {
+    expect(parseDiscordMarkdown('***bold italic***')).toEqual([
+      { value: 'bold italic', style: { bold: true, italic: true } },
+    ])
+  })
+
+  it('combines nested styles', () => {
+    expect(parseDiscordMarkdown('**bold _and italic_**')).toEqual([
+      { value: 'bold ', style: { bold: true } },
+      { value: 'and italic', style: { bold: true, italic: true } },
+    ])
+  })
+
+  it('mixes styled and plain runs, in order', () => {
+    expect(parseDiscordMarkdown('normal **bold** normal')).toEqual([
+      { value: 'normal ' },
+      { value: 'bold', style: { bold: true } },
+      { value: ' normal' },
+    ])
+  })
+
+  it('keeps markdown inside a code span literal and unstyled', () => {
+    expect(parseDiscordMarkdown('`**not bold**`')).toEqual([{ value: '**not bold**' }])
+  })
+
+  it('strips markdown nested inside a masked link label', () => {
+    expect(parseDiscordMarkdown('[**bold** label](https://example.com)')).toEqual([
+      { value: 'bold', style: { bold: true } },
+      { value: ' label' },
+    ])
+  })
+
+  it('reveals a spoiler as plain, unstyled text', () => {
+    expect(parseDiscordMarkdown('||spoiler||')).toEqual([{ value: 'spoiler' }])
   })
 })

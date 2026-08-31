@@ -196,6 +196,8 @@ export async function renderConversation(
     topMarginRatio: 0.1,
     images,
     onMissing,
+    baseWeight: 'normal',
+    family,
   }
 
   for (const op of ops) {
