@@ -402,6 +402,12 @@ describe('render', () => {
 
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
+
+  it('renders an image watermark (a logo) without throwing', async () => {
+    const buffer = await quote().setWatermark(redSquare()).toBuffer('png')
+
+    expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
+  })
 })
 
 describe('backgroundGradient', () => {

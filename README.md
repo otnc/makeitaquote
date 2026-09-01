@@ -67,7 +67,7 @@ Requires Node.js 22 or newer.
 - [Misskey notes](#misskey-notes) — quoting a note, and MFM
 - [X (Twitter)](#x-twitter) — quoting a tweet, via FxTwitter or the official API
 - [Markdown](#markdown) — strip it, leave it raw, or render bold/italic/underline/strikethrough
-- [Conversations](#conversations) — several messages as one image
+- [Chain](#chain) — a reply/quote pair, two `MiQ` quotes stacked as one image
 - [Themes](#themes) — palettes, layouts, and how to change them
 - [Colors](#colors) — every notation, including transparency
 - [Size](#size) — scaling, and fitting to the avatar
@@ -192,8 +192,6 @@ MFM is stripped by default, unlike Discord's markdown, because the markup differ
 > [!NOTE]
 > `stripMfm: true`/`false` still works, but is deprecated — `markdown: false`/`'raw'` says the same thing and also lets you ask for `'misskey'` rendering instead of stripping. See [Markdown](#markdown).
 
-`MiQConversation` has `setFromNotes()` for the same thing across several notes.
-
 ---
 
 ## X (Twitter)
@@ -277,38 +275,36 @@ This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it) rath
 
 ---
 
-## Conversations
+## Chain
 
-`MiQ` quotes one message. `MiQConversation` renders several as one image — a message log, not a quote — each with its own avatar, name and wrapped text:
-
-```ts
-const png = await new MiQConversation()
-  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '吾輩は猫である。' })
-  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '名前はまだ無い。' })
-  .addMessage({ username: 'someone', text: 'Cats are liquid, by volume.' })
-  .toBuffer('png')
-```
-
-Consecutive messages from the same `username` collapse onto one avatar and name, the same way Discord's own client groups them.
-
-Straight from real messages, the same way `MiQ#setFromMessage()` reads one — content, name, avatar, and the same `avatar` / `name` / `stripDiscordMarkdown` / `resolveMentions` options:
+Discord, X and Misskey all have a reply or a quote — a post that only makes sense alongside the one it's answering. `MiQChain` stacks two already-built `MiQ` quotes into one image, top and bottom, for exactly that:
 
 ```ts
-new MiQConversation().setFromMessages(messages) // messages: an array, oldest first
+import { MiQ, MiQChain } from 'makeitaquote'
+
+const original = new MiQ().setText('元の投稿').setUsername('otoneko.')
+const reply = new MiQ().setText('それへの返信').setUsername('ねこ')
+
+const png = await new MiQChain(original, reply).toBuffer('png')
 ```
 
-A separate class rather than an array mode on `MiQ`, because it has none of a quote's per-field theming — two built-in looks, not the full `Theme` system:
+Each `MiQ` keeps whatever it was already configured with — theme, color, bold, `markdown`, everything — `MiQChain` only decides which side each one's avatar sits on:
 
 ```ts
-new MiQConversation({ theme: 'light', width: 500 })
+new MiQChain(original, reply, { flip: true })
 ```
 
-| Option  | Default                            |
-| ------- | ---------------------------------- |
-| `theme` | `'dark'` — `'light'` is the other  |
-| `width` | `600` — height follows the content |
+| Option       | Default                                                    |
+| ------------ | ----------------------------------------------------------- |
+| `flip`       | `false` — top's avatar on the right, bottom's on the left. `true` swaps the pair |
+| `topFlip`    | Forces the top avatar to a side, overriding `flip` for this half only |
+| `bottomFlip` | Same, for the bottom half |
 
-Custom emoji, Twemoji and Misskey emoji all work inside a message the same way they do in `MiQ`, through the same `misskey` option.
+Neither `MiQ` passed in is mutated — `MiQChain` clones each one internally before adjusting its avatar side.
+
+Two conditions: both quotes must render at the **same width** (mismatched widths throw rather than silently stretching one to fit — match them with `setTheme({ width })` or `setScale()`), and neither can use `{ layout: 'new' }` yet, since that full-bleed layout has no left/right avatar box to pair.
+
+`MiQChain` replaces `MiQConversation` (removed in v12 — see [MIGRATING.md](MIGRATING.md)), which rendered a chat-log-style list of messages rather than a pair of full quote cards.
 
 ---
 
@@ -391,6 +387,18 @@ Both are off by default.
 .setTheme({ quoteMark: { display: 'block' } })                     // large, above
 .setTheme({ divider: { enabled: true } })                          // rule below
 ```
+
+### Watermark
+
+`setWatermark()` takes either a string (drawn as text) or a `URL`/`Buffer`/`Uint8Array` (drawn as an image instead, a logo say) — unlike `setAvatar()`, a plain string is always read as a text label here, never as a URL:
+
+```ts
+new MiQ().setWatermark('Make it a Quote')                       // text
+new MiQ().setWatermark(new URL('https://example.com/logo.png')) // image — note the URL wrapper
+new MiQ().setWatermark(readFileSync('./logo.png'))               // image — Buffer/Uint8Array
+```
+
+The two are mutually exclusive — the last one set wins. An image is drawn at the same height `theme.watermark.size` would give the text, keeping the scale consistent when switching between them; `theme.watermark.color`/`font`/`weight` only apply to the text form. `theme.watermark.position` (`'auto'`/`'bottom-left'`/`'bottom-center'`/`'bottom-right'`) works the same for both.
 
 ---
 

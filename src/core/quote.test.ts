@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { ValidationError } from './errors'
 import {
   applyInput,
   emptyQuote,
+  normalizeWatermarkInput,
   resolveMarkdownMode,
   resolveQuoteText,
   translateLegacyStrip,
@@ -98,5 +100,62 @@ describe('applyInput markdown handling', () => {
 
     expect(next.text).toBe('**bold**')
     expect(next.markdown).toBe('raw')
+  })
+})
+
+describe('normalizeWatermarkInput', () => {
+  it('treats a string as text', () => {
+    expect(normalizeWatermarkInput('Make it a Quote')).toEqual({
+      watermark: 'Make it a Quote',
+      watermarkImage: null,
+    })
+  })
+
+  it('enforces the text length limit through normalizeWatermark', () => {
+    expect(() => normalizeWatermarkInput('x'.repeat(65))).toThrow(ValidationError)
+  })
+
+  it('treats a URL as an image', () => {
+    const url = new URL('https://example.test/logo.png')
+    expect(normalizeWatermarkInput(url)).toEqual({ watermark: '', watermarkImage: url })
+  })
+
+  it('treats a Buffer/Uint8Array as an image', () => {
+    const bytes = new Uint8Array([1, 2, 3])
+    expect(normalizeWatermarkInput(bytes)).toEqual({ watermark: '', watermarkImage: bytes })
+  })
+
+  it('treats null as clearing both', () => {
+    expect(normalizeWatermarkInput(null)).toEqual({ watermark: '', watermarkImage: null })
+  })
+
+  it('rejects anything else', () => {
+    expect(() => normalizeWatermarkInput(42)).toThrow(ValidationError)
+    expect(() => normalizeWatermarkInput({})).toThrow(ValidationError)
+  })
+})
+
+describe('applyInput watermark handling', () => {
+  it('sets the text half and clears any image when given a string', () => {
+    const target = { ...emptyQuote(), watermarkImage: new URL('https://example.test/old.png') }
+    const next = applyInput(target, { watermark: 'Make it a Quote' })
+
+    expect(next.watermark).toBe('Make it a Quote')
+    expect(next.watermarkImage).toBeNull()
+  })
+
+  it('sets the image half and clears any text when given an image source', () => {
+    const url = new URL('https://example.test/logo.png')
+    const next = applyInput({ ...emptyQuote(), watermark: 'old text' }, { watermark: url })
+
+    expect(next.watermark).toBe('')
+    expect(next.watermarkImage).toBe(url)
+  })
+
+  it('leaves the watermark untouched when not given', () => {
+    const target = { ...emptyQuote(), watermark: 'kept' }
+    const next = applyInput(target, { username: 'someone' })
+
+    expect(next.watermark).toBe('kept')
   })
 })

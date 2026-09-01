@@ -19,7 +19,30 @@ npm install @makeitaquote/voids
 
 Why: the two halves never shared anything but input validation, and they fail for entirely different reasons — one when a native binary is missing, the other when someone else's server is down. Keeping them in one package meant every local-rendering release also re-published an HTTP client for a third-party service this project doesn't operate, and every bug report had to start by asking which entry point it came from.
 
-Nothing else is breaking. If you only ever imported `makeitaquote`, v12 is a no-op upgrade — `MiQError` and its subclasses are unaffected apart from `VoidsApiError`, which was only ever thrown by the subpath and now lives in the new package.
+If you only ever imported `makeitaquote` and never used `MiQConversation` (below), v12 is otherwise a no-op upgrade — `MiQError` and its subclasses are unaffected apart from `VoidsApiError`, which was only ever thrown by the subpath and now lives in the new package.
+
+### `MiQConversation` is gone — use `MiQChain` instead
+
+`MiQConversation`, `setFromMessages()`, `setFromNotes()`, `ConversationMessage`, `ConversationOptions` and `ConversationThemeName` are all removed, not deprecated.
+
+`MiQConversation` rendered a chat-log-style list of messages with none of a quote's own theming — two built-in looks, not the full `Theme` system. `MiQChain` replaces it with something that composes better: it stacks two already-built `MiQ` quotes (each with its own full theme, avatar, `markdown`, everything) into one image, top and bottom — a reply/quote pair, not a message log.
+
+```diff
+- new MiQConversation()
+-   .addMessage({ username: 'otoneko.', text: '吾輩は猫である。' })
+-   .addMessage({ username: 'someone', text: 'Cats are liquid, by volume.' })
+-   .toBuffer('png')
++ new MiQChain(
++   new MiQ().setText('吾輩は猫である。').setUsername('otoneko.'),
++   new MiQ().setText('Cats are liquid, by volume.').setUsername('someone'),
++ ).toBuffer('png')
+```
+
+There is no drop-in replacement for more than two messages, or for `setFromMessages()`/`setFromNotes()`'s bulk read — build each `MiQ` individually (`setFromMessage()`/`setFromNote()` per message) and chain pairs. See the [Chain](README.md#chain) section of the README.
+
+### New: an image watermark
+
+`setWatermark()` now also accepts a `URL`/`Buffer`/`Uint8Array` — drawn as an image (a logo, say) instead of text, at the same corner/scale. A plain string is still always read as text, same as before. See the [Watermark](README.md#watermark) section of the README.
 
 ### New: render markdown instead of just stripping it
 
