@@ -27,6 +27,10 @@ npm install makeitaquote
 > ```bash
 > npm install @makeitaquote/voids
 > ```
+> There's also [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx), the same idea against the MiqX API instead of Voids:
+> ```bash
+> npm install @makeitaquote/miqx
+> ```
 
 ```ts
 import { writeFile } from 'node:fs/promises'
@@ -918,13 +922,13 @@ A missing emoji, avatar or font never throws by default — the image degrades i
 
 **Node.js** is the tested runtime (22+). **Bun** loads the native binding fine and both entry points (ESM and CJS) render correctly — it isn't part of CI, so treat it as working rather than officially supported. **Deno** hasn't been verified: its Node-API compatibility for native addons like this one is still maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font files besides.
 
-On a platform without a binary, use [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — the external-API client that used to live here as `makeitaquote/api`.
+On a platform without a binary, use [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — the external-API client that used to live here as `makeitaquote/api` — or [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx), the same idea against the MiqX API instead.
 
 ---
 
 ## Migrating
 
-v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids). v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
+v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — or use [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx) for the MiqX API instead. v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
 
 ---
 
