@@ -16,6 +16,12 @@ The HTTP client (retry/timeout/backoff, on top of `ofetch` — no longer a direc
 
 Disagrees with this package's own prior implementation in two narrow, accepted ways: a backslash escape resolves even inside a code span (Discord's client leaves it literal there), and an intraword underscore (`snake_case_var`) is read as italic rather than left alone. Both are pinned in `discordMarkdown.test.ts` rather than worked around, and reported upstream ([discomd#2](https://github.com/otnc/discomd/issues/2), [discomd#3](https://github.com/otnc/discomd/issues/3), both fixed by 1.0.1) for the two that were genuine bugs rather than accepted differences.
 
+### is-package-latest
+
+Replaces the hand-rolled `registry.npmjs.org/makeitaquote/latest` fetch `src/cli/updateCheck.ts` used to do itself — `miq outdated`/`miq update`'s package-version check. A real dual CJS/ESM build, same author as this package.
+
+`^3.1.0` shipped with no `timeout`/`retry`/`AbortSignal` option at all (a bare `ofetch(url)` internally), which would have let `miq outdated`/`miq update` hang indefinitely against a stalled network instead of failing the way the hand-rolled fetch it replaced did (`timeout: 8_000, retry: 1`, through `@makeitaquote/utils/http`'s `createClient()`). Reported upstream ([is-package-latest#23](https://github.com/otnc/is-package-latest/issues/23)) rather than worked around locally, the same call made for discomd's two bugs above — fixed in `3.2.0`, which added exactly that options object (with an 8s default even when the caller passes none), so this package pins `^3.2.0` and passes `{ timeout: 8_000, retry: 1 }` explicitly.
+
 ### markdown-it
 
 Picked over the `remark`/`mdast` ecosystem for the same job — 1.7MB and 45 packages for `remark` + `strip-markdown`, or 1.0MB and 28 for `mdast-util-from-markdown` + `mdast-util-to-string`, against `markdown-it`'s ~2MB across 7 packages, but a real dual CJS/ESM build where the other two are ESM-only.
