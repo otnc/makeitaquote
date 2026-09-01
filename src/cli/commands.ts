@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs/promises'
+import { errorMessage } from '@makeitaquote/utils/errors'
 import {
   installTwemoji,
   latestTwemojiVersion,
@@ -25,7 +26,6 @@ import {
 } from '../font/install'
 import { DEFAULT_FONT_FAMILIES } from '../font/sources'
 import { checkFontUpdates, type FontUpdateStatus } from '../font/updates'
-import { errorMessage } from '../util/errorMessage'
 import { isNewerVersion } from '../util/version'
 import { checkEnv, type EnvReport } from './env'
 import { currentVersion } from './packageVersion'

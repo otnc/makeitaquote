@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import process from 'node:process'
-import { errorMessage } from '../util/errorMessage'
+import { errorMessage } from '@makeitaquote/utils/errors'
 import { run } from './index'
 
 /** Progress only when the output can overwrite a line in place. */

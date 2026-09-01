@@ -1,34 +1,8 @@
-export interface MiQErrorOptions {
-  cause?: unknown
-}
+import type { MiQErrorOptions } from '@makeitaquote/utils/errors'
+import { MiQError } from '@makeitaquote/utils/errors'
 
-/**
- * Base class for everything this package throws.
- *
- * Catching `MiQError` catches all of them, from the library and the CLI alike.
- */
-export class MiQError extends Error {
-  constructor(message: string, options?: MiQErrorOptions) {
-    super(message, options)
-    this.name = 'MiQError'
-  }
-}
-
-export interface ValidationErrorOptions extends MiQErrorOptions {
-  /** Which input field was rejected, e.g. `'text'` or `'theme.text.size'`. */
-  field?: string
-}
-
-/** An input failed a type, range or presence check. */
-export class ValidationError extends MiQError {
-  readonly field: string | undefined
-
-  constructor(message: string, options?: ValidationErrorOptions) {
-    super(message, options)
-    this.name = 'ValidationError'
-    this.field = options?.field
-  }
-}
+export type { MiQErrorOptions, ValidationErrorOptions } from '@makeitaquote/utils/errors'
+export { MiQError, ValidationError } from '@makeitaquote/utils/errors'
 
 export interface FontNotAvailableErrorOptions extends MiQErrorOptions {
   family?: string

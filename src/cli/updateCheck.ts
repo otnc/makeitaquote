@@ -1,4 +1,4 @@
-import { createClient } from '../http/client'
+import { createClient } from '@makeitaquote/utils/http'
 
 const REGISTRY_URL = 'https://registry.npmjs.org/makeitaquote/latest'
 

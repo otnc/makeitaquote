@@ -1,20 +1,19 @@
 import type { Readable } from 'node:stream'
+import { deprecate } from '@makeitaquote/utils'
+import { normalizeAvatarSource, normalizeString } from '@makeitaquote/utils/validation'
 import { encode, encodeDataURL, encodeStream } from '../output/encode'
 import type { Canvas } from '../render/canvasFactory'
 import { renderQuote } from '../render/pipeline'
 import { stripMarkdown } from '../text/markdown'
 import { defineTheme } from '../theme/resolve'
 import type { Theme, ThemeInput, ThemePalette } from '../theme/types'
-import { deprecate } from './deprecate'
 import { ValidationError } from './errors'
 import { fromNote } from './note'
 import {
   applyInput,
   emptyQuote,
-  normalizeAvatar,
-  normalizeDisplayName,
-  normalizeText,
-  normalizeUsername,
+  MAX_NAME_LENGTH,
+  MAX_TEXT_LENGTH,
   normalizeWatermarkInput,
   resolveMarkdownMode,
   resolveQuoteText,
@@ -78,7 +77,7 @@ export class MiQ {
    * quoted exactly as written unless you opt in. See `MarkdownMode`.
    */
   setText(text: string, options?: { markdown?: MarkdownMode }): this {
-    const normalized = normalizeText(text)
+    const normalized = normalizeString(text, 'text', MAX_TEXT_LENGTH)
     const mode = resolveMarkdownMode([options?.markdown, this.#options.markdown], 'raw')
     const resolved = resolveQuoteText(normalized, mode, () => stripMarkdown(normalized))
     this.#data.text = resolved.text
@@ -87,17 +86,17 @@ export class MiQ {
   }
 
   setAvatar(avatar: AvatarSource | null): this {
-    this.#data.avatar = normalizeAvatar(avatar)
+    this.#data.avatar = normalizeAvatarSource(avatar, 'avatar') as AvatarSource | null
     return this
   }
 
   setUsername(username: string): this {
-    this.#data.username = normalizeUsername(username)
+    this.#data.username = normalizeString(username, 'username', MAX_NAME_LENGTH)
     return this
   }
 
   setDisplayName(displayName: string): this {
-    this.#data.displayName = normalizeDisplayName(displayName)
+    this.#data.displayName = normalizeString(displayName, 'displayName', MAX_NAME_LENGTH)
     return this
   }
 

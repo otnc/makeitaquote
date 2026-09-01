@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
+import { createClient } from '@makeitaquote/utils/http'
 import { pLimit } from 'plimit-lit'
 import type { Segment } from '../core/types'
-import { createClient } from '../http/client'
 import { type Image, loadImage } from '../render/canvasFactory'
 import { emojiCache } from './cache'
 import { localTwemojiFile } from './twemojiStore'

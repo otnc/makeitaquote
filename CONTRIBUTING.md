@@ -38,7 +38,6 @@ src/
 ├─ theme/    presets and merging
 ├─ render/   the drawing pipeline
 ├─ output/   encoding
-├─ http/     the shared fetch wrapper
 └─ cli/      the `miq` command
 ```
 
