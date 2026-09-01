@@ -78,6 +78,7 @@
     "culori": "^4.0.2",
     "discomd": "^1.2.0",
     "fastest-levenshtein": "^1.0.16",
+    "is-package-latest": "^3.2.0",
     "markdown-it": "^15.0.1",
     "mfm-js": "^0.26.0",
     "plimit-lit": "^3.4.0",
