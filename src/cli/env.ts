@@ -2,9 +2,9 @@ import { constants } from 'node:fs'
 import { access } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import process from 'node:process'
+import { createClient } from '@makeitaquote/utils/http'
 import { resolveTwemojiDir } from '../emoji/twemojiStore'
 import { resolveCacheDir } from '../font/diskCache'
-import { createClient } from '../http/client'
 import { findProjectRoot } from '../util/projectRoot'
 
 export interface StorageStatus {

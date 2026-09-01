@@ -6,7 +6,11 @@ Background that doesn't belong in [CONTRIBUTING.md](CONTRIBUTING.md) — not thi
 
 **The bar: every runtime dependency must ship a real CJS build** — a `require` export condition, not just a bare `"type": "module"` package `require()` would throw on. All else equal, an ESM-only package is passed over for one that isn't, and `check-build.js` fails the build if one slips in anyway (see `tsdown.config.ts`'s `deps.alwaysBundle`, which sits empty on purpose). That's the standing requirement; nothing else about a candidate disqualifies it on its own.
 
-Owning a specification this package doesn't, or being smaller than the code it deletes, is _why_ each existing dependency in particular got added — not a requirement the next one has to clear too. `mfm-js` is Misskey's own MFM parser, `discomd` is Discord's own Markdown dialect, `markdown-it` is a CommonMark/GFM parser and `culori` is the CSS colour syntax — all four moving targets a local regex only approximates, and all four replaced code that had already been wrong once. `tiny-lru` replaced 89 lines outright, and `ofetch` owns retry/timeout/backoff for the same reason a hand-rolled version of that was wrong once too.
+Owning a specification this package doesn't, or being smaller than the code it deletes, is _why_ each existing dependency in particular got added — not a requirement the next one has to clear too. `mfm-js` is Misskey's own MFM parser, `discomd` is Discord's own Markdown dialect, `markdown-it` is a CommonMark/GFM parser and `culori` is the CSS colour syntax — all four moving targets a local regex only approximates, and all four replaced code that had already been wrong once. `tiny-lru` replaced 89 lines outright.
+
+### @makeitaquote/utils
+
+The HTTP client (retry/timeout/backoff, on top of `ofetch` — no longer a direct dependency of this package, since nothing here imports it directly anymore), the `MiQError`/`ValidationError` base classes, Discord mention resolution and message field helpers, Twitter v2 author matching, the `normalizeString`/`normalizeAvatarSource` validation primitives and the deprecation-warning helper were all identical, dependency-free code duplicated across this package, `@makeitaquote/voids` and `@makeitaquote/miqx`. `@makeitaquote/utils` is that shared layer, factored out once all three had it working independently. Everything specific to this package's own canvas rendering (Discord/Misskey markdown-to-styled-runs, text layout) stays local; only the plain-text/validation/HTTP layer moved.
 
 ### discomd
 

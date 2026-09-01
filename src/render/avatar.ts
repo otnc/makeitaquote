@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
+import { createClient } from '@makeitaquote/utils/http'
 import type { AvatarSource } from '../core/types'
-import { createClient } from '../http/client'
 import { parseColor, toCSS } from '../theme/color'
 import type { AvatarTheme } from '../theme/types'
 import type { AssetCache } from '../util/assetCache'

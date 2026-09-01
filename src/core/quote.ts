@@ -1,3 +1,4 @@
+import { normalizeAvatarSource, normalizeString } from '@makeitaquote/utils/validation'
 import { stripMarkdown } from '../text/markdown'
 import { ValidationError } from './errors'
 import type { AvatarSource, MarkdownMode, QuoteData, QuoteInput, RenderMarkdownMode } from './types'
@@ -66,57 +67,6 @@ export function resolveQuoteText(
   return { text, markdown: mode }
 }
 
-function assertString(value: unknown, field: string): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new ValidationError(`${field} must be a string, received ${typeof value}`, { field })
-  }
-}
-
-function assertLength(value: string, max: number, field: string) {
-  if (value.length > max) {
-    throw new ValidationError(
-      `${field} must be at most ${max} characters, received ${value.length}`,
-      {
-        field,
-      },
-    )
-  }
-}
-
-export function normalizeText(text: unknown): string {
-  assertString(text, 'text')
-  assertLength(text, MAX_TEXT_LENGTH, 'text')
-  return text
-}
-
-export function normalizeUsername(username: unknown): string {
-  assertString(username, 'username')
-  assertLength(username, MAX_NAME_LENGTH, 'username')
-  return username
-}
-
-export function normalizeDisplayName(displayName: unknown): string {
-  assertString(displayName, 'displayName')
-  assertLength(displayName, MAX_NAME_LENGTH, 'displayName')
-  return displayName
-}
-
-export function normalizeWatermark(watermark: unknown): string {
-  assertString(watermark, 'watermark')
-  assertLength(watermark, MAX_WATERMARK_LENGTH, 'watermark')
-  return watermark
-}
-
-export function normalizeAvatar(avatar: unknown): AvatarSource | null {
-  if (avatar === null || avatar === undefined) return null
-  if (typeof avatar === 'string') return avatar
-  if (avatar instanceof URL) return avatar
-  if (avatar instanceof Uint8Array) return avatar
-  throw new ValidationError('avatar must be a string, URL, Buffer, Uint8Array or null', {
-    field: 'avatar',
-  })
-}
-
 /**
  * Splits a `watermark` input into its text/image halves — the two are
  * mutually exclusive, unlike `avatar` where a string is itself an image
@@ -129,7 +79,10 @@ export function normalizeWatermarkInput(value: unknown): {
 } {
   if (value === null) return { watermark: '', watermarkImage: null }
   if (typeof value === 'string')
-    return { watermark: normalizeWatermark(value), watermarkImage: null }
+    return {
+      watermark: normalizeString(value, 'watermark', MAX_WATERMARK_LENGTH),
+      watermarkImage: null,
+    }
   if (value instanceof URL || value instanceof Uint8Array) {
     return { watermark: '', watermarkImage: value }
   }
@@ -155,7 +108,7 @@ export function applyInput(
 
   const next: QuoteData = { ...target }
 
-  if (input.text !== undefined) next.text = normalizeText(input.text)
+  if (input.text !== undefined) next.text = normalizeString(input.text, 'text', MAX_TEXT_LENGTH)
 
   const mode = input.markdown ?? globalMarkdown
   if (mode !== undefined) {
@@ -163,9 +116,12 @@ export function applyInput(
     next.text = resolved.text
     next.markdown = resolved.markdown
   }
-  if (input.avatar !== undefined) next.avatar = normalizeAvatar(input.avatar)
-  if (input.username !== undefined) next.username = normalizeUsername(input.username)
-  if (input.displayName !== undefined) next.displayName = normalizeDisplayName(input.displayName)
+  if (input.avatar !== undefined)
+    next.avatar = normalizeAvatarSource(input.avatar, 'avatar') as AvatarSource | null
+  if (input.username !== undefined)
+    next.username = normalizeString(input.username, 'username', MAX_NAME_LENGTH)
+  if (input.displayName !== undefined)
+    next.displayName = normalizeString(input.displayName, 'displayName', MAX_NAME_LENGTH)
   if (input.watermark !== undefined) {
     const resolved = normalizeWatermarkInput(input.watermark)
     next.watermark = resolved.watermark

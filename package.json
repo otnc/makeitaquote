@@ -70,6 +70,7 @@
     "migrate": "biome migrate --write"
   },
   "dependencies": {
+    "@makeitaquote/utils": "^1.2.0",
     "@napi-rs/canvas": "^1.0.8",
     "@twemoji/parser": "^17.0.2",
     "budoux": "^0.9.1",
@@ -79,7 +80,6 @@
     "fastest-levenshtein": "^1.0.16",
     "markdown-it": "^15.0.1",
     "mfm-js": "^0.26.0",
-    "ofetch": "^1.5.1",
     "plimit-lit": "^3.4.0",
     "tiny-lru": "^13.0.0"
   },

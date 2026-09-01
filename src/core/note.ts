@@ -1,3 +1,4 @@
+import { resolveNoteText } from '@makeitaquote/utils/mfm'
 import { stripMfm } from '../text/mfm'
 import { ValidationError } from './errors'
 import { emptyQuote, resolveMarkdownMode, resolveQuoteText, translateLegacyStrip } from './quote'
@@ -43,7 +44,7 @@ export function fromNote(
     throw new ValidationError('setFromNote expects a note with `user.username`', { field: 'note' })
   }
 
-  const source = options.preferCw ? (note.cw ?? note.text ?? '') : (note.text ?? note.cw ?? '')
+  const source = resolveNoteText(note, options.preferCw)
 
   const quote = emptyQuote()
   const mode = resolveMarkdownMode(
