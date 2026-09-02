@@ -67,6 +67,7 @@
     "ci": "biome ci",
     "check:build": "node scripts/check-build.js",
     "visual": "node scripts/visual-check/index.js",
+    "visual:watch": "node --watch scripts/visual-check/index.js",
     "prepublishOnly": "npm run build",
     "checkupdates": "ncu -u -t minor",
     "migrate": "biome migrate --write"
@@ -93,6 +94,7 @@
     "@types/node": "^22.20.1",
     "@vitest/coverage-v8": "^4.1.11",
     "npm-check-updates": "^23.1.0",
+    "picocolors": "^1.1.1",
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"

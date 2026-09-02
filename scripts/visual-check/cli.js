@@ -1,12 +1,7 @@
 import { parseArgs } from 'node:util'
 
-/**
- * Parses the CLI flags.
- *
- * `parseArgs` takes both `--out dir` and `--out=dir`, and reports an unknown
- * flag rather than ignoring it — a typo in `--only` used to just render
- * nothing.
- */
+// `parseArgs` reports an unknown flag rather than ignoring it — a typo in
+// `--only` used to just render nothing.
 export function parseCli() {
   const { values } = parseArgs({
     options: {

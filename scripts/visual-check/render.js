@@ -1,12 +1,11 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
+import pc from 'picocolors'
 import { pngSize, SIGNATURES } from './signatures.js'
 
 /** Renders every selected case, checking each produces a decodable image of the expected shape. */
 export async function renderCases(cases, { offline, only, outDir }) {
-  // Every group that exists, regardless of `only` — the index manifest lists
-  // all of them even when this particular run only touches some.
   const allGroups = [...new Set(cases.map((testCase) => testCase.group))]
 
   const selected = cases.filter((testCase) => {
@@ -27,8 +26,7 @@ export async function renderCases(cases, { offline, only, outDir }) {
   await mkdir(outDir, { recursive: true })
 
   // Only the groups actually being (re)rendered are cleared — `--only` runs
-  // leave every other group's images and manifest exactly as they were,
-  // rather than wiping the whole gallery down to one group.
+  // leave every other group untouched.
   const groupsToRender = [...new Set(selected.map((testCase) => testCase.group))]
   for (const group of groupsToRender) {
     await rm(join(outDir, group), { recursive: true, force: true })
@@ -53,7 +51,6 @@ export async function renderCases(cases, { offline, only, outDir }) {
 
     if (testCase.group !== currentGroup) {
       currentGroup = testCase.group
-      await mkdir(join(outDir, currentGroup), { recursive: true })
       console.log(`\n  ${currentGroup}`)
     }
 
@@ -90,9 +87,10 @@ export async function renderCases(cases, { offline, only, outDir }) {
 
     results.push(result)
 
-    const status = result.problems.length === 0 ? 'ok' : 'FAIL'
+    const ok = result.problems.length === 0
+    const status = (ok ? pc.green : pc.red)((ok ? 'ok' : 'FAIL').padEnd(4))
     process.stdout.write(
-      `    ${status.padEnd(4)} ${testCase.name}${result.error ? ` — ${result.error}` : ''}\n`,
+      `    ${status} ${testCase.name}${result.error ? ` — ${result.error}` : ''}\n`,
     )
   }
 

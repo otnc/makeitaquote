@@ -1,29 +1,39 @@
-// --- 07-quotes: quote marks and divider ---------------------------------------
+import { avatars, base, text } from '../fixtures.js'
 
-export default function registerQuotes(add, { base, text, avatars }) {
-  add('07-quotes', 'none (default)', () => base().setText(text.ja).setAvatar(avatars.illustration))
-  add('07-quotes', 'inline', () =>
-    base()
-      .setText(text.ja)
-      .setAvatar(avatars.illustration)
-      .setTheme({ quoteMark: { display: 'inline' } }),
-  )
-  add('07-quotes', 'inline with 「」', () =>
-    base()
-      .setText(text.ja)
-      .setAvatar(avatars.illustration)
-      .setTheme({ quoteMark: { display: 'inline', chars: ['「', '」'] } }),
-  )
-  add('07-quotes', 'block', () =>
-    base()
-      .setText(text.ja)
-      .setAvatar(avatars.illustration)
-      .setTheme({ quoteMark: { display: 'block' } }),
-  )
-  add('07-quotes', 'divider', () =>
-    base()
-      .setText(text.ja)
-      .setAvatar(avatars.illustration)
-      .setTheme({ divider: { enabled: true } }),
-  )
-}
+export const group = '07-quotes'
+
+export const cases = [
+  { name: 'none (default)', build: () => base().setText(text.ja).setAvatar(avatars.illustration) },
+  {
+    name: 'inline',
+    build: () =>
+      base()
+        .setText(text.ja)
+        .setAvatar(avatars.illustration)
+        .setTheme({ quoteMark: { display: 'inline' } }),
+  },
+  {
+    name: 'inline with 「」',
+    build: () =>
+      base()
+        .setText(text.ja)
+        .setAvatar(avatars.illustration)
+        .setTheme({ quoteMark: { display: 'inline', chars: ['「', '」'] } }),
+  },
+  {
+    name: 'block',
+    build: () =>
+      base()
+        .setText(text.ja)
+        .setAvatar(avatars.illustration)
+        .setTheme({ quoteMark: { display: 'block' } }),
+  },
+  {
+    name: 'divider',
+    build: () =>
+      base()
+        .setText(text.ja)
+        .setAvatar(avatars.illustration)
+        .setTheme({ divider: { enabled: true } }),
+  },
+]

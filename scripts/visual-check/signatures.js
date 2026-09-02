@@ -1,5 +1,3 @@
-// Image sniffing, so a case is verified and not merely produced.
-
 export const SIGNATURES = {
   png: (b) =>
     b.length > 24 && b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),

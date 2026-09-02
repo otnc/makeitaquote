@@ -1,34 +1,40 @@
-// --- 05-typography: weight ---------------------------------------------------
+import { avatars, base, text } from '../fixtures.js'
 
-export default function registerTypography(add, { base, text, avatars }) {
-  add('05-typography', 'normal (default)', () =>
-    base().setText(text.wrapping).setAvatar(avatars.illustration),
-  )
-  add(
-    '05-typography',
-    'bold',
-    () =>
+export const group = '05-typography'
+
+export const cases = [
+  {
+    name: 'normal (default)',
+    build: () => base().setText(text.wrapping).setAvatar(avatars.illustration),
+  },
+  {
+    name: 'bold',
+    build: () =>
       base()
         .setText(text.wrapping)
         .setAvatar(avatars.illustration)
         .setTheme({ text: { weight: 'bold' } }),
-    { note: 'emulated by stroking when the font has no bold face' },
-  )
-  add('05-typography', 'weight 900', () =>
-    base()
-      .setText(text.wrapping)
-      .setAvatar(avatars.illustration)
-      .setTheme({ text: { weight: 900 } }),
-  )
-  add('05-typography', 'everything bold', () =>
-    base()
-      .setText(text.ja)
-      .setAvatar(avatars.illustration)
-      .setTheme({
-        text: { weight: 'bold' },
-        displayName: { weight: 'bold' },
-        username: { weight: 'bold' },
-        watermark: { weight: 'bold' },
-      }),
-  )
-}
+    note: 'emulated by stroking when the font has no bold face',
+  },
+  {
+    name: 'weight 900',
+    build: () =>
+      base()
+        .setText(text.wrapping)
+        .setAvatar(avatars.illustration)
+        .setTheme({ text: { weight: 900 } }),
+  },
+  {
+    name: 'everything bold',
+    build: () =>
+      base()
+        .setText(text.ja)
+        .setAvatar(avatars.illustration)
+        .setTheme({
+          text: { weight: 'bold' },
+          displayName: { weight: 'bold' },
+          username: { weight: 'bold' },
+          watermark: { weight: 'bold' },
+        }),
+  },
+]

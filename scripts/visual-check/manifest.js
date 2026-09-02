@@ -9,14 +9,9 @@ export function titleOf(group) {
     .replace(/^./, (c) => c.toUpperCase())
 }
 
-/**
- * Split one file per group (docs/visual/<group>/manifest.json) plus a small
- * index (docs/visual/manifest.json) listing which groups exist. Two PRs
- * touching different groups now touch different files, full stop — no shared
- * file for them to conflict on. Within a group's own file there is nothing
- * but a pure function of its cases: no timestamp, no counts, nothing that
- * changes between two runs unless the rendered output actually did.
- */
+// One file per group (docs/visual/<group>/manifest.json) plus a small index
+// (docs/visual/manifest.json) listing which groups exist — so two PRs
+// touching different groups touch different files, never a shared one.
 export async function writeManifests({
   outDir,
   allGroups,
@@ -49,11 +44,9 @@ export async function writeManifests({
     )
   }
 
-  // The index has to list every group that exists, not just the ones this run
-  // touched — `allGroups` comes from the full case list, so a partial `--only`
-  // run never shrinks it. It changes only when a group is added or removed, or
-  // on a version bump, which is rare enough that it is barely ever the thing
-  // two branches collide on.
+  // The index lists every group, not just the ones this run touched —
+  // `allGroups` comes from the full case list, so a partial `--only` run
+  // never shrinks it.
   const index = {
     version: packageVersion,
     groups: allGroups.map((group) => ({ name: group, title: titleOf(group) })),
