@@ -29,7 +29,7 @@ import { checkFontUpdates, type FontUpdateStatus } from '../font/updates'
 import { isNewerVersion } from '../util/version'
 import { checkEnv, type EnvReport } from './env'
 import { currentVersion } from './packageVersion'
-import { type RenderInput, renderToBuffer, resolveAvatar } from './render'
+import { type RenderInput, renderToBuffer, resolveAvatar, resolveWatermarkImage } from './render'
 import { checkPackageUpdate, type PackageUpdateStatus } from './updateCheck'
 
 /**
@@ -56,6 +56,7 @@ export interface CliDeps {
   checkEnv?: () => Promise<EnvReport>
   render?: (input: RenderInput) => Promise<Buffer>
   resolveAvatar?: (value: string) => ReturnType<typeof resolveAvatar>
+  resolveWatermarkImage?: (value: string) => ReturnType<typeof resolveWatermarkImage>
   writeFile?: (path: string, bytes: Buffer) => Promise<void>
 }
 
@@ -486,13 +487,15 @@ export async function envCommand(
   return report.storage.fontsWritable && report.storage.twemojiWritable ? 0 : 1
 }
 
-/** Raw `miq render` flag values, before `--avatar` is resolved to bytes. */
+/** Raw `miq render` flag values, before `--avatar`/`--watermark-image` are resolved to bytes. */
 export interface RenderOptions {
   text?: string
   avatar?: string
   username?: string
   displayName?: string
   watermark?: string
+  /** Mutually exclusive with `watermark` — one is text, the other an image. */
+  watermarkImage?: string
   color?: boolean
   /** Validated by cleye's `oneOf()` before this ever runs — a plain string here, not re-checked. */
   theme?: string
@@ -516,6 +519,10 @@ export async function renderCommand(
     io.line('Error: --text is required.')
     return 1
   }
+  if (options.watermark !== undefined && options.watermarkImage !== undefined) {
+    io.line('Error: --watermark and --watermark-image are mutually exclusive.')
+    return 1
+  }
 
   const format = (options.format ?? 'png') as RenderInput['format']
   const outPath = options.out ?? `quote.${format}`
@@ -525,13 +532,17 @@ export async function renderCommand(
       options.avatar === undefined
         ? undefined
         : await (deps.resolveAvatar ?? resolveAvatar)(options.avatar)
+    const watermark =
+      options.watermarkImage === undefined
+        ? options.watermark
+        : await (deps.resolveWatermarkImage ?? resolveWatermarkImage)(options.watermarkImage)
 
     const bytes = await (deps.render ?? renderToBuffer)({
       text: options.text,
       ...(avatar !== undefined ? { avatar } : {}),
       ...(options.username !== undefined ? { username: options.username } : {}),
       ...(options.displayName !== undefined ? { displayName: options.displayName } : {}),
-      ...(options.watermark !== undefined ? { watermark: options.watermark } : {}),
+      ...(watermark !== undefined ? { watermark } : {}),
       ...(options.color !== undefined ? { color: options.color } : {}),
       ...(options.theme !== undefined ? { theme: options.theme as RenderInput['theme'] } : {}),
       ...(options.layout !== undefined ? { layout: options.layout as RenderInput['layout'] } : {}),

@@ -404,6 +404,8 @@ new MiQ().setWatermark(readFileSync('./logo.png'))               // image — Bu
 
 The two are mutually exclusive — the last one set wins. An image is drawn at the same height `theme.watermark.size` would give the text, keeping the scale consistent when switching between them; `theme.watermark.color`/`font`/`weight` only apply to the text form. `theme.watermark.position` (`'auto'`/`'bottom-left'`/`'bottom-center'`/`'bottom-right'`) works the same for both.
 
+**Supported image formats** (same decoder as `setAvatar()`/`backgroundImage`, courtesy of `@napi-rs/canvas`'s Skia backend): PNG, JPEG, WebP, AVIF, GIF (first frame only — not animated), BMP, and SVG. SVG only decodes from bytes or a `data:` URL, not a bare SVG string.
+
 ---
 
 ## Colors
@@ -857,8 +859,9 @@ Network
 | Flag | Does |
 | --- | --- |
 | `--text <string>` | The quoted text (required) |
-| `--avatar <string>` | A URL, or a local image file |
+| `--avatar <string>` | A URL, a local image file, or `-` to read stdin |
 | `--username`, `--display-name`, `--watermark <string>` | The same three fields `setUsername()`/`setDisplayName()`/`setWatermark()` set |
+| `--watermark-image <string>` | A URL, a local image file, or `-` to read stdin — an image watermark instead of text; mutually exclusive with `--watermark` |
 | `--theme <name>` | `dark` (default), `light` or `custom` |
 | `--layout <name>` | `side` (default) or `new` |
 | `--color` | Keep the avatar in color instead of desaturating it |
@@ -872,6 +875,9 @@ Network
 $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png \
     --username otoneko. --display-name 音猫 --theme light --out quote.png
 ✓ quote.png (31 KB)
+
+$ cat logo.png | miq generate --text "Hello" --watermark-image -
+✓ quote.png (24 KB)
 ```
 
 ### Where things are stored
