@@ -40,29 +40,44 @@ function applyFont(
 }
 
 /**
- * Width of a line as it will actually be drawn.
+ * Each segment's drawn width. Call once per line and pass the result to both
+ * `drawnLineWidth()` (for alignment, before drawing) and `drawLine()` (to
+ * avoid re-measuring every segment a second time) — `drawLine` still accepts
+ * no `widths` and measures its own if the caller only needs to draw.
  *
  * Deliberately resolves font/stroke the same way `drawLine()` does for each
  * segment, so a line can never be laid out at one width and drawn at another.
+ * A missing emoji drawn as its raw fallback text (`onMissing: 'text'`) is
+ * measured as that actual text, not a generic emoji-square width;
+ * `onMissing: 'ignore'` draws and advances nothing.
  */
-export function drawnLineWidth(ctx: SKRSContext2D, line: Line, options: DrawLineOptions): number {
-  let width = 0
-  for (const segment of line) {
+export function measureLine(ctx: SKRSContext2D, line: Line, options: DrawLineOptions): number[] {
+  return line.map((segment) => {
     if (segment.kind === 'text') {
       const stroke = applyFont(ctx, segment.style, options)
-      width += ctx.measureText(segment.value).width + boldAdvance(stroke)
-    } else {
-      width += emojiWidth(options)
+      return ctx.measureText(segment.value).width + boldAdvance(stroke)
     }
-  }
-  return width
+    if (options.images.get(segment.url)) return emojiWidth(options)
+    if (options.onMissing === 'text') {
+      const stroke = applyFont(ctx, undefined, options)
+      return ctx.measureText(segment.raw).width + boldAdvance(stroke)
+    }
+    return 0
+  })
+}
+
+/** Width of a line as it will actually be drawn. */
+export function drawnLineWidth(ctx: SKRSContext2D, line: Line, options: DrawLineOptions): number {
+  return measureLine(ctx, line, options).reduce((total, width) => total + width, 0)
 }
 
 /**
  * Draws one wrapped line, with `x` at its left edge and `y` on the baseline.
  *
  * Emoji are drawn as squares of the font size, sitting on the baseline the
- * same way a glyph would.
+ * same way a glyph would. `widths` is `measureLine()`'s result for this same
+ * line — pass the one the caller already computed for `alignedX()` rather
+ * than measuring every segment over again; omit it to measure here instead.
  */
 export function drawLine(
   ctx: SKRSContext2D,
@@ -70,37 +85,37 @@ export function drawLine(
   x: number,
   y: number,
   options: DrawLineOptions,
+  widths: readonly number[] = measureLine(ctx, line, options),
 ): void {
   const { fontSize } = options
   const sideMargin = fontSize * options.sideMarginRatio
   const topMargin = fontSize * options.topMarginRatio
   let cursor = x
 
-  for (const segment of line) {
+  line.forEach((segment, i) => {
     if (segment.kind === 'text') {
       const stroke = applyFont(ctx, segment.style, options)
       fillText(ctx, segment.value, cursor, y, stroke)
-      const width = ctx.measureText(segment.value).width
+      // The plain (unstroked) width, for the decoration bands below —
+      // widths[i] already includes boldAdvance(stroke) on top of it.
+      const width = (widths[i] as number) - boldAdvance(stroke)
       if (segment.style?.underline) drawDecoration(ctx, cursor, y, width, fontSize, 'underline')
       if (segment.style?.strikethrough) {
         drawDecoration(ctx, cursor, y, width, fontSize, 'strikethrough')
       }
-      cursor += width + boldAdvance(stroke)
-      continue
+    } else {
+      const image = options.images.get(segment.url)
+      if (image) {
+        drawEmoji(ctx, image, cursor + sideMargin, y - fontSize + topMargin, fontSize)
+      } else if (options.onMissing === 'text') {
+        // Better to show `<:blobcat:123…>` than a gap where an emoji should be.
+        // Unstyled: this is fallback text, not the markdown source's own run.
+        const stroke = applyFont(ctx, undefined, options)
+        fillText(ctx, segment.raw, cursor, y, stroke)
+      }
     }
-
-    const image = options.images.get(segment.url)
-    if (image) {
-      drawEmoji(ctx, image, cursor + sideMargin, y - fontSize + topMargin, fontSize)
-      cursor += emojiWidth(options)
-    } else if (options.onMissing === 'text') {
-      // Better to show `<:blobcat:123…>` than a gap where an emoji should be.
-      // Unstyled: this is fallback text, not the markdown source's own run.
-      const stroke = applyFont(ctx, undefined, options)
-      fillText(ctx, segment.raw, cursor, y, stroke)
-      cursor += ctx.measureText(segment.raw).width + boldAdvance(stroke)
-    }
-  }
+    cursor += widths[i] as number
+  })
 }
 
 /**
