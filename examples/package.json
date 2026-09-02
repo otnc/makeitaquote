@@ -1,0 +1,9 @@
+{
+  "name": "examples",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "makeitaquote": "file:.."
+  }
+}
