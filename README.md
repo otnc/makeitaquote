@@ -26,7 +26,7 @@ With discord.js(beta): [beta-with-discordjs.md](https://github.com/otnc/makeitaq
 
 ## Development
 
-This branch (`legacy`) is a long-term maintenance line for the legacy `axios`/`displus`-based
+This branch (`legacy`) is a long-term maintenance line for the legacy `axios`/`discomd`-based
 implementation and is published under the npm `legacy` dist-tag; it is never merged into `main`.
 
 ```bash

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import displus from 'displus'
+import { strip } from 'discomd'
 
 export interface Format {
   text: string
@@ -93,7 +93,7 @@ export class MiQ {
     if (typeof formatText !== 'boolean') {
       throw new TypeError('formatText must be boolean')
     }
-    if (formatText) t = displus.removeMarkdown(t)
+    if (formatText) t = strip(t)
     this.format.text = t
     return this
   }
