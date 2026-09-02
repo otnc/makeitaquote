@@ -90,10 +90,18 @@ export async function writeCachedFont(
 
   const handle = await open(tmp, 'w')
   try {
-    await handle.write(bytes)
-    await handle.sync()
-  } finally {
-    await handle.close()
+    try {
+      await handle.write(bytes)
+      await handle.sync()
+    } finally {
+      await handle.close()
+    }
+  } catch (cause) {
+    // A failed write still leaves the temp file on disk — clean it up rather
+    // than leaking a growing pile of half-written `.tmp` files on every
+    // interrupted download.
+    await unlink(tmp).catch(() => {})
+    throw cause
   }
 
   try {
