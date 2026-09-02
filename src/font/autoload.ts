@@ -172,7 +172,15 @@ async function registerFromDiskCache(family: string, options: EnsureOptions): Pr
 
   let names: string[]
   try {
-    names = readdirSync(dir).filter((name) => name.startsWith(prefix) && name.endsWith('.ttf'))
+    // A bare prefix match isn't enough: "Noto-Sans-" is also a prefix of
+    // "Noto-Sans-JP-v30-…", a different family's file. Requiring the version
+    // marker (fileNameFor's `v\d+`) right after the slug rules that out.
+    names = readdirSync(dir).filter(
+      (name) =>
+        name.startsWith(prefix) &&
+        /^v\d+-/.test(name.slice(prefix.length)) &&
+        name.endsWith('.ttf'),
+    )
   } catch {
     return false
   }

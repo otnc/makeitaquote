@@ -5,7 +5,7 @@ import { ensureDefaultFonts, reportMissingFonts, useFont } from '../font/autoloa
 import { GENERIC_FONT_FAMILIES, unquoteFontFamily } from '../font/catalogue'
 import { fonts, resolveFamily } from '../font/registry'
 import { DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY } from '../font/sources'
-import { alignedX, type DrawLineOptions, drawLine, drawnLineWidth } from '../text/draw'
+import { alignedX, type DrawLineOptions, drawLine, measureLine } from '../text/draw'
 import { fitText } from '../text/fit'
 import { memoizeMeasurer } from '../text/measure'
 import { resolveEmojiSegments, segmentText } from '../text/segment'
@@ -231,8 +231,16 @@ function drawQuote(
 
   let y = top + result.fontSize
   for (const line of result.lines) {
-    const width = drawnLineWidth(ctx, line, lineOptions)
-    drawLine(ctx, line, alignedX(theme.text.align, area.x, area.width, width), y, lineOptions)
+    const widths = measureLine(ctx, line, lineOptions)
+    const width = widths.reduce((total, w) => total + w, 0)
+    drawLine(
+      ctx,
+      line,
+      alignedX(theme.text.align, area.x, area.width, width),
+      y,
+      lineOptions,
+      widths,
+    )
     y += lineStep
   }
 

@@ -162,6 +162,21 @@ function luma(r: number, g: number, b: number): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b
 }
 
+interface Circle {
+  cx: number
+  cy: number
+  radius: number
+}
+
+/** The largest circle that fits inside `box`, centred — matches `clipToCircle()`. */
+function circleFor(box: AvatarBox): Circle {
+  return {
+    cx: box.x + box.width / 2,
+    cy: box.y + box.height / 2,
+    radius: Math.min(box.width, box.height) / 2,
+  }
+}
+
 /**
  * Desaturates a region in place, for when `ctx.filter` isn't available.
  *
@@ -169,8 +184,12 @@ function luma(r: number, g: number, b: number): number {
  * `getImageData`/`putImageData` need integer pixels, so this rounds outward
  * (floor the origin, ceil the far edge) rather than truncating, to always
  * cover the whole painted area instead of clipping a row or column of it.
+ *
+ * `getImageData`/`putImageData` ignore the canvas's own clip path, so a
+ * `circle` clip must be re-applied by hand here — otherwise a circle-shaped
+ * avatar desaturates the card background sitting in the box's corners too.
  */
-function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox): void {
+function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox, circle?: Circle): void {
   const x = Math.floor(box.x)
   const y = Math.floor(box.y)
   const width = Math.ceil(box.x + box.width) - x
@@ -178,11 +197,19 @@ function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox): void {
 
   const image = ctx.getImageData(x, y, width, height)
   const { data } = image
-  for (let i = 0; i < data.length; i += 4) {
-    const value = luma(data[i] as number, data[i + 1] as number, data[i + 2] as number)
-    data[i] = value
-    data[i + 1] = value
-    data[i + 2] = value
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      if (circle) {
+        const dx = x + col + 0.5 - circle.cx
+        const dy = y + row + 0.5 - circle.cy
+        if (dx * dx + dy * dy > circle.radius * circle.radius) continue
+      }
+      const i = (row * width + col) * 4
+      const value = luma(data[i] as number, data[i + 1] as number, data[i + 2] as number)
+      data[i] = value
+      data[i + 1] = value
+      data[i + 2] = value
+    }
   }
   ctx.putImageData(image, x, y)
 }
@@ -202,9 +229,9 @@ export interface DrawAvatarOptions {
  * bottom — same as a round profile picture would on any other card shape.
  */
 function clipToCircle(ctx: SKRSContext2D, box: AvatarBox): void {
-  const radius = Math.min(box.width, box.height) / 2
+  const { cx, cy, radius } = circleFor(box)
   ctx.beginPath()
-  ctx.arc(box.x + box.width / 2, box.y + box.height / 2, radius, 0, Math.PI * 2)
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2)
   ctx.closePath()
   ctx.clip()
 }
@@ -237,7 +264,9 @@ export function drawAvatar(
     }
 
     if (useFilter) ctx.filter = 'none'
-    if (theme.grayscale && !useFilter) desaturateRegion(ctx, painted)
+    if (theme.grayscale && !useFilter) {
+      desaturateRegion(ctx, painted, theme.shape === 'circle' ? circleFor(box) : undefined)
+    }
   } else if (theme.fallback) {
     ctx.fillStyle = toCSS(parseColor(theme.fallback.background, 'theme.avatar.fallback.background'))
     ctx.fillRect(box.x, box.y, box.width, box.height)
