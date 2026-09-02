@@ -90,6 +90,7 @@ function deps() {
     ),
     render: vi.fn(async (_input: RenderInput): Promise<Buffer> => Buffer.from('image-bytes')),
     resolveAvatar: vi.fn(async (value: string): Promise<string> => value),
+    resolveWatermarkImage: vi.fn(async (value: string): Promise<URL> => new URL(value)),
     writeFile: vi.fn(async (_path: string, _bytes: Buffer): Promise<void> => {}),
   }
 }
@@ -813,6 +814,42 @@ describe('generate', () => {
       offline: true,
     })
     expect(d.writeFile).toHaveBeenCalledWith('out.webp', Buffer.from('image-bytes'))
+  })
+
+  it('resolves --watermark-image and passes the result as watermark', async () => {
+    const d = deps()
+
+    await run(
+      ['generate', '--text', 'Hi', '--watermark-image', 'https://example.com/logo.png'],
+      d,
+      io(),
+    )
+
+    expect(d.resolveWatermarkImage).toHaveBeenCalledWith('https://example.com/logo.png')
+    expect(d.render).toHaveBeenCalledWith(
+      expect.objectContaining({ watermark: new URL('https://example.com/logo.png') }),
+    )
+  })
+
+  it('rejects --watermark and --watermark-image together', async () => {
+    const spy = io()
+
+    const exitCode = await run(
+      [
+        'generate',
+        '--text',
+        'Hi',
+        '--watermark',
+        'text',
+        '--watermark-image',
+        'https://example.com/logo.png',
+      ],
+      deps(),
+      spy,
+    )
+
+    expect(exitCode).toBe(1)
+    expect(spy.lines[0]).toContain('--watermark and --watermark-image are mutually exclusive')
   })
 
   it('defaults --out to quote.<format>', async () => {

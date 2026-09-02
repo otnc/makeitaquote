@@ -1,4 +1,4 @@
-import { ValidationError } from './errors'
+import { findTweetV2Author } from '@makeitaquote/utils/twitter'
 import type { TweetLike } from './types'
 
 /**
@@ -42,13 +42,7 @@ export function fromTwitterApiV2Tweet(
   tweet: TweetV2Like,
   includes?: { users?: readonly UserV2Like[] },
 ): TweetLike {
-  const author = includes?.users?.find((user) => user.id === tweet.author_id)
-  if (!author) {
-    throw new ValidationError(
-      'tweet has no matching author in includes.users — request the author_id expansion',
-      { field: 'includes' },
-    )
-  }
+  const author = findTweetV2Author(tweet, includes)
 
   return {
     text: tweet.text,

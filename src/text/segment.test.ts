@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { discordEmojiURL, misskeyEmojiURL, segmentText } from './segment'
+import {
+  discordEmojiURL,
+  misskeyEmojiURL,
+  plainTextOf,
+  segmentStyledText,
+  segmentText,
+} from './segment'
 
 /** Real ids, from assets/discordemoji.json. */
 const CHU = '<:chu_:1485918581815377950>'
@@ -307,5 +313,58 @@ describe('Misskey custom emoji', () => {
 describe('discordEmojiURL', () => {
   it('builds a PNG url by default', () => {
     expect(discordEmojiURL('1', false)).toBe('https://cdn.discordapp.com/emojis/1.png?size=64')
+  })
+})
+
+describe('segmentStyledText', () => {
+  it('tags every text segment cut from a run with that run style', () => {
+    const segments = segmentStyledText([{ value: 'bold', style: { bold: true } }])
+
+    expect(segments).toEqual([{ kind: 'text', value: 'bold', style: { bold: true } }])
+  })
+
+  it('carries style across an emoji split within one run', () => {
+    const segments = segmentStyledText([{ value: '君👼ね', style: { italic: true } }])
+
+    expect(segments).toEqual([
+      { kind: 'text', value: '君', style: { italic: true } },
+      { kind: 'emoji', source: 'twemoji', url: expect.any(String), raw: '👼' },
+      { kind: 'text', value: 'ね', style: { italic: true } },
+    ])
+  })
+
+  it('carries style through a custom Discord emoji split', () => {
+    const segments = segmentStyledText([{ value: `a${CHU}b`, style: { bold: true } }])
+
+    expect(segments[0]).toEqual({ kind: 'text', value: 'a', style: { bold: true } })
+    expect(segments[2]).toEqual({ kind: 'text', value: 'b', style: { bold: true } })
+  })
+
+  it('keeps separate runs of different style unmerged even when adjacent', () => {
+    const segments = segmentStyledText([
+      { value: 'a', style: { bold: true } },
+      { value: 'b', style: { italic: true } },
+    ])
+
+    expect(segments).toEqual([
+      { kind: 'text', value: 'a', style: { bold: true } },
+      { kind: 'text', value: 'b', style: { italic: true } },
+    ])
+  })
+
+  it('treats a run with no style the same as segmentText does', () => {
+    expect(segmentStyledText([{ value: 'plain' }])).toEqual(segmentText('plain'))
+  })
+})
+
+describe('plainTextOf', () => {
+  it('concatenates every run, discarding style', () => {
+    expect(plainTextOf([{ value: 'bold', style: { bold: true } }, { value: ' plain' }])).toBe(
+      'bold plain',
+    )
+  })
+
+  it('returns an empty string for no runs', () => {
+    expect(plainTextOf([])).toBe('')
   })
 })

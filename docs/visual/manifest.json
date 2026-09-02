@@ -1,5 +1,5 @@
 {
-  "version": "11.4.1",
+  "version": "12.0.0-beta.2",
   "groups": [
     {
       "name": "01-themes",
@@ -66,8 +66,8 @@
       "title": "Sizing"
     },
     {
-      "name": "13-conversation",
-      "title": "Conversation"
+      "name": "13-chain",
+      "title": "Chain"
     }
   ]
 }

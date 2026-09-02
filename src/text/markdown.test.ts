@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { stripMarkdown } from './markdown'
+import { parseMarkdown, stripMarkdown } from './markdown'
 
 describe('stripMarkdown', () => {
   it('leaves plain text alone', () => {
@@ -124,5 +124,106 @@ describe('stripMarkdown', () => {
     // The gap before a link reference definition is real source, but the
     // definition itself renders nothing — so nothing should trail after it.
     expect(stripMarkdown('text\n\n[ref]: https://example.com')).toBe('text')
+  })
+})
+
+describe('parseMarkdown', () => {
+  it('leaves plain text as one unstyled run', () => {
+    expect(parseMarkdown('nothing to style')).toEqual([{ value: 'nothing to style' }])
+  })
+
+  it('tags bold, italic and strikethrough', () => {
+    expect(parseMarkdown('**bold**')).toEqual([{ value: 'bold', style: { bold: true } }])
+    expect(parseMarkdown('*italic*')).toEqual([{ value: 'italic', style: { italic: true } }])
+    expect(parseMarkdown('~~strike~~')).toEqual([
+      { value: 'strike', style: { strikethrough: true } },
+    ])
+  })
+
+  it('combines nested styles', () => {
+    expect(parseMarkdown('**bold _and italic_**')).toEqual([
+      { value: 'bold ', style: { bold: true } },
+      { value: 'and italic', style: { bold: true, italic: true } },
+    ])
+  })
+
+  it('mixes styled and plain runs, in order', () => {
+    expect(parseMarkdown('normal **bold** normal')).toEqual([
+      { value: 'normal ' },
+      { value: 'bold', style: { bold: true } },
+      { value: ' normal' },
+    ])
+  })
+
+  describe('raw HTML style tags', () => {
+    it('renders <u> as underline — CommonMark has no native syntax for it', () => {
+      expect(parseMarkdown('<u>underlined</u>')).toEqual([
+        { value: 'underlined', style: { underline: true } },
+      ])
+    })
+
+    it('renders <b>/<strong> as bold', () => {
+      expect(parseMarkdown('<b>bold</b>')).toEqual([{ value: 'bold', style: { bold: true } }])
+      expect(parseMarkdown('<strong>bold</strong>')).toEqual([
+        { value: 'bold', style: { bold: true } },
+      ])
+    })
+
+    it('renders <i>/<em> as italic', () => {
+      expect(parseMarkdown('<i>italic</i>')).toEqual([{ value: 'italic', style: { italic: true } }])
+      expect(parseMarkdown('<em>italic</em>')).toEqual([
+        { value: 'italic', style: { italic: true } },
+      ])
+    })
+
+    it('renders <s>/<del> as strikethrough', () => {
+      expect(parseMarkdown('<s>gone</s>')).toEqual([
+        { value: 'gone', style: { strikethrough: true } },
+      ])
+      expect(parseMarkdown('<del>gone</del>')).toEqual([
+        { value: 'gone', style: { strikethrough: true } },
+      ])
+    })
+
+    it('is case-insensitive', () => {
+      expect(parseMarkdown('<U>underlined</U>')).toEqual([
+        { value: 'underlined', style: { underline: true } },
+      ])
+    })
+
+    it('combines with real markdown syntax nested inside', () => {
+      expect(parseMarkdown('<u>under **and bold**</u>')).toEqual([
+        { value: 'under ', style: { underline: true } },
+        { value: 'and bold', style: { underline: true, bold: true } },
+      ])
+    })
+
+    it('combines with real markdown syntax wrapped around it', () => {
+      expect(parseMarkdown('**<u>bold underline</u>**')).toEqual([
+        { value: 'bold underline', style: { bold: true, underline: true } },
+      ])
+    })
+
+    it('leaves an unmatched open tag dropped, same as any other raw HTML', () => {
+      expect(parseMarkdown('text <u>never closed')).toEqual([{ value: 'text never closed' }])
+    })
+
+    it('handles same-tag reopening at the right depth', () => {
+      expect(parseMarkdown('<u>a<u>b</u>c</u>')).toEqual([
+        { value: 'abc', style: { underline: true } },
+      ])
+    })
+
+    it('ignores an unrecognized tag, same as before', () => {
+      expect(parseMarkdown('text with <div>raw html</div> inline')).toEqual([
+        { value: 'text with raw html inline' },
+      ])
+    })
+  })
+
+  it('keeps headings as structural plain text — size changes are deferred', () => {
+    expect(parseMarkdown('# **Bold Heading**')).toEqual([
+      { value: 'Bold Heading', style: { bold: true } },
+    ])
   })
 })

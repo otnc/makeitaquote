@@ -123,9 +123,23 @@ export function watermarkCorner(theme: Theme): 'bottom-right' | 'bottom-left' | 
   return theme.avatar.position === 'right' ? 'bottom-left' : 'bottom-right'
 }
 
-/** Builds the CSS font shorthand a canvas context expects. */
-export function fontString(weight: string | number, size: number, family: string): string {
-  return weight === 'normal' ? `${size}px ${family}` : `${weight} ${size}px ${family}`
+/**
+ * Builds the CSS font shorthand a canvas context expects.
+ *
+ * `italic` is the one style keyword this package sets from markdown — Skia
+ * (`@napi-rs/canvas`) synthesizes an oblique for it even when a family has no
+ * dedicated italic face, the same way browsers do, so there is no
+ * bold-style `syntheticBoldWidth()`-equivalent detection needed for it.
+ */
+export function fontString(
+  weight: string | number,
+  size: number,
+  family: string,
+  italic = false,
+): string {
+  const stylePrefix = italic ? 'italic ' : ''
+  const weightPart = weight === 'normal' ? '' : `${weight} `
+  return `${stylePrefix}${weightPart}${size}px ${family}`
 }
 
 /** Resolves a size that may be a fraction of the canvas height, or pixels. */

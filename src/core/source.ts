@@ -1,62 +1,14 @@
+import {
+  avatarURL,
+  formatUsername,
+  globalName,
+  guildName,
+  resolveMentions,
+} from '@makeitaquote/utils/discord'
 import { stripDiscordMarkdown } from '../text/discordMarkdown'
 import { ValidationError } from './errors'
-import { resolveMentions } from './mentions'
-import { emptyQuote } from './quote'
-import type { MessageLike, MessageSourceOptions, QuoteData } from './types'
-
-/**
- * Ask discord.js for a PNG avatar at a sane size.
- *
- * The default `displayAvatarURL()` can hand back an animated WebP, and pulling
- * a 4096px source to draw it at 600 is pure waste. Some older or hand-rolled
- * message objects take no arguments at all, so fall back to a bare call.
- */
-function avatarURL(holder: { displayAvatarURL?: (options?: unknown) => string }): string | null {
-  if (typeof holder.displayAvatarURL !== 'function') return null
-  try {
-    const url = holder.displayAvatarURL({ extension: 'png', size: 512 })
-    if (typeof url === 'string' && url.length > 0) return url
-  } catch {
-    // Falls through to the no-argument form below.
-  }
-  try {
-    const url = holder.displayAvatarURL()
-    return typeof url === 'string' && url.length > 0 ? url : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * Pre-Pomelo accounts still have a discriminator; migrated ones report `'0'`
- * and are displayed as a bare username.
- */
-function formatUsername(author: MessageLike['author']): string {
-  const { username, discriminator } = author
-  if (typeof discriminator === 'string' && discriminator !== '' && discriminator !== '0') {
-    return `${username}#${discriminator}`
-  }
-  return username
-}
-
-/** The per-server nickname, if this message has one. */
-function guildName(message: MessageLike): string | null {
-  const member = message.member
-  if (!member) return null
-  if (typeof member.nickname === 'string' && member.nickname) return member.nickname
-  // discord.js exposes displayName as "nickname, or the global name"; it is
-  // only a guild name when a nickname is actually set, so it is checked second.
-  if (typeof member.displayName === 'string' && member.displayName) return member.displayName
-  return null
-}
-
-/** The account-wide display name, ignoring any server nickname. */
-function globalName(message: MessageLike): string | null {
-  const { author } = message
-  if (typeof author.globalName === 'string' && author.globalName) return author.globalName
-  if (typeof author.global_name === 'string' && author.global_name) return author.global_name
-  return null
-}
+import { emptyQuote, resolveMarkdownMode, resolveQuoteText, translateLegacyStrip } from './quote'
+import type { MarkdownMode, MessageLike, MessageSourceOptions, QuoteData } from './types'
 
 function isMessageLike(value: unknown): value is MessageLike {
   if (value === null || typeof value !== 'object') return false
@@ -77,7 +29,11 @@ function isMessageLike(value: unknown): value is MessageLike {
  * Whichever is chosen, the other is still the fallback: asking for a guild
  * avatar on a message with none gets the global one rather than nothing.
  */
-export function fromMessage(message: unknown, options: MessageSourceOptions = {}): QuoteData {
+export function fromMessage(
+  message: unknown,
+  options: MessageSourceOptions = {},
+  globalMarkdown?: MarkdownMode,
+): QuoteData {
   if (!isMessageLike(message)) {
     throw new ValidationError(
       'setFromMessage expects a message with `content` and `author.username`',
@@ -100,7 +56,15 @@ export function fromMessage(message: unknown, options: MessageSourceOptions = {}
           message,
           typeof options.resolveMentions === 'object' ? options.resolveMentions : {},
         )
-  quote.text = options.stripDiscordMarkdown ? stripDiscordMarkdown(withMentions) : withMentions
+  const mode = resolveMarkdownMode(
+    [options.markdown, translateLegacyStrip(options.stripDiscordMarkdown), globalMarkdown],
+    'raw',
+  )
+  const resolvedText = resolveQuoteText(withMentions, mode, () =>
+    stripDiscordMarkdown(withMentions),
+  )
+  quote.text = resolvedText.text
+  quote.markdown = resolvedText.markdown
   quote.username = formatUsername(message.author)
   quote.displayName = preferGlobalName
     ? (globalName(message) ?? guildName(message) ?? message.author.username)

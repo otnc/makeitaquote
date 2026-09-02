@@ -2,9 +2,9 @@ import { existsSync, statSync } from 'node:fs'
 import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import process from 'node:process'
+import { createClient } from '@makeitaquote/utils/http'
 import { pLimit } from 'plimit-lit'
 import { resolveCacheDir } from '../font/diskCache'
-import { createClient } from '../http/client'
 
 const http = createClient({ timeout: 30_000, retry: 2 })
 

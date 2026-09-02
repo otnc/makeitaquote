@@ -1,8 +1,8 @@
 import process from 'node:process'
+import { resetDeprecationsForTests } from '@makeitaquote/utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { computeLayout, sizeToAvatar } from '../render/layout'
 import { defineTheme } from '../theme/resolve'
-import { resetDeprecationsForTests } from './deprecate'
 import { ValidationError } from './errors'
 import { MiQ } from './MiQ'
 

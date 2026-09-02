@@ -6,18 +6,17 @@ export {
   ValidationError,
 } from './core/errors'
 export { MiQ } from './core/MiQ'
-export { MiQConversation } from './core/MiQConversation'
+export { MiQChain } from './core/MiQChain'
 export type { FxTwitterStatusLike, TweetV2Like, UserV2Like } from './core/tweetAdapters'
 export { fromFxTwitterStatus, fromTwitterApiV2Tweet } from './core/tweetAdapters'
 export type {
   AutoFontOptions,
   AvatarSource,
-  ConversationMessage,
-  ConversationOptions,
-  ConversationThemeName,
+  ChainOptions,
   EncodeOptions,
   FontSource,
   LayoutMode,
+  MarkdownMode,
   MentionOptions,
   MessageLike,
   MessageSourceOptions,
@@ -28,11 +27,14 @@ export type {
   OutputFormat,
   QuoteData,
   QuoteInput,
+  RenderMarkdownMode,
   Segment,
+  TextStyle,
   Theme,
   ThemeInput,
   ThemePalette,
   TweetLike,
+  TweetSourceOptions,
 } from './core/types'
 export type { EmojiCacheOptions } from './emoji/cache'
 export { clearEmojiCache, configureEmojiCache, emojiCacheInfo } from './emoji/cache'

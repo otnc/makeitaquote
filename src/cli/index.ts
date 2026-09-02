@@ -55,8 +55,9 @@ export async function run(
         noFallback: {
           type: Boolean,
           description:
-            'Skip the automatic script-fallback fonts (Nanum Gothic, Noto Sans SC, IBM Plex ' +
-            'Sans Arabic) — only fonts selectable with `font=`. No effect on a specific family.',
+            'Skip the automatic script-fallback fonts (Nanum Gothic, Chiron GoRound TC, Noto ' +
+            'Sans SC, IBM Plex Sans Arabic) — only fonts selectable with `font=`. No effect on ' +
+            'a specific family.',
         },
       },
       help: {
@@ -213,10 +214,19 @@ export async function run(
       alias: 'render',
       flags: {
         text: { type: String, description: 'The quoted text (required)' },
-        avatar: { type: String, description: 'An avatar URL, or a local image file' },
+        avatar: {
+          type: String,
+          description: 'An avatar URL, a local image file, or - to read stdin',
+        },
         username: { type: String, description: '@handle line' },
         displayName: { type: String, description: 'Display/nickname line' },
         watermark: { type: String, description: 'Small corner text' },
+        watermarkImage: {
+          type: String,
+          description:
+            'A watermark image URL, a local image file, or - to read stdin ' +
+            '(mutually exclusive with --watermark)',
+        },
         color: {
           type: Boolean,
           description: 'Keep the avatar in color instead of desaturating it',
@@ -245,6 +255,8 @@ export async function run(
           'miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png --out quote.png',
           'miq generate --text "Hello" --theme light --format webp',
           'miq generate --text "Hello" --layout new',
+          'miq generate --text "Hello" --watermark-image ./logo.png',
+          'cat logo.png | miq generate --text "Hello" --watermark-image -',
         ],
       },
     },

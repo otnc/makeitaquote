@@ -1,7 +1,7 @@
 {
   "name": "makeitaquote",
-  "version": "11.4.1",
-  "description": "Generate \"Make it a Quote\" images locally, or via an external API.",
+  "version": "12.0.0-beta.2",
+  "description": "Generate \"Make it a Quote\" images locally.",
   "keywords": [
     "img",
     "image",
@@ -9,10 +9,12 @@
     "generate",
     "miq",
     "makeitaquote",
+    "Make it a Quote",
     "quote",
     "discord",
-    "canvas",
-    "api"
+    "twitter",
+    "misskey",
+    "canvas"
   ],
   "homepage": "https://github.com/otnc/makeitaquote#readme",
   "bugs": {
@@ -41,14 +43,6 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./api": {
-      "types": {
-        "import": "./dist/api/index.d.mts",
-        "require": "./dist/api/index.d.cts"
-      },
-      "import": "./dist/api/index.mjs",
-      "require": "./dist/api/index.cjs"
-    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -72,35 +66,35 @@
     "check": "biome check --write",
     "ci": "biome ci",
     "check:build": "node scripts/check-build.js",
-    "visual": "node scripts/visual-check.js",
+    "visual": "node scripts/visual-check/index.js",
+    "visual:watch": "node --watch scripts/visual-check/index.js",
     "prepublishOnly": "npm run build",
     "checkupdates": "ncu -u -t minor",
     "migrate": "biome migrate --write"
   },
   "dependencies": {
+    "@makeitaquote/utils": "^1.2.0",
     "@napi-rs/canvas": "^1.0.8",
     "@twemoji/parser": "^17.0.2",
     "budoux": "^0.9.1",
     "cleye": "^2.6.0",
     "culori": "^4.0.2",
-    "discomd": "^1.1.1",
+    "discomd": "^1.2.0",
     "fastest-levenshtein": "^1.0.16",
+    "is-package-latest": "^3.2.0",
     "markdown-it": "^15.0.1",
     "mfm-js": "^0.26.0",
-    "ofetch": "^1.5.1",
     "plimit-lit": "^3.4.0",
-    "tiny-lru": "^13.0.0",
-    "ufo": "^1.6.4",
-    "write-file-atomic": "^8.0.0"
+    "tiny-lru": "^13.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.11",
     "@types/culori": "^4.0.1",
     "@types/markdown-it": "^14.2.0",
     "@types/node": "^22.20.1",
-    "@types/write-file-atomic": "^4.0.3",
     "@vitest/coverage-v8": "^4.1.11",
     "npm-check-updates": "^23.1.0",
+    "picocolors": "^1.1.1",
     "tsdown": "^0.22.14",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"

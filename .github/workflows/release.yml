@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release: a semver bump (patch/minor/major/prerelease) or an explicit version (e.g. 9.0.1)'
+        description: 'Release line: "major", "minor" or "patch" (bumps the current version''s release core), or an explicit X.Y.Z. Combine with dist_tag to cut a prerelease of it. An explicit X.Y.Z-tag.N is also accepted, published verbatim.'
         required: true
         default: patch
+      dist_tag:
+        description: 'npm dist-tag. "latest" publishes a normal release. Anything else (e.g. "rc", "alpha", "beta") publishes X.Y.Z-<dist_tag>.N instead, N picking up from the last release of that exact version+tag.'
+        required: false
+        default: latest
 
 # Trusted publishing: npm authenticates this workflow via OIDC, so no NPM_TOKEN
 # secret is needed. Configure the link on npmjs.com first:
@@ -18,6 +22,13 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # `ref_name` is whichever branch or tag this workflow was dispatched
+    # against — never hardcoded to `main`, so a prerelease can be cut from a
+    # working branch without anything here assuming it's the default branch.
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      prerelease: ${{ steps.bump.outputs.prerelease }}
+      ref: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,12 +44,72 @@ jobs:
       - run: npm run build
       - run: npm run check:build
 
-      - name: Bump version
+      - name: Compute release version
         id: bump
         run: |
           OLD="$(node -p "require('./package.json').version")"
-          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
-          NEW="$(node -p "require('./package.json').version")"
+          # The release core to bump from, ignoring any prerelease this
+          # version is currently sitting at — "major" on 12.0.0-beta.3 means
+          # "the major line I'm already working towards", i.e. 13.0.0, not
+          # "graduate the beta". Continuing an existing prerelease line uses
+          # the explicit X.Y.Z form instead (see below).
+          OLD_CORE="${OLD%%-*}"
+          IFS='.' read -r MA MI PA <<< "$OLD_CORE"
+
+          INPUT_VERSION="${{ inputs.version }}"
+          DIST_TAG="${{ inputs.dist_tag }}"
+          NEW=""
+          BASE=""
+
+          if ! [[ "$DIST_TAG" =~ ^[A-Za-z][A-Za-z0-9-]*$ ]]; then
+            echo "::error::dist_tag must be a plain identifier (letters, digits, hyphens) — e.g. latest, beta, alpha, rc"
+            exit 1
+          fi
+
+          case "$INPUT_VERSION" in
+            major) BASE="$((MA + 1)).0.0" ;;
+            minor) BASE="${MA}.$((MI + 1)).0" ;;
+            patch) BASE="${MA}.${MI}.$((PA + 1))" ;;
+            *)
+              if [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                BASE="$INPUT_VERSION"
+              elif [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+-.+$ ]]; then
+                # A full version, tag and build number all spelled out —
+                # published verbatim, no auto-numbering.
+                NEW="$INPUT_VERSION"
+              else
+                echo "::error::version must be 'major', 'minor', 'patch', an explicit X.Y.Z, or a full X.Y.Z-tag.N"
+                exit 1
+              fi
+              ;;
+          esac
+
+          if [ -z "$NEW" ] && [ "$DIST_TAG" = "latest" ]; then
+            NEW="$BASE"
+          elif [ -z "$NEW" ]; then
+            # X.Y.Z-<dist_tag>.N — N continues from whatever this exact
+            # version+tag pair last released, found from existing git tags,
+            # so re-running the same inputs advances the line instead of
+            # colliding with a tag that already exists.
+            PREFIX="v${BASE}-${DIST_TAG}."
+            MAX=-1
+            while IFS= read -r t; do
+              suffix="${t#"$PREFIX"}"
+              if [[ "$suffix" =~ ^[0-9]+$ ]] && [ "$suffix" -gt "$MAX" ]; then
+                MAX="$suffix"
+              fi
+            done < <(git tag -l "${PREFIX}*")
+            NEW="${BASE}-${DIST_TAG}.$((MAX + 1))"
+          elif [ "$DIST_TAG" = "latest" ] && [[ "$NEW" == *-* ]]; then
+            # An exact prerelease version was given but dist_tag was left at
+            # its default — publishing that under `latest` is almost never
+            # what's wanted, so fall back to the identifier already in it.
+            REST="${NEW#*-}"
+            DIST_TAG="${REST%%.*}"
+          fi
+
+          npm version "$NEW" --no-git-tag-version --allow-same-version >/dev/null
+
           echo "version=v${NEW}" >> "$GITHUB_OUTPUT"
           if [ "$OLD" = "$NEW" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -47,10 +118,17 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+          echo "npm_tag=$DIST_TAG" >> "$GITHUB_OUTPUT"
+          if [ "$DIST_TAG" = "latest" ]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+
       # Trusted publishing: no NODE_AUTH_TOKEN — npm exchanges the OIDC token
       # issued by GitHub for a short-lived publish credential.
       - run: npm install -g npm@11
-      - run: npm publish --access public --provenance
+      - run: npm publish --access public --provenance --tag "${{ steps.bump.outputs.npm_tag }}"
 
       - name: Commit, tag and push
         run: |
@@ -63,12 +141,19 @@ jobs:
           if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
             git tag "${{ steps.bump.outputs.version }}"
           fi
+          # HEAD, not `main` — pushes back to whichever branch this workflow
+          # was dispatched against, so a prerelease cut from a working branch
+          # stays on that branch instead of landing on main.
           git push origin HEAD "${{ steps.bump.outputs.version }}"
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ steps.bump.outputs.version }}" --title "${{ steps.bump.outputs.version }}" --generate-notes
+        run: |
+          gh release create "${{ steps.bump.outputs.version }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --generate-notes \
+            ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}
 
   # The gallery is regenerated from the released build, so the published
   # examples always match what that version actually produces.
@@ -76,13 +161,18 @@ jobs:
   # Deliberately a separate job that runs after the release: it needs the font
   # and emoji CDNs, and a hiccup there must not hold up a publish. If it fails,
   # the release still happened and this can be re-run on its own.
+  #
+  # Skipped for a prerelease: a beta cut from a working branch has no business
+  # regenerating the public gallery (which GitHub Pages serves from `main`'s
+  # `/docs`) against code nobody has decided to ship yet.
   gallery:
     needs: release
+    if: needs.release.outputs.prerelease != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ needs.release.outputs.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -100,5 +190,5 @@ jobs:
             echo "::notice::Gallery unchanged."
           else
             git commit -m "docs: regenerate the example gallery"
-            git push origin HEAD:main
+            git push origin HEAD:${{ needs.release.outputs.ref }}
           fi

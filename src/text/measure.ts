@@ -1,13 +1,26 @@
-import type { Segment } from '../core/types'
+import type { Segment, TextStyle } from '../core/types'
 
 /**
  * The slice of the canvas context that measurement needs.
  *
  * Narrow on purpose: tests inject a fake with predictable widths instead of
  * standing up a real canvas and depending on whatever fonts the machine has.
+ *
+ * `style` is optional so a plain `{ measureText(text) }` fake (as most tests
+ * already write) keeps working — omitting it is the same as passing no style.
  */
 export interface TextMeasurer {
-  measureText(text: string): { width: number }
+  measureText(text: string, style?: TextStyle): { width: number }
+}
+
+/**
+ * A stable string key for a style, so two segments can be compared for
+ * "draws the same way" without a deep-equal — and so a style-aware cache can
+ * key on it alongside the text.
+ */
+export function styleKey(style: TextStyle | undefined): string {
+  if (!style) return ''
+  return `${style.bold ? 1 : 0}${style.italic ? 1 : 0}${style.underline ? 1 : 0}${style.strikethrough ? 1 : 0}`
 }
 
 /** What to do with an emoji whose image could not be fetched. */
@@ -37,7 +50,9 @@ export function segmentWidth(
   measurer: TextMeasurer,
   metrics: EmojiMetrics,
 ): number {
-  return segment.kind === 'text' ? measurer.measureText(segment.value).width : emojiWidth(metrics)
+  return segment.kind === 'text'
+    ? measurer.measureText(segment.value, segment.style).width
+    : emojiWidth(metrics)
 }
 
 export function measureSegments(
@@ -60,11 +75,12 @@ export function measureSegments(
 export function memoizeMeasurer(measurer: TextMeasurer): TextMeasurer {
   const cache = new Map<string, number>()
   return {
-    measureText(text: string) {
-      const cached = cache.get(text)
+    measureText(text: string, style?: TextStyle) {
+      const key = `${styleKey(style)} ${text}`
+      const cached = cache.get(key)
       if (cached !== undefined) return { width: cached }
-      const { width } = measurer.measureText(text)
-      cache.set(text, width)
+      const { width } = measurer.measureText(text, style)
+      cache.set(key, width)
       return { width }
     },
   }

@@ -8,6 +8,10 @@ Turn a message into a quote image.
 
 Renders locally — no API, no browser, no headless Chrome. Japanese line breaking, Twemoji, Discord and Misskey custom emoji, and fonts that download themselves are all built in.
 
+```sh
+npm install makeitaquote
+```
+
 | Default (`dark`) | `color` |
 | --- | --- |
 | ![Sample quote image, default dark theme](assets/readme/mono.png) | ![Sample quote image, color theme](assets/readme/color.png) |
@@ -17,9 +21,16 @@ Renders locally — no API, no browser, no headless Chrome. Japanese line breaki
 > The self-hosted Make it a Quote Bot is now open source:  
 > https://github.com/otnc/OpenMiQ
 
-```sh
-npm install makeitaquote
-```
+> [!Important]
+>   
+> `VoidsMiQ` (`makeitaquote/api`) has been removed and moved to another package: https://github.com/otnc/makeitaquote-voids
+> ```bash
+> npm install @makeitaquote/voids
+> ```
+> There's also [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx), the same idea against the MiqX API instead of Voids:
+> ```bash
+> npm install @makeitaquote/miqx
+> ```
 
 ```ts
 import { writeFile } from 'node:fs/promises'
@@ -59,8 +70,8 @@ Requires Node.js 22 or newer.
 - [Discord bots](#discord-bots) — the one thing most people are here for
 - [Misskey notes](#misskey-notes) — quoting a note, and MFM
 - [X (Twitter)](#x-twitter) — quoting a tweet, via FxTwitter or the official API
-- [Markdown](#markdown) — plain CommonMark, for anything else
-- [Conversations](#conversations) — several messages as one image
+- [Markdown](#markdown) — strip it, leave it raw, or render bold/italic/underline/strikethrough
+- [Chain](#chain) — a reply/quote pair, two `MiQ` quotes stacked as one image
 - [Themes](#themes) — palettes, layouts, and how to change them
 - [Colors](#colors) — every notation, including transparency
 - [Size](#size) — scaling, and fitting to the avatar
@@ -69,10 +80,9 @@ Requires Node.js 22 or newer.
 - [Text](#text) — wrapping, kinsoku, overflow
 - [Output](#output) — formats and streams
 - [Offline use](#offline-use) — the `miq` command, and installing assets ahead of time
-- [Using an external API](#using-an-external-api) instead of rendering locally
 - [Errors](#errors) · [Platform support](#platform-support)
 - [Migrating](#migrating)
-- [Author](#author) · [Licence](#licence)
+- [Requirements](#requirements) · [Contributing](#contributing) · [Author](#author) · [Licence](#licence)
 
 ---
 
@@ -111,12 +121,12 @@ new MiQ().setFromMessage(message, { avatar: 'global', name: 'global' })
 | --- | --- | --- |
 | `avatar` | `'guild'` — per-server avatar | `'global'` — account avatar |
 | `name` | `'nickname'` — server nickname | `'global'` — account name |
-| `stripDiscordMarkdown` | `false` — quoted exactly as written | `true` — `**bold**` becomes bold |
+| `markdown` | `'raw'` — quoted exactly as written | `false` strips it, `'discord'` renders it — see [Markdown](#markdown) |
 | `resolveMentions` | `true` — `<@id>` becomes `@name` | `false` — quoted as the raw token |
 
 Whichever avatar or name you choose, the other is still the fallback, so a message with only one of them always renders.
 
-`message.content` normally comes through untouched — `**bold**` is quoted with its asterisks and all, since that is what was actually typed. Opt into plain text with `stripDiscordMarkdown: true`, or call the exported `stripDiscordMarkdown()` yourself on any text:
+`message.content` normally comes through untouched — `**bold**` is quoted with its asterisks and all, since that is what was actually typed. Opt into plain text with `markdown: false`, actually draw the bold/italic/underline/strikethrough with `markdown: 'discord'` (see [Markdown](#markdown)), or call the exported `stripDiscordMarkdown()` yourself on any text:
 
 ```ts
 import { stripDiscordMarkdown } from 'makeitaquote'
@@ -127,6 +137,9 @@ stripDiscordMarkdown('**bold**, *italic*, ~~strike~~, `code`') // → 'bold, ita
 It handles what Discord message content actually renders — bold, italic, underline, strikethrough, spoilers, code (inline and fenced), block quotes (`>` at the start of a line, same as Discord), headers, subtext (`-# `), list markers (`-`, `*`, `1.`) and masked links (`[text](url)` reduces to `text`) — and honours a backslash escape. A code span keeps markdown inside it literal, so `` `**x**` `` keeps its asterisks (a backslash escape is the one exception — `` `\*x\*` `` still resolves to `*x*`, since Discord's own client is the only thing that treats a code span's contents as fully inert).
 
 This runs on [`discomd`](https://www.npmjs.com/package/discomd), Discord's own dialect rather than CommonMark. A generic Markdown stripper gets real things wrong here, like reading `__x__` as bold instead of underline.
+
+> [!NOTE]
+> `stripDiscordMarkdown: true`/`false` still works, but is deprecated — `markdown: false`/`'raw'` says the same thing and also lets you ask for `'discord'` rendering instead of stripping. See [Markdown](#markdown).
 
 ### Tokens
 
@@ -171,16 +184,17 @@ const png = await new MiQ({ misskey: 'https://misskey.example' })
 
 The display name goes over the handle, which is written `@user` locally and `@user@host` for a remote author — exactly as Misskey writes it.
 
-| Option     | Default                                            |
-| ---------- | -------------------------------------------------- |
-| `stripMfm` | `true` — `$[jelly x]` becomes `x`                  |
-| `preferCw` | `false` — quotes the note, not the content warning |
+| Option     | Default                                                                 |
+| ---------- | ------------------------------------------------------------------------ |
+| `markdown` | `false` — strips it, `$[jelly x]` becomes `x` — see [Markdown](#markdown) |
+| `preferCw` | `false` — quotes the note, not the content warning                       |
 
-MFM is stripped by default, unlike Discord's markdown, because the markup differs: `**bold**` still reads as its own text with the asterisks left in, while `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read.
+MFM is stripped by default, unlike Discord's markdown, because the markup differs: `**bold**` still reads as its own text with the asterisks left in, while `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read. Pass `markdown: 'misskey'` to actually draw the bold/italic/strikethrough instead of stripping it.
 
 `stripMfm()` is exported on its own too, and handles decoration functions (including nested ones), `<b>`/`<i>`/`<s>`/`<small>`, `<center>`, quotes, code, maths and links. Custom emoji, mentions and hashtags are deliberately left alone — the emoji layer draws the first, and unlike Discord, a Misskey mention is written `@user@host` in the note already, so there is no id to resolve.
 
-`MiQConversation` has `setFromNotes()` for the same thing across several notes.
+> [!NOTE]
+> `stripMfm: true`/`false` still works, but is deprecated — `markdown: false`/`'raw'` says the same thing and also lets you ask for `'misskey'` rendering instead of stripping. See [Markdown](#markdown).
 
 ---
 
@@ -215,61 +229,86 @@ const png = await new MiQ()
 
 Neither library is a dependency of this package — both adapters take a structural subset of the real response shape, the same as `MessageLike`, so any object with those fields works, whether or not the library that produced it is actually installed.
 
-There is nothing here for either adapter to strip: X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline, so the text goes through exactly as written, the same way a Discord `@everyone` needs no resolving.
+There is no markup for either adapter to strip: X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline, so the text goes through exactly as written by default, the same way a Discord `@everyone` needs no resolving. `setFromTweet()` still takes a `markdown` option, though — a tweet has no real syntax, but "Twitter bold/italic" (the Unicode Mathematical Alphanumeric Symbols some clients paste in place of real formatting) is common enough to be worth acting on:
+
+```ts
+new MiQ().setFromTweet(tweet, { markdown: 'twitter' }) // renders 𝗕𝗼𝗹𝗱/𝘪𝘵𝘢𝘭𝘪𝘤 as real bold/italic
+new MiQ().setFromTweet(tweet, { markdown: false }) // normalizes it back to plain ASCII instead
+```
+
+See [Markdown](#markdown).
 
 ---
 
 ## Markdown
 
-For a source that is neither Discord, Misskey nor X — a blog post, a GitHub comment, a Mastodon toot — `stripMarkdown()` strips plain CommonMark (plus the common GFM extras: strikethrough, tables, task lists). `.setText()` has no built-in option for it, unlike `setFromMessage`/`setFromNote`, since it takes a bare string with no source to opt out of stripping _from_:
+Quoted text can be stripped, left exactly as written, or actually rendered — bold, italic, underline and strikethrough drawn onto the image instead of just having their markup removed. One option controls all of it: `markdown`, settable per call on `setFromMessage()`, `setFromNote()`, `setFromTweet()`, `setText()` and `setFromObject()`, and as a package-wide default via `new MiQ({ markdown })`:
+
+| `markdown` | Effect |
+| --- | --- |
+| `false` | Strip to plain text immediately, with whichever parser fits the source (`stripDiscordMarkdown()`/`stripMfm()`/`stripMarkdown()` for `setFromMessage()`/`setFromNote()`/everything else; for `setFromTweet()`, normalizes Unicode "Twitter bold/italic" back to plain ASCII) |
+| `'raw'` | Leave the text exactly as written — markup characters are drawn as literal text |
+| `true` | Render standard CommonMark+GFM: **bold**, *italic*, ~~strikethrough~~, plus the `<u>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<s>`/`<del>` raw HTML tags |
+| `'discord'` | Render Discord's own dialect: bold, italic, underline, strikethrough |
+| `'misskey'` | Render MFM's bold, italic, strikethrough |
+| `'twitter'` | Render Unicode "Twitter bold/italic" as real bold/italic |
+
+```ts
+new MiQ().setText('**bold**, _italic_, and <u>underline</u>', { markdown: true }).toBuffer('png')
+```
+
+Default is off — `'raw'` for `setFromMessage()`/`setFromTweet()`/`setText()`/`setFromObject()` (matching each one's behaviour before this option existed), `false` for `setFromNote()` (matching `stripMfm`'s old default). Nothing changes unless you opt in.
+
+Headings, MFM's `<small>`/`<center>`, and anything else that would change font size or layout are drawn as plain structural text rather than picking up a size — only the four style flags are actually rendered.
+
+For a source that is neither Discord, Misskey nor X — a blog post, a GitHub comment, a Mastodon toot — `setText()`/`setFromObject()` treat `markdown` as standard CommonMark, the same as `true` above. `stripMarkdown()` is also exported on its own, for anywhere you just want the plain-text version of some CommonMark:
 
 ```ts
 import { stripMarkdown } from 'makeitaquote'
-
-new MiQ().setText(stripMarkdown(text))
 
 stripMarkdown('**bold**, *italic*, ~~strike~~, [a link](url)')
 // → 'bold, italic, strike, a link'
 ```
 
-A link or image keeps its label/alt text and drops the URL — that is what a reader saw, not the address behind it — and raw inline/block HTML is dropped rather than rendered or left as literal tag text. A list item becomes one line, a table becomes tab-separated cells, and a hard line break (two trailing spaces) becomes a real one.
+A link or image keeps its label/alt text and drops the URL — that is what a reader saw, not the address behind it — and raw inline/block HTML that isn't one of the four style tags above is dropped rather than rendered or left as literal tag text. A list item becomes one line, a table becomes tab-separated cells, and a hard line break (two trailing spaces) becomes a real one.
 
 This is built on [`markdown-it`](https://www.npmjs.com/package/markdown-it) rather than a local approximation, the same reasoning as `stripDiscordMarkdown()` and `stripMfm()`: CommonMark has enough corners — reference-style `[label][ref]` links, loose vs. tight lists, a fenced code block's language tag — that matching a real implementation is worth the dependency.
 
+> [!NOTE]
+> `stripDiscordMarkdown`/`stripMfm` (the two old per-source booleans) still work, but are deprecated: `markdown` says the same thing they did, plus lets you render instead of just stripping.
+
 ---
 
-## Conversations
+## Chain
 
-`MiQ` quotes one message. `MiQConversation` renders several as one image — a message log, not a quote — each with its own avatar, name and wrapped text:
-
-```ts
-const png = await new MiQConversation()
-  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '吾輩は猫である。' })
-  .addMessage({ username: 'otoneko.', displayName: '音猫｡', text: '名前はまだ無い。' })
-  .addMessage({ username: 'someone', text: 'Cats are liquid, by volume.' })
-  .toBuffer('png')
-```
-
-Consecutive messages from the same `username` collapse onto one avatar and name, the same way Discord's own client groups them.
-
-Straight from real messages, the same way `MiQ#setFromMessage()` reads one — content, name, avatar, and the same `avatar` / `name` / `stripDiscordMarkdown` / `resolveMentions` options:
+Discord, X and Misskey all have a reply or a quote — a post that only makes sense alongside the one it's answering. `MiQChain` stacks two already-built `MiQ` quotes into one image, top and bottom, for exactly that:
 
 ```ts
-new MiQConversation().setFromMessages(messages) // messages: an array, oldest first
+import { MiQ, MiQChain } from 'makeitaquote'
+
+const original = new MiQ().setText('元の投稿').setUsername('otoneko.')
+const reply = new MiQ().setText('それへの返信').setUsername('ねこ')
+
+const png = await new MiQChain(original, reply).toBuffer('png')
 ```
 
-A separate class rather than an array mode on `MiQ`, because it has none of a quote's per-field theming — two built-in looks, not the full `Theme` system:
+Each `MiQ` keeps whatever it was already configured with — theme, color, bold, `markdown`, everything — `MiQChain` only decides which side each one's avatar sits on:
 
 ```ts
-new MiQConversation({ theme: 'light', width: 500 })
+new MiQChain(original, reply, { flip: true })
 ```
 
-| Option  | Default                            |
-| ------- | ---------------------------------- |
-| `theme` | `'dark'` — `'light'` is the other  |
-| `width` | `600` — height follows the content |
+| Option       | Default                                                    |
+| ------------ | ----------------------------------------------------------- |
+| `flip`       | `false` — top's avatar on the right, bottom's on the left. `true` swaps the pair |
+| `topFlip`    | Forces the top avatar to a side, overriding `flip` for this half only |
+| `bottomFlip` | Same, for the bottom half |
 
-Custom emoji, Twemoji and Misskey emoji all work inside a message the same way they do in `MiQ`, through the same `misskey` option.
+Neither `MiQ` passed in is mutated — `MiQChain` clones each one internally before adjusting its avatar side.
+
+Two conditions: both quotes must render at the **same width** (mismatched widths throw rather than silently stretching one to fit — match them with `setTheme({ width })` or `setScale()`), and neither can use `{ layout: 'new' }` yet, since that full-bleed layout has no left/right avatar box to pair.
+
+`MiQChain` replaces `MiQConversation` (removed in v12 — see [MIGRATING.md](MIGRATING.md)), which rendered a chat-log-style list of messages rather than a pair of full quote cards.
 
 ---
 
@@ -352,6 +391,20 @@ Both are off by default.
 .setTheme({ quoteMark: { display: 'block' } })                     // large, above
 .setTheme({ divider: { enabled: true } })                          // rule below
 ```
+
+### Watermark
+
+`setWatermark()` takes either a string (drawn as text) or a `URL`/`Buffer`/`Uint8Array` (drawn as an image instead, a logo say) — unlike `setAvatar()`, a plain string is always read as a text label here, never as a URL:
+
+```ts
+new MiQ().setWatermark('Make it a Quote')                       // text
+new MiQ().setWatermark(new URL('https://example.com/logo.png')) // image — note the URL wrapper
+new MiQ().setWatermark(readFileSync('./logo.png'))               // image — Buffer/Uint8Array
+```
+
+The two are mutually exclusive — the last one set wins. An image is drawn at the same height `theme.watermark.size` would give the text, keeping the scale consistent when switching between them; `theme.watermark.color`/`font`/`weight` only apply to the text form. `theme.watermark.position` (`'auto'`/`'bottom-left'`/`'bottom-center'`/`'bottom-right'`) works the same for both.
+
+**Supported image formats** (same decoder as `setAvatar()`/`backgroundImage`, courtesy of `@napi-rs/canvas`'s Skia backend): PNG, JPEG, WebP, AVIF, GIF (first frame only — not animated), BMP, and SVG. SVG only decodes from bytes or a `data:` URL, not a bare SVG string.
 
 ---
 
@@ -502,7 +555,7 @@ For a different shape, set it on the theme:
 
 ## Fonts
 
-**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic behind that for Korean, Simplified Chinese and Arabic.
+**Nothing to configure.** If the system has no font for the text, the first render fetches one, caches it, and never fetches it again. The default is M PLUS Rounded 1c, with Noto Sans JP behind it as the general CJK safety net, and Nanum Gothic, Chiron GoRound TC, Noto Sans SC and IBM Plex Sans Arabic behind that for Korean, Traditional Chinese, Simplified Chinese and Arabic.
 
 Name any font and it is fetched on demand:
 
@@ -529,7 +582,7 @@ Any Google Fonts family works. These are the ones `fonts.catalogue()` lists:
 | --- | --- |
 | Japanese | M PLUS Rounded 1c · Noto Sans JP · Dela Gothic One · DotGothic16 · Hachi Maru Pop · Rampart One · Reggae One · RocknRoll One · Zen Old Mincho · Yuji Syuku · Yusei Magic |
 | Latin | Inconsolata · Exo 2 · Bruno Ace SC · Poltawski Nowy · Vina Sans · Dancing Script · Castoro Titling |
-| Script fallback | Nanum Gothic (Korean) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but fallback-only, so none of them has a `FONT_ALIASES` short name |
+| Script fallback | Nanum Gothic (Korean) · Chiron GoRound TC (Traditional Chinese) · Noto Sans SC (Simplified Chinese) · IBM Plex Sans Arabic (Arabic) — fetchable by name like any other entry, but fallback-only, so none of them has a `FONT_ALIASES` short name |
 
 Short, typing-friendly names for the same list are in `FONT_ALIASES`:
 
@@ -717,6 +770,7 @@ Fonts
   ✓ M PLUS Rounded 1c
   ✓ Noto Sans JP
   ✓ Nanum Gothic
+  ✓ Chiron GoRound TC
   ✓ Noto Sans SC
   ✓ IBM Plex Sans Arabic
 ```
@@ -735,7 +789,7 @@ Fonts
 
 `all` only changes what `install` does — `uninstall all` and plain `uninstall` are identical, since removing everything doesn't care which fonts are catalogued. `outdated` takes no target; it always checks miq itself, Twemoji, and every installed font.
 
-`install --no-fallback` skips Nanum Gothic, Noto Sans SC and IBM Plex Sans Arabic — the fonts fetched automatically as script fallback (see [Fonts](#fonts)) but never selectable with `font=`. It only trims a broad target (no target, `all`, `fonts`); naming a family explicitly always installs it, fallback or not.
+`install --no-fallback` skips Nanum Gothic, Chiron GoRound TC, Noto Sans SC and IBM Plex Sans Arabic — the fonts fetched automatically as script fallback (see [Fonts](#fonts)) but never selectable with `font=`. It only trims a broad target (no target, `all`, `fonts`); naming a family explicitly always installs it, fallback or not.
 
 ### Commands
 
@@ -805,8 +859,9 @@ Network
 | Flag | Does |
 | --- | --- |
 | `--text <string>` | The quoted text (required) |
-| `--avatar <string>` | A URL, or a local image file |
+| `--avatar <string>` | A URL, a local image file, or `-` to read stdin |
 | `--username`, `--display-name`, `--watermark <string>` | The same three fields `setUsername()`/`setDisplayName()`/`setWatermark()` set |
+| `--watermark-image <string>` | A URL, a local image file, or `-` to read stdin — an image watermark instead of text; mutually exclusive with `--watermark` |
 | `--theme <name>` | `dark` (default), `light` or `custom` |
 | `--layout <name>` | `side` (default) or `new` |
 | `--color` | Keep the avatar in color instead of desaturating it |
@@ -820,6 +875,9 @@ Network
 $ miq generate --text "吾輩は猫である。" --avatar https://…/avatar.png \
     --username otoneko. --display-name 音猫 --theme light --out quote.png
 ✓ quote.png (31 KB)
+
+$ cat logo.png | miq generate --text "Hello" --watermark-image -
+✓ quote.png (24 KB)
 ```
 
 ### Where things are stored
@@ -848,34 +906,6 @@ await twemojiInfo() // → { images, bytes, version }
 
 ---
 
-## Using an external API
-
-If you would rather not render locally at all:
-
-```ts
-import { VoidsMiQ } from 'makeitaquote/api'
-
-const url = await new VoidsMiQ().setText('Hello World!').toURL()
-const png = await new VoidsMiQ().setText('Hello World!').toBuffer()
-```
-
-The two endpoints do different things, so the method picks one:
-
-|                        | `toURL()`          | `toBuffer()`     |
-| ---------------------- | ------------------ | ---------------- |
-| Endpoint               | `/fakequote`       | `/fakequotebeta` |
-| Returns                | a hosted image URL | the image bytes  |
-| Round trips            | 1                  | 1                |
-| Stored on their server | **yes**            | no               |
-
-`toBuffer({ hosted: true })` uploads and then downloads it back — two round trips, only useful if you specifically want the bytes of the hosted image.
-
-Importing `makeitaquote/api` does not load the rendering stack, so it also works on platforms `@napi-rs/canvas` has no binary for.
-
-> The Voids API is not operated by this package's developer. Please don't open issues here about it being down.
-
----
-
 ## Errors
 
 Everything thrown extends `MiQError`:
@@ -885,8 +915,7 @@ MiQError
 ├─ ValidationError          bad input (carries .field)
 ├─ FontNotAvailableError    no font, with strictFonts or onAssetError: 'throw'
 ├─ AssetFetchError          an avatar, emoji or font could not be fetched
-├─ RenderError              drawing failed, or text could not be made to fit
-└─ VoidsApiError            the API refused or failed (.status, .body, .endpoint)
+└─ RenderError              drawing failed, or text could not be made to fit
 ```
 
 A missing emoji, avatar or font never throws by default — the image degrades instead. All three follow `onAssetError`; `strictFonts` is a font-specific override for it.
@@ -899,13 +928,25 @@ A missing emoji, avatar or font never throws by default — the image degrades i
 
 **Node.js** is the tested runtime (22+). **Bun** loads the native binding fine and both entry points (ESM and CJS) render correctly — it isn't part of CI, so treat it as working rather than officially supported. **Deno** hasn't been verified: its Node-API compatibility for native addons like this one is still maturing, and it needs `--allow-ffi`/`--allow-read` for the binding and font files besides.
 
-On a platform without a binary, use `makeitaquote/api`.
+On a platform without a binary, use [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — the external-API client that used to live here as `makeitaquote/api` — or [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx), the same idea against the MiqX API instead.
 
 ---
 
 ## Migrating
 
-v10 keeps the same API as v9, but moves the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
+v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — or use [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx) for the MiqX API instead. v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
+
+---
+
+## Requirements
+
+- Node.js >= 22
+
+---
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ---
 
@@ -921,8 +962,6 @@ otoneko. https://github.com/otnc
 
 - Make it a Quote (Twitter) https://twitter.com/MakeItAQuote
 - Make it a Quote (Discord / Misskey / Bluesky) https://miq.moe/
-
----
 
 ## Licence
 

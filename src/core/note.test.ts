@@ -78,3 +78,47 @@ describe('fromNote', () => {
     expect(() => fromNote({ user: {} })).toThrow(ValidationError)
   })
 })
+
+describe('the markdown option', () => {
+  it('defaults to stripping, matching the historical stripMfm default', () => {
+    const quote = fromNote(note({ text: '**bold** note' }))
+
+    expect(quote.text).toBe('bold note')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('leaves the text raw when set to "raw"', () => {
+    const quote = fromNote(note({ text: '**bold** note' }), { markdown: 'raw' })
+
+    expect(quote.text).toBe('**bold** note')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('keeps the text untouched and defers a render mode to render time', () => {
+    const quote = fromNote(note({ text: '**bold** note' }), { markdown: 'misskey' })
+
+    expect(quote.text).toBe('**bold** note')
+    expect(quote.markdown).toBe('misskey')
+  })
+
+  it('takes priority over the deprecated stripMfm boolean', () => {
+    const quote = fromNote(note({ text: '**bold**' }), { markdown: 'raw', stripMfm: true })
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('raw')
+  })
+
+  it('falls back to the global default when neither markdown nor the legacy boolean is set', () => {
+    const quote = fromNote(note({ text: '**bold**' }), {}, 'misskey')
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('misskey')
+  })
+
+  it('lets an explicit legacy boolean win over the global default', () => {
+    const quote = fromNote(note({ text: '**bold**' }), { stripMfm: false }, 'misskey')
+
+    expect(quote.text).toBe('**bold**')
+    expect(quote.markdown).toBe('raw')
+  })
+})

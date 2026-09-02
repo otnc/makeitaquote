@@ -1,6 +1,22 @@
-# makeitaquote v9 詳細設計書
+# makeitaquote 設計書
 
-作成日: 2026-07-31対象バージョン: `makeitaquote@9.0.0`（v8 系との後方互換性は**持たない**）リポジトリ: https://github.com/otnc/makeitaquote リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
+最終更新: 2026-08-30／対象バージョン: `makeitaquote@12.0.0` までの設計判断を累積した記録
+リポジトリ: https://github.com/otnc/makeitaquote ／ リポジトリ構成のベース: [`oto-lab/npm-biome-ts`](https://github.com/oto-lab/npm-biome-ts)
+
+> **この文書について**: §1〜§13 は 2026-07-31 に書いた v9 時点の詳細設計書で、当時の判断をそのまま残している（v8 との後方互換を持たない、という § 1.3 の決定を含め、事実として過去に確定した内容だから）。**v9 以降の変更は §14 以降に版ごとの節として追記**しており、本体の記述と矛盾する場合は番号の大きい節が優先する。今の姿を知りたいだけなら本体は読み飛ばし、下の一覧から該当する節に直接飛んでよい。
+>
+> | 版 | 節 | 何が変わったか |
+> | --- | --- | --- |
+> | v9.1 | §14 | 縦長レイアウト・反転・太字 |
+> | v9.2 | §15 | フォント名解決の API 経由化、Misskey カスタム絵文字 |
+> | v9.3 | §16 | 折り返しの実バグ修正、色システム、サイズ、字形フォールバック |
+> | v10 | — | フォント／Twemoji キャッシュがプロジェクトローカルに（README/MIGRATING 参照、本書に節なし） |
+> | v11 | — | 会話・ツイート取り込みなど（README 参照、本書に節なし） |
+> | v12 | §19 | `makeitaquote/api` サブパスを廃止し `@makeitaquote/voids` へ分離 |
+> | v12 | §20 | `markdown` オプション追加 — 太字/斜体/下線/取り消し線を除去せず描画できるように |
+> | v12 | §21 | watermark の画像対応、`MiQConversation` を `MiQChain`（返信/引用チェーン画像）に置き換え |
+>
+> v10・v11 で本書に節がないのは、当時ここに追記する運用がまだ無かったため。README・MIGRATING.md の記載が一次情報になる。
 
 ---
 
@@ -81,6 +97,8 @@ return Buffer.from(response)                    // ← 画像バイナリを直�
 | `axios` | `ky` に置換（§3.5） |
 | `displus` | `setText(text, formatText)` の Markdown 除去のためだけに使われていた。整形は本パッケージの責務ではないため機能ごと廃止 |
 | `.github/dependabot.yml` | **廃止**。ベーステンプレートに存在せず、ネイティブバイナリを含む本パッケージでは自動 PR の検証コストに見合わない。依存更新は手動で行う |
+
+> **v12 で一部上書き**: 「整形は本パッケージの責務ではない」という上記の判断は、*除去*機能（`displus` の役割）についてのものであり、v12 の `markdown` オプションは除去に加えて**描画**という新しい種類の機能を追加するもの。当時 `displus` を切った理由（Markdown 除去のためだけの薄い依存を増やしたくない）は今回も踏襲しており、新規依存は追加していない。経緯は §20 を参照。
 
 ---
 
@@ -242,6 +260,8 @@ discord.js v13 / v14 / discord.js-selfbot-v13 のいずれの `Message` もこ�
 ## 4. パッケージ構成
 
 ### 4.1 方針
+
+> **v12 で廃止**: `makeitaquote/api` サブパスは削除し、外部 API クライアントは別パッケージ `@makeitaquote/voids` へ切り出した。以下は v9〜v11 の設計記録として残す。経緯と現行構成は §19 を参照。
 
 **単一 npm パッケージ + subpath exports**。npm 上のパッケージ名は `makeitaquote` 1 つ。
 
@@ -937,6 +957,8 @@ const buffer = await new MiQ()
 ```
 
 ### 6.4 API サブパス（`makeitaquote/api`）
+
+> **v12 で廃止**: この節の内容はそのまま `@makeitaquote/voids` へ移設された。名前・挙動とも変更なし。§19 を参照。
 
 §2.1 で確認したエンドポイントの機能差を、そのまま API 形状に反映する。
 
@@ -1820,3 +1842,141 @@ Noto Sans JP               猫=100.0  A=57.4
 - [tsdown: Migrate from tsup](https://tsdown.dev/guide/migrate-from-tsup)（設定項目の対応。ただし実際の `DepsConfig` は §14-1 のとおり改名されている）
 - `tsdown@0.22.14` の `dist/types-*.d.mts` にある `DepsConfig`（`neverBundle` / `alwaysBundle`）
 - `ky@2.0.2` のフック引数とエラー時のレスポンス消費挙動（実測、§14-3〜5）
+
+---
+
+## 19. v12: Voids API クライアントの分離
+
+### 19.1 決定
+
+`makeitaquote/api` サブパスを **削除**し、Voids API クライアントを別リポジトリ・別パッケージ **`@makeitaquote/voids`** に切り出す。`makeitaquote` はローカル描画（＋ `miq` CLI）だけを持つパッケージになる。
+
+```
+require('makeitaquote')          →  ローカル画像生成（唯一のエントリ）
+require('@makeitaquote/voids')   →  Voids API クライアント（別パッケージ）
+```
+
+§4.1 で「サブパス名は `voids` ではなく `api`」とした判断は、**将来 Voids 以外の API 実装を足す**という前提に立っていた。3 年運用してその実装は 1 つも増えず、前提が成立しなかった。名前の抽象度だけが残り、中身は最初から最後まで Voids 専用だった。
+
+### 19.2 分離する理由
+
+| # | 理由 | 内容 |
+| --- | --- | --- |
+| 1 | 共有していたものが少ない | `src/api/*` が本体と共有していたのは入力正規化（`core/quote`）・`MessageLike` 系の型・`http/client` だけ。描画・フォント・絵文字・テーマ・出力とは一切の接点がない |
+| 2 | 壊れ方が違う | ローカル側はネイティブバイナリの有無で壊れ、API 側は他人のサーバの死活で壊れる。同居させると Issue が毎回「どちらのエントリか」の切り分けから始まる（§5.12 の Issue テンプレートに実際にその設問があった） |
+| 3 | リリースが連動してしまう | 描画側の修正を出すたび、無関係な HTTP クライアントを再 publish していた。逆に API 側の URL 変更ひとつで本体の版が上がる |
+| 4 | 運用主体が違う | Voids API は本パッケージの開発者の運用物ではない。同じパッケージに同梱すると、その責任分界が README の注記でしか表現できない |
+| 5 | ビルド境界の維持コスト | 「`makeitaquote/api` からネイティブスタックへ到達しない」保証のために `check-build.js` の検査 4・5 と `RENDERING_DEPS` を維持していた。パッケージを分ければ、この不変条件は「そもそも依存していない」という自明な事実になる |
+
+理由 5 が実質的に一番大きい。§17 の「設計どおりに機能したことの確認」に挙がっている `makeitaquote/api` の分離保証は、**パッケージが 1 つであることの帳尻を合わせるための仕掛け**であり、分離すれば検査ごと不要になる。
+
+### 19.3 本リポジトリから削除するもの
+
+| 対象 | 内容 |
+| --- | --- |
+| `src/api/` | `client.ts` / `client.test.ts` / `endpoints.ts` / `types.ts` / `index.ts` の 5 ファイル |
+| `examples/api.ts` | サブパスの使用例 |
+| `package.json` | `exports['./api']`、keywords の `"api"`、description の "or via an external API" |
+| `tsdown.config.ts` | entry から `src/api/index.ts` |
+| `scripts/check-build.js` | `RENDERING_DEPS`、検査 4（require 時のロード内容）、検査 5（到達可能チャンクの静的検査）、検査 1 の `api/*` パス。以降の番号を繰り上げ |
+| `src/http/client.ts` | `post()` と `RequestOptions.json`。Voids クライアント専用で、他の呼び出し元は `get` / `head` / `getBuffer` しか使っていない |
+
+`src/http/client.ts` 自体は残す。絵文字・フォント・アバター・`miq env` の 4 系統が使っている。
+
+### 19.4 残すもの
+
+- `src/theme/presets.ts` と `src/core/sizing.test.ts` にある `api.voids.top` への言及。これは**レイアウト定数の出自**を記録したコメントで、「その値を実際に API を叩いて確認した」という事実は分離後も変わらない
+- `DESIGN.md` の §2.1 / §4 / §6.4 など、v9 当時の設計記録。廃止の注記を付けたうえで残す
+
+### 19.5 `@makeitaquote/voids` 側
+
+移設先では名前と挙動を変えない。`VoidsMiQ`（および `MiQ` 別名）・`VoidsOptions` / `VoidsPayload` / `VoidsQuoteData`・`VoidsApiError`・`endpoints` / `DEFAULT_BASE_URL` はすべて同じ。利用者の差分が `import` 文 1 行で済むようにするため。
+
+本体と共有していたコード（入力正規化・`MessageLike` 系の型・`http/client`）は、`makeitaquote` に依存するのではなく**移設先へコピーする**。依存させると「API だけ使いたい人にネイティブバイナリを引かせない」という §4.2 の目的が振り出しに戻るうえ、正規化ロジックは 100 行に満たない。
+
+構築手順は `.private/stack/*.md` に置く。
+
+### 19.6 利用者への影響
+
+| 使い方 | v12 での影響 |
+| --- | --- |
+| `import { MiQ } from 'makeitaquote'` | なし |
+| `miq` CLI | なし |
+| `import { VoidsMiQ } from 'makeitaquote/api'` | `npm i @makeitaquote/voids` して import 元を差し替える。それ以外の変更なし |
+| `VoidsApiError` を root から catch | root からは元々 export していないため影響なし |
+
+破壊的変更はサブパスの削除 1 点のみ。MIGRATING.md の「From v11」に記載する。
+
+---
+
+## 20. v12: `markdown` オプション — 除去ではなく描画も選べるように
+
+### 20.1 決定
+
+`stripDiscordMarkdown()` / `stripMfm()` / `stripMarkdown()` は元々「除去して plain text にする」機能しか持たなかった（§2.2）。v12 では、除去ではなく**太字・斜体・下線・取り消し線を実際に画像へ描画する**選択肢を追加する。
+
+新設する `MarkdownMode` は方言を選ぶ 1 つのオプションで、`setFromMessage`/`setFromNote`/`setFromTweet`/`setText`/`setFromObject` の各呼び出しと、`new MiQ({ markdown })` のパッケージ全体デフォルトに置く:
+
+```ts
+type MarkdownMode = true | 'discord' | 'twitter' | 'misskey' | 'raw' | false
+```
+
+`false`＝除去（既存の `stripX()` と同じ挙動・同じタイミング）、`'raw'`＝無加工、`true`＝標準 CommonMark+GFM 描画、`'discord'`/`'misskey'`/`'twitter'`＝それぞれの方言の描画。デフォルトは各呼び出しの**歴史的デフォルトを完全に保つ**（Discord/Tweet/汎用は `'raw'`、Note は `false`）ため、オプトインしない限り既存ユーザーの見た目は一切変わらない。文字サイズが変わる系（見出し、MFM の `small`/`center`）は今回保留 — 構造だけ保持したプレーンテキストとして描画する。
+
+### 20.2 内部設計: stripX と描画用パーサーの統合
+
+除去用と描画用を方言ごとに別々の関数として持つと、木を歩くロジックが 2 重化する。そこで各方言につき常に `StyledRun[]`（`{ value, style? }` の配列）を返すパーサーを 1 つだけ持ち（`parseMarkdown` / `parseDiscordMarkdown` / `parseMfm` / `parseTwitterText`。いずれも非公開 — 公開 API は既存の `stripX()` 3 関数のみ据え置き）、除去はその出力からスタイルを捨てて文字列に潰すだけの薄い後処理（`plainTextOf()`）として表現した。`stripMarkdown()` 等の公開シグネチャ・挙動は変えていない。
+
+`discomd` は `strip()`/`toHTML()` の他に位置ベースの `parse(): Token[]` を公開しており、これをそのままスタイル抽出に転用できた（Discord 方言が一番簡単だった理由）。`mfm-js` は `<b>`/`<i>`/`<s>` タグを元々 `bold`/`italic`/`strike` ノードとしてパースするため、markdown-it 側のような自前の HTML タグ対応は不要だった。
+
+### 20.3 生 HTML タグ対応と依存の選定
+
+標準 Markdown モード（`true`）では `<u>`（CommonMark に対応構文が無い）・`<b>`/`<strong>`・`<i>`/`<em>`・`<s>`/`<del>` も装飾として解釈する。`markdown-it` は生 HTML を `html_inline` という**フラットな**トークンとしてしか出さない（`strong_open`/`strong_close` のように木として入れ子にしない）ため、対になる開始・終了タグを自前でペアリングする小さな変換（`pairHtmlTags`、`text/markdown.ts`）を追加した。
+
+検討したが不採用にしたもの:
+
+- **turndown**（HTML→Markdown 変換）: 今回の入力は「Markdown 本文にところどころ生 HTML タグが混ざったもの」であり、turndown は「HTML 全体を Markdown に変換する」ためのツールなので形が合わない。
+- **`rehype-raw`**（unified/remark-rehype 系）: markdown 内の生 HTML を `parse5` で正式に HTML5 仕様通りパースし直す、最も「正しい」選択肢。ただし公式ドキュメント自身が「パフォーマンス/バンドルサイズ的に重い処理」と明言しており、`unified`+`remark-parse`+`remark-rehype`+`rehype-raw` の最低 4 パッケージが必要になる。`<u>`/`<b>`/`<i>`/`<s>` の 6 タグの単純な開閉ペアリングのためだけに導入するには不釣り合いに重い。
+
+結論として、新規依存を追加しない自前の小さなペアリング処理を採用した（§2.2 で `displus` を切った「除去のためだけの薄い依存を増やしたくない」という判断と同じ理由）。
+
+### 20.4 Twitter モード: 実体は Unicode 数学英数記号
+
+X（Twitter）の投稿 API・FxTwitter のいずれも `text` はプレーンな文字列のみを返し、太字/斜体を表す構造化フィールドは存在しない（Web 検索で確認）。「Twitter の太字」は実際には Unicode の数学英数記号ブロック（U+1D400–U+1D7FF）をクライアント側またはツールが文字単位で置換しているだけで、構造化されたマークではない。そのため `'twitter'` モードは独自のパーサー（`text/twitterText.ts`）としてこれらのコードポイント範囲を検出し、ASCII に正規化しつつスタイルを付与する。範囲は連続したオフセット計算数個で実装しており、ルックアップテーブルは持たない。
+
+### 20.5 スコープ外にしたもの
+
+- **`MiQConversation`**: 依頼・実例が単一の quote (`MiQ`) についてのものだったため、今回は対象外。`conversationPipeline.ts` への同形の追加実装は将来の課題として残す。
+- **文字サイズが変わる構文**（見出し、MFM の `small`/`center`）: スタイル（太字/斜体/下線/取り消し線）とサイズ変更は別種の変更であり、後者は保留。
+- **公開 API としての `parseX()`/`StyledRun`**: `stripX()` 3 関数は据え置きで公開のままだが、新設した `parseMarkdown`/`parseDiscordMarkdown`/`parseMfm`/`parseTwitterText` と `StyledRun` 型は非公開のまま。既存の `segmentText()` 等 `text/` 配下のヘルパーも同様に非公開であり、その慣例に合わせた。
+
+---
+
+## 21. v12: watermark の画像対応と `MiQChain`（`MiQConversation` の置き換え）
+
+### 21.1 決定
+
+2つの独立した追加:
+
+1. `WatermarkTheme` はテキストのみだったが、`MiQ#setWatermark()` が `string | URL | Buffer | Uint8Array` を受け取れるようにし、ロゴなどの画像を watermark 位置に描画できるようにした。
+2. `MiQConversation`（§20.5 で「今回はスコープ外」とした複数メッセージのチャットログ描画）を**即座に削除**し、代わりに新設 `MiQChain` を追加した。Discord・X・Misskey にはリプライ元・引用元があり、「元投稿＋返信」を1枚の画像にしたいという要望に対して、`MiQConversation` の延長（チャットログの行数を増やす）ではなく、**既存の横向き `MiQ` 画像を2枚そのまま上下にくっつける**という別の形で応えた。
+
+### 21.2 watermark の内部表現
+
+`QuoteData.watermark: string` と `QuoteData.watermarkImage: AvatarSource | null` の2フィールドに分け、互いに排他とした（`avatar` と違い、watermark では**文字列は常にテキスト**として扱う — `URL`/`Buffer`/`Uint8Array` だけが画像）。`normalizeWatermarkInput()`（`core/quote.ts`）が公開の union 入力をこの2フィールドへ振り分ける。
+
+描画側は `theme.watermark.size` を、テキストではフォントサイズとして、画像では**高さ**として流用する（テキスト⇔画像を差し替えても見た目のスケール感が変わらないようにするため）。`color`/`font`/`weight` は画像には適用されない。
+
+### 21.3 `MiQChain` の設計
+
+API は「既に個別に組み立てた2つの `MiQ` インスタンスを渡す」形 `new MiQChain(top, bottom, options?)` にした（ユーザー確認済み）。理由: 各 `MiQ` は既に theme・bold・color・`markdown` などを持っているので、`MiQChain` 自身がそれらのオプション体系を再発明する必要がない。`MiQChain` が扱うのは「どちらの半分の `avatar.position` をどちらの辺にするか」という、**2枚を組み合わせたときにだけ意味を持つ**関心事だけに絞った（`ChainOptions.flip`/`topFlip`/`bottomFlip`）。
+
+デフォルトのペアリングは 上=`'right'`、下=`'left'`（README「Flipping sides」でいう flip/unflip）。`flip: true` で反転、`topFlip`/`bottomFlip` で片側だけ明示的に上書きできる。
+
+**実装上の落とし穴**: 当初 `top.clone().setTheme({ avatar: { position } })` としていたが、`MiQ#setTheme()` は**インスタンスの現在のテーマにマージするのではなく、`defineTheme()` で毎回ゼロから組み立て直す**（`extends` パレット + 渡した入力のみから）。そのため部分オブジェクトを渡すと、呼び出し元が設定していた `layout: 'new'` を含む他のテーマ設定が黙って `'dark'`/`'side'` のデフォルトに巻き戻ってしまうバグがあった（`layout: 'new'` 禁止のテストを書いて実際に検出）。修正: `getTheme()`（`structuredClone` 済み）で完全なテーマのスナップショットを取り、`avatar.position` だけをそのオブジェクト上で書き換えてから `setTheme()` に丸ごと渡す — `defineTheme()` は渡された完全なテーマの全フィールド（`layout` を含む）で上書きするため、実質的に「1フィールドだけ変えたコピー」になる。
+
+`layout: 'new'` は左右のアバターボックスという概念自体が無いため、今回は非対応とし `ValidationError` を投げる。2枚の幅が一致しない場合も、暗黙のリサイズ/引き伸ばしはせず `ValidationError` で止める。
+
+### 21.4 `MiQConversation` 削除の範囲
+
+`src/core/MiQConversation.ts`・`src/core/conversation.ts`・`src/render/conversationPipeline.ts`（それぞれの `.test.ts` 含む）を削除。`ConversationMessage`/`ConversationOptions`/`ConversationThemeName` 型と `index.ts` からの export も削除。CLI・examples に参照は無かった。MIGRATING.md の「From v11」に破壊的変更として記載。

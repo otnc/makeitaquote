@@ -149,4 +149,20 @@ describe('fontString', () => {
   it('includes a numeric weight', () => {
     expect(fontString(700, 32, 'Noto Sans JP')).toBe('700 32px Noto Sans JP')
   })
+
+  it('omits italic by default', () => {
+    expect(fontString('normal', 32, 'Noto Sans JP')).toBe('32px Noto Sans JP')
+  })
+
+  it('prefixes italic before the weight, in CSS shorthand order', () => {
+    expect(fontString('bold', 32, 'Noto Sans JP', true)).toBe('italic bold 32px Noto Sans JP')
+  })
+
+  it('prefixes italic even with a normal weight', () => {
+    expect(fontString('normal', 32, 'Noto Sans JP', true)).toBe('italic 32px Noto Sans JP')
+  })
+
+  it('prefixes italic before a numeric weight', () => {
+    expect(fontString(700, 32, 'Noto Sans JP', true)).toBe('italic 700 32px Noto Sans JP')
+  })
 })

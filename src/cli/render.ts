@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import process from 'node:process'
 import { MiQ } from '../core/MiQ'
 import type {
   AvatarSource,
@@ -19,10 +20,28 @@ export interface RenderInput extends QuoteInput {
   quality?: number
 }
 
-/** A local file wins over a URL when `value` happens to exist on disk. */
+async function readStdin(): Promise<Buffer> {
+  const chunks: Buffer[] = []
+  for await (const chunk of process.stdin) chunks.push(chunk)
+  return Buffer.concat(chunks)
+}
+
+/** `-` reads stdin; a local file wins over a URL when `value` happens to exist on disk. */
 export async function resolveAvatar(value: string): Promise<AvatarSource> {
+  if (value === '-') return readStdin()
   if (existsSync(value)) return readFile(value)
   return value
+}
+
+/**
+ * Same resolution as `resolveAvatar()`, but never returns a bare string —
+ * `QuoteInput.watermark` reads a `string` as text, so the remote/data URL
+ * case has to be wrapped in a real `URL` to be read as an image instead.
+ */
+export async function resolveWatermarkImage(value: string): Promise<Buffer | URL> {
+  if (value === '-') return readStdin()
+  if (existsSync(value)) return readFile(value)
+  return new URL(value)
 }
 
 /**

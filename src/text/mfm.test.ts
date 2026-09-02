@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { stripMfm } from './mfm'
+import { parseMfm, stripMfm } from './mfm'
 
 describe('stripMfm', () => {
   it('leaves plain text alone', () => {
@@ -138,5 +138,47 @@ describe('stripMfm', () => {
     expect(stripMfm('$[jelly おはよう] :blobcat: **今日** はいい天気')).toBe(
       'おはよう :blobcat: 今日 はいい天気',
     )
+  })
+})
+
+describe('parseMfm', () => {
+  it('leaves plain text as one unstyled run', () => {
+    expect(parseMfm('nothing to style')).toEqual([{ value: 'nothing to style' }])
+  })
+
+  it('tags bold, italic and strike from markdown-style markers', () => {
+    expect(parseMfm('**bold**')).toEqual([{ value: 'bold', style: { bold: true } }])
+    expect(parseMfm('*italic*')).toEqual([{ value: 'italic', style: { italic: true } }])
+    expect(parseMfm('~~strike~~')).toEqual([{ value: 'strike', style: { strikethrough: true } }])
+  })
+
+  it('tags bold, italic and strike from their tag form the same way', () => {
+    expect(parseMfm('<b>bold</b>')).toEqual([{ value: 'bold', style: { bold: true } }])
+    expect(parseMfm('<i>x</i>')).toEqual([{ value: 'x', style: { italic: true } }])
+    expect(parseMfm('<s>y</s>')).toEqual([{ value: 'y', style: { strikethrough: true } }])
+  })
+
+  it('combines nested styles', () => {
+    expect(parseMfm('**bold $[fn *and italic*]**')).toEqual([
+      { value: 'bold ', style: { bold: true } },
+      { value: 'and italic', style: { bold: true, italic: true } },
+    ])
+  })
+
+  it('mixes styled and plain runs, in order', () => {
+    expect(parseMfm('normal **bold** normal')).toEqual([
+      { value: 'normal ' },
+      { value: 'bold', style: { bold: true } },
+      { value: ' normal' },
+    ])
+  })
+
+  it('keeps <small>/<center> structural rather than styled — size/layout is deferred', () => {
+    expect(parseMfm('<small>x</small>')).toEqual([{ value: 'x' }])
+    expect(parseMfm('<center>x</center>')).toEqual([{ value: 'x' }])
+  })
+
+  it('keeps a custom emoji shortcode as an unstyled run for the emoji layer', () => {
+    expect(parseMfm(':blobcat:')).toEqual([{ value: ':blobcat:' }])
   })
 })

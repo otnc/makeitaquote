@@ -19,9 +19,6 @@ const root = join(__dirname, '..')
 const dist = join(root, 'dist')
 const require = createRequire(join(root, 'package.json'))
 
-/** Deps that must never be reachable from the `makeitaquote/api` entry. */
-const RENDERING_DEPS = ['@napi-rs/canvas', 'budoux', '@twemoji/parser']
-
 const failures = []
 let checks = 0
 
@@ -101,10 +98,8 @@ for (const expected of [
   'index.cjs',
   'index.d.mts',
   'index.d.cts',
-  'api/index.mjs',
-  'api/index.cjs',
-  'api/index.d.mts',
-  'api/index.d.cts',
+  'cli/main.mjs',
+  'cli/main.cjs',
 ]) {
   check(`dist/${expected} exists`, present.includes(expected))
 }
@@ -184,7 +179,7 @@ for (const file of files.filter((f) => f.endsWith('.cjs'))) {
 report()
 
 // ---------------------------------------------------------------------------
-// 3. Both module systems can load both entry points.
+// 3. Both module systems can load the entry point.
 // ---------------------------------------------------------------------------
 
 const cjsRoot = require('./dist/index.cjs')
@@ -194,61 +189,12 @@ check('dist/index.cjs exports fonts', typeof cjsRoot.fonts === 'object')
 const esmRoot = await import(pathToFileURL(join(dist, 'index.mjs')).href)
 check('dist/index.mjs exports MiQ', typeof esmRoot.MiQ === 'function')
 
-const esmApi = await import(pathToFileURL(join(dist, 'api', 'index.mjs')).href)
-check('dist/api/index.mjs exports VoidsMiQ', typeof esmApi.VoidsMiQ === 'function')
-check('dist/api/index.mjs aliases it as MiQ', typeof esmApi.MiQ === 'function')
-
 // ---------------------------------------------------------------------------
-// 4. Requiring the api entry must not load the native canvas binding.
-//
-//    This is the guarantee that lets someone use `makeitaquote/api` on a
-//    platform @napi-rs/canvas has no binary for. Checked by loading it in a
-//    clean cache and looking at what arrived. See DESIGN.md 4.2.
-// ---------------------------------------------------------------------------
-
-for (const key of Object.keys(require.cache)) delete require.cache[key]
-
-const cjsApi = require('./dist/api/index.cjs')
-check('dist/api/index.cjs exports VoidsMiQ', typeof cjsApi.VoidsMiQ === 'function')
-
-const loadedModules = Object.keys(require.cache)
-  .filter((path) => path.includes('node_modules'))
-  .map((path) => path.split('node_modules').pop().replaceAll('\\', '/'))
-
-for (const dep of RENDERING_DEPS) {
-  check(
-    `requiring makeitaquote/api does not load ${dep}`,
-    !loadedModules.some((module) => module.includes(dep)),
-    `Loaded: ${loadedModules.join(', ') || '(nothing)'}`,
-  )
-}
-
-// ---------------------------------------------------------------------------
-// 5. The same guarantee, statically: no chunk the api entry can reach may
-//    mention the rendering stack.
-// ---------------------------------------------------------------------------
-
-for (const entry of ['api/index.cjs', 'api/index.mjs']) {
-  const reachable = await reachableFrom(join(dist, entry))
-  for (const file of reachable) {
-    const source = await readFile(file, 'utf8')
-    for (const dep of RENDERING_DEPS) {
-      check(
-        `${entry} → dist/${name(file)} does not reference ${dep}`,
-        !source.includes(dep),
-        'The api subpath must not pull in the rendering stack.',
-      )
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 6. The native binding must stay external — a bundled .node file won't load.
+// 4. The native binding must stay external — a bundled .node file won't load.
 //
 //    With several entry points, rolldown may move the import into a shared
 //    chunk rather than the entry file itself, so the check follows relative
-//    imports (same walk as check 5) and accepts the statement wherever the
-//    entry can reach it.
+//    imports and accepts the statement wherever the entry can reach it.
 // ---------------------------------------------------------------------------
 
 for (const entry of ['index.cjs', 'index.mjs', 'cli/main.cjs', 'cli/main.mjs']) {
@@ -265,7 +211,7 @@ for (const entry of ['index.cjs', 'index.mjs', 'cli/main.cjs', 'cli/main.mjs']) 
 }
 
 // ---------------------------------------------------------------------------
-// 7. Line endings stay LF, matching .gitattributes and Biome.
+// 5. Line endings stay LF, matching .gitattributes and Biome.
 // ---------------------------------------------------------------------------
 
 for (const file of files) {

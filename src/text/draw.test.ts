@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createCanvas } from '../render/canvasFactory'
-import { resetBoldDetectionForTests } from '../render/textStyle'
+import { fontString } from '../render/layout'
+import { resetBoldDetectionForTests, resolvedWeight, syntheticBoldWidth } from '../render/textStyle'
 import { type DrawLineOptions, drawLine, drawnLineWidth, measureLine } from './draw'
 import type { Line } from './wrap'
 
@@ -15,6 +16,8 @@ function options(overrides: Partial<DrawLineOptions> = {}): DrawLineOptions {
     topMarginRatio: 0,
     images: new Map(),
     onMissing: 'ignore',
+    baseWeight: 'normal',
+    family: 'sans-serif',
     ...overrides,
   }
 }
@@ -72,16 +75,24 @@ describe('drawnLineWidth / drawLine agreement', () => {
     expect(width).toBeCloseTo(cursor)
   })
 
-  it('adds the synthetic-bold stroke width to both the alignment width and the cursor advance', () => {
+  it('includes the synthetic-bold stroke width in a bold segment measurement', () => {
     const ctx = context()
-    const line: Line = [{ kind: 'text', value: 'bold text' }]
-    const plain = options()
-    const bold = options({ boldStroke: 3 })
+    const opts = options()
+    const weight = resolvedWeight(opts.baseWeight, true)
 
-    const plainWidth = drawnLineWidth(ctx, line, plain)
-    const boldWidth = drawnLineWidth(ctx, line, bold)
+    // The same primitives applyFont() uses internally, so this is an
+    // independent check of measureLine()'s formula rather than a tautology.
+    ctx.font = fontString(weight, opts.fontSize, opts.family, false)
+    const stroke = syntheticBoldWidth(ctx, weight, opts.family, opts.fontSize)
+    const textWidth = ctx.measureText('bold text').width
 
-    expect(boldWidth).toBeCloseTo(plainWidth + 3)
+    const [width] = measureLine(
+      ctx,
+      [{ kind: 'text', value: 'bold text', style: { bold: true } }],
+      opts,
+    )
+
+    expect(width).toBeCloseTo(textWidth + stroke)
   })
 
   it('draws nothing and advances nothing for a missing emoji when onMissing is ignore', () => {

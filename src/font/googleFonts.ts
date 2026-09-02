@@ -1,5 +1,5 @@
+import { createClient } from '@makeitaquote/utils/http'
 import { AssetFetchError } from '../core/errors'
-import { createClient } from '../http/client'
 import { normalizeFontFamily, suggestionFor, unavailableReason } from './catalogue'
 
 const CSS_ENDPOINT = 'https://fonts.googleapis.com/css2'
