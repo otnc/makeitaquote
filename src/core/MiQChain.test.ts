@@ -29,6 +29,15 @@ describe('resolvePosition', () => {
 })
 
 describe('MiQChain', () => {
+  it('does not throw when a quote has a URL backgroundImage source', async () => {
+    const top = quote().setTheme({
+      backgroundImage: { source: new URL('https://example.test/bg.png'), fit: 'cover', opacity: 1 },
+    })
+    const bottom = quote()
+
+    await expect(new MiQChain(top, bottom).render()).resolves.toBeDefined()
+  })
+
   it('never mutates the MiQ instances passed in', async () => {
     const top = quote()
     const bottom = quote()

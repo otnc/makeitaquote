@@ -39,10 +39,10 @@ export class MiQChain {
     const top = withAvatarPosition(this.#top, resolvePosition(this.#options, true))
     const bottom = withAvatarPosition(this.#bottom, resolvePosition(this.#options, false))
 
-    assertChainable(top, 'top')
-    assertChainable(bottom, 'bottom')
+    assertChainable(top.theme, 'top')
+    assertChainable(bottom.theme, 'bottom')
 
-    const [topCanvas, bottomCanvas] = await Promise.all([top.render(), bottom.render()])
+    const [topCanvas, bottomCanvas] = await Promise.all([top.miq.render(), bottom.miq.render()])
 
     if (topCanvas.width !== bottomCanvas.width) {
       throw new ValidationError(
@@ -75,7 +75,9 @@ export class MiQChain {
 
 /**
  * A clone of `miq` with `avatar.position` overridden, everything else about
- * its theme untouched.
+ * its theme untouched — plus the resulting theme itself, so a caller that
+ * needs a field off it (`assertChainable`'s `.layout` check) doesn't have to
+ * pay for another `getTheme()` clone to get one already computed here.
  *
  * `MiQ#setTheme()` doesn't merge onto the instance's current theme — it
  * resolves a fresh one from `{ extends, layout }` plus whatever the input
@@ -86,14 +88,15 @@ export class MiQChain {
  * `defineTheme()`'s merge a no-op for every field except this one, since a
  * complete `Theme` object supplies its own value for all of them, `layout`
  * included (the one field `defineTheme()` reads before merging, to pick
- * which preset shape to start from).
+ * which preset shape to start from) — so `theme` below is still accurate
+ * after `setTheme()` resolves it.
  */
-function withAvatarPosition(miq: MiQ, position: 'left' | 'right'): MiQ {
+function withAvatarPosition(miq: MiQ, position: 'left' | 'right'): { miq: MiQ; theme: Theme } {
   const clone = miq.clone()
   const theme = clone.getTheme() as Theme
   theme.avatar.position = position
   clone.setTheme(theme)
-  return clone
+  return { miq: clone, theme }
 }
 
 /**
@@ -113,8 +116,8 @@ export function resolvePosition(options: ChainOptions, isTop: boolean): 'left' |
 }
 
 /** `layout: 'new'` has no left/right avatar box to pair, so it isn't supported yet. */
-function assertChainable(miq: MiQ, side: 'top' | 'bottom'): void {
-  if (miq.getTheme().layout === 'new') {
+function assertChainable(theme: Theme, side: 'top' | 'bottom'): void {
+  if (theme.layout === 'new') {
     throw new ValidationError(`MiQChain does not support layout: 'new' yet (${side})`, {
       field: `${side}.layout`,
     })
