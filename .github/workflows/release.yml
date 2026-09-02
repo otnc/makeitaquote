@@ -71,8 +71,5 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        # --latest=false: this is the old major version, so it must never
-        # win the "Latest" badge over a main/release/v12 release. GitHub's
-        # automatic "latest" pick isn't purely chronological, but it's not
-        # worth trusting to keep favoring the higher major forever either.
+        # --latest=false: this is the old major version, so it must never win the "Latest" badge over a main/release/* release.
         run: gh release create "${{ steps.bump.outputs.version }}" --target legacy --title "${{ steps.bump.outputs.version }}" --generate-notes --latest=false
