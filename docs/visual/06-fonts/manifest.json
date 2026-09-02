@@ -212,6 +212,17 @@
       "error": null
     },
     {
+      "name": "Chiron GoRound TC",
+      "file": "06-fonts/chiron-goround-tc.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 184240,
+      "ok": true,
+      "error": null
+    },
+    {
       "name": "Nanum Gothic",
       "file": "06-fonts/nanum-gothic.png",
       "note": null,
