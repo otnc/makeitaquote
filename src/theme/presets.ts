@@ -231,7 +231,20 @@ export function presetFor(palette: ThemePalette, layout: LayoutMode): Theme {
   return themes[palette][layout]
 }
 
-/** A deep copy, so presets can never be mutated by a caller. */
-export function clone<T>(value: T): T {
-  return structuredClone(value)
+/**
+ * A deep copy, so presets can never be mutated by a caller.
+ *
+ * `structuredClone` can't handle every `BackgroundImageSource`: a `URL`
+ * throws ("Cannot clone object of unsupported type"), and a `Buffer` clones
+ * but is silently demoted to a plain `Uint8Array`. Carried through by
+ * reference instead when present — nothing here ever mutates it, so sharing
+ * the same instance across a clone is safe.
+ */
+export function clone(value: Theme): Theme {
+  const image = value.backgroundImage
+  if (!image || typeof image.source === 'string') return structuredClone(value)
+
+  const { source, ...rest } = image
+  const copy = structuredClone({ ...value, backgroundImage: rest })
+  return { ...copy, backgroundImage: { ...copy.backgroundImage, source } }
 }

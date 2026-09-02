@@ -91,6 +91,38 @@ describe('MiQ#clone', () => {
 
     expect(cloned.getData().markdown).toBe('discord')
   })
+
+  it('does not throw when the theme has a URL backgroundImage source', () => {
+    const url = new URL('https://example.test/bg.png')
+    const original = new MiQ().setTheme({
+      backgroundImage: { source: url, fit: 'cover', opacity: 1 },
+    })
+
+    const cloned = original.clone()
+
+    expect(cloned.getTheme().backgroundImage?.source).toBe(url)
+  })
+
+  it('preserves a Buffer backgroundImage source, identity included', () => {
+    const bytes = Buffer.from([1, 2, 3])
+    const original = new MiQ().setTheme({
+      backgroundImage: { source: bytes, fit: 'cover', opacity: 1 },
+    })
+
+    const cloned = original.clone()
+
+    expect(cloned.getTheme().backgroundImage?.source).toBe(bytes)
+  })
+})
+
+describe('MiQ#getTheme', () => {
+  it('does not throw when the theme has a URL backgroundImage source', () => {
+    const url = new URL('https://example.test/bg.png')
+    const miq = new MiQ().setTheme({ backgroundImage: { source: url, fit: 'cover', opacity: 1 } })
+
+    expect(() => miq.getTheme()).not.toThrow()
+    expect(miq.getTheme().backgroundImage?.source).toBe(url)
+  })
 })
 
 describe('MiQ#setWatermark', () => {

@@ -5,6 +5,7 @@ import { encode, encodeDataURL, encodeStream } from '../output/encode'
 import type { Canvas } from '../render/canvasFactory'
 import { renderQuote } from '../render/pipeline'
 import { stripMarkdown } from '../text/markdown'
+import { clone as cloneTheme } from '../theme/presets'
 import { defineTheme } from '../theme/resolve'
 import type { Theme, ThemeInput, ThemePalette } from '../theme/types'
 import { ValidationError } from './errors'
@@ -238,13 +239,13 @@ export class MiQ {
   }
 
   getTheme(): Readonly<Theme> {
-    return structuredClone(this.#theme)
+    return cloneTheme(this.#theme)
   }
 
   clone(): MiQ {
     const copy = new MiQ(this.#options)
     copy.#data = { ...this.#data }
-    copy.#theme = structuredClone(this.#theme)
+    copy.#theme = cloneTheme(this.#theme)
     copy.#explicitWidth = this.#explicitWidth
     copy.#explicitHeight = this.#explicitHeight
     return copy
