@@ -147,7 +147,6 @@ function toPlainNode(node: Node): string {
     // Leaves: nothing further to walk, the content is already what a reader saw.
     case 'text':
     case 'code_inline':
-    case 'image':
       return node.content
 
     // A line break a reader actually saw, whether CommonMark calls it soft

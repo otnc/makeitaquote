@@ -62,6 +62,12 @@ describe('stripMarkdown', () => {
       expect(stripMarkdown('![alt text](https://example.com/img.png)')).toBe('alt text')
     })
 
+    it('strips markup inside alt text too, the same as a link label', () => {
+      expect(stripMarkdown('![*italic* alt **text**](https://example.com/img.png)')).toBe(
+        'italic alt text',
+      )
+    })
+
     it('resolves a reference-style link to its label', () => {
       expect(stripMarkdown('[label][ref]\n\n[ref]: https://example.com "t"')).toBe('label')
     })
