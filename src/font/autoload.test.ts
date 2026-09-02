@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ensureDefaultFonts, type FontFetcher, resetAutoloadForTests, useFont } from './autoload'
 import { resolveCacheDir } from './diskCache'
 import { fileNameFor, resolveGoogleFont } from './googleFonts'
+import { fonts } from './registry'
 
 let cacheDir = ''
 
@@ -397,5 +398,21 @@ describe('cached fonts on disk', () => {
     const fetcher = countingFetcher()
     await useFont(family, { cacheDir, fetcher })
     expect(fetcher.calls).toEqual([])
+  })
+
+  it('does not match a cached file whose family merely shares a name prefix', async () => {
+    const base = unusedFamily()
+    // e.g. "Noto Sans" vs "Noto Sans JP" — the base family's slug is a
+    // string-prefix of the longer one's, but they are different families.
+    const longer = `${base} JP`
+    const wrongFile = fileNameFor({ family: longer, weight: 400, style: 'normal', url: '' })
+    await writeFile(join(cacheDir, wrongFile), 'font-bytes')
+    resetAutoloadForTests()
+    const registerSpy = vi.spyOn(fonts, 'registerFromPath')
+
+    const ok = await useFont(base, { cacheDir, online: false })
+
+    expect(ok).toBe(false)
+    expect(registerSpy).not.toHaveBeenCalledWith(join(cacheDir, wrongFile), expect.anything())
   })
 })
