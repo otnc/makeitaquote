@@ -267,4 +267,37 @@ describe('drawAvatar grayscale fallback (no ctx.filter support)', () => {
     expect(data[0]).toBe(data[1])
     expect(data[1]).toBe(data[2])
   })
+
+  it('leaves the box corners alone for a circle shape, instead of staining them', async () => {
+    setFilterSupportedForTests(false)
+
+    const canvas = createCanvas(10, 10)
+    const ctx = canvas.getContext('2d')
+    // A colored "card background" painted before the avatar, standing in for
+    // whatever sits behind the box's corners once the circle clip excludes them.
+    ctx.fillStyle = '#3366CC'
+    ctx.fillRect(0, 0, 10, 10)
+    const image = await loadAvatar(redSquare())
+
+    drawAvatar(ctx, image, {
+      theme: {
+        grayscale: true,
+        position: 'left',
+        widthRatio: 1,
+        fit: 'cover',
+        shape: 'circle',
+        fallback: null,
+      },
+      box: { x: 0, y: 0, width: 10, height: 10 },
+    })
+
+    const corner = ctx.getImageData(0, 0, 1, 1).data
+    const center = ctx.getImageData(5, 5, 1, 1).data
+
+    // The corner is outside the circle: still the untouched blue background.
+    expect([corner[0], corner[1], corner[2]]).toEqual([0x33, 0x66, 0xcc])
+    // The center is inside the circle: the red avatar, desaturated to grey.
+    expect(center[0]).toBe(center[1])
+    expect(center[1]).toBe(center[2])
+  })
 })
