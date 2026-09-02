@@ -63,7 +63,7 @@ if (!existsSync(distEntry)) {
 
 const {
   MiQ,
-  MiQConversation,
+  MiQChain,
   FONT_CATALOGUE,
   COLOR_THEME_CATALOGUE,
   CUSTOM_COLOR_THEME_CATALOGUE,
@@ -827,45 +827,37 @@ add('09-sizing', 'avatar contained rather than cropped', () =>
     .setTheme({ avatar: { fit: 'contain' } }),
 )
 
-// --- 13-conversation: MiQConversation, several messages as one image ------
+// --- 13-chain: MiQChain, a reply/quote pair stacked as one image ----------
 
 add(
-  '13-conversation',
-  'dark (default) — consecutive messages from one speaker group',
+  '13-chain',
+  'dark (default) — original on top, reply below',
   () =>
-    new MiQConversation()
-      .addMessage({
-        username: who.username,
-        displayName: who.displayName,
-        avatar: avatars.illustration,
-        text: text.ja,
-      })
-      .addMessage({
-        username: who.username,
-        displayName: who.displayName,
-        avatar: avatars.illustration,
-        text: 'どこで生れたか頓と見当がつかぬ。',
-      })
-      .addMessage({ username: 'someone', text: text.en }),
-  { note: 'the second message shares an avatar and name with the first' },
-)
-add('13-conversation', 'light', () =>
-  new MiQConversation({ theme: 'light' })
-    .addMessage({ username: who.username, avatar: avatars.photo, text: text.short })
-    .addMessage({ username: 'someone', text: 'Quoting a whole thread, not just one line.' }),
+    new MiQChain(
+      base().setText(text.ja).setAvatar(avatars.illustration),
+      new MiQ().setUsername('ねこ').setText(text.en),
+    ),
+  { note: "default pairing: top's avatar on the right, bottom's on the left" },
 )
 add(
-  '13-conversation',
-  'from real messages (setFromMessages)',
+  '13-chain',
+  'flip — swaps which side each avatar sits on',
   () =>
-    new MiQConversation().setFromMessages([
-      {
-        content: `おはよう ${discordEmoji[0]}`,
-        author: { username: 'otoneko.', globalName: '音猫｡', displayAvatarURL: () => avatars.url },
-      },
-      { content: 'いい天気ですね', author: { username: 'otoneko.', globalName: '音猫｡' } },
-    ]),
-  { network: true, note: 'reads content/name/avatar the same way MiQ#setFromMessage() does' },
+    new MiQChain(
+      base().setText(text.short).setAvatar(avatars.illustration),
+      new MiQ().setUsername('ねこ').setText('それへの返信'),
+      { flip: true },
+    ),
+)
+add(
+  '13-chain',
+  'each half keeps its own theme',
+  () =>
+    new MiQChain(
+      base().setText(text.ja).setAvatar(avatars.illustration).setTheme('light'),
+      new MiQ().setUsername('ねこ').setText(text.en).setAvatar(avatars.photo),
+    ),
+  { note: 'MiQChain only decides avatar side — theme, color, bold and markdown stay per-half' },
 )
 
 // ---------------------------------------------------------------------------
