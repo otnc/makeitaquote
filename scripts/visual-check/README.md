@@ -1,8 +1,6 @@
 # visual-check
 
-Renders a curated set of option combinations to `docs/visual/`, the source for the
-[published gallery](https://otnc.github.io/makeitaquote/). Every case is also checked
-programmatically (decodable image, expected format/size), so this doubles as a smoke test.
+Renders a curated set of option combinations to `docs/visual/`, the source for the [published gallery](https://otnc.github.io/makeitaquote/). Every case is also checked programmatically (decodable image, expected format/size), so this doubles as a smoke test.
 
 ```sh
 npm run build          # reads dist/, so build first
@@ -40,15 +38,12 @@ Find the group file under `cases/` and add an entry to its `cases` array:
 
 - `name` is unique within the group and becomes the image filename.
 - `build` returns a `MiQ`/`MiQChain` — nothing is rendered until `render.js` calls `.toBuffer()` on it.
-- Optional fields: `note` (shown under the card), `network: true` (skipped by `--offline`),
-  `format`/`encodeOptions` (default `'png'`), `expect: { width, height }` (asserted after render).
-- A case earns its place only if it looks meaningfully different from its neighbours —
-  near-duplicates belong in a unit test instead.
+- Optional fields: `note` (shown under the card), `network: true` (skipped by `--offline`), `format`/`encodeOptions` (default `'png'`), `expect: { width, height }` (asserted after render).
+- A case earns its place only if it looks meaningfully different from its neighbours — near-duplicates belong in a unit test instead.
 
 ## Adding a group
 
-1. Create `cases/NN-your-group.js` (the number just keeps output folders sorted on disk —
-   it does not decide the gallery's display order):
+1. Create `cases/NN-your-group.js` (the number just keeps output folders sorted on disk — it does not decide the gallery's display order):
 
    ```js
    import { avatars, base, text } from '../fixtures.js'
@@ -60,14 +55,10 @@ Find the group file under `cases/` and add an entry to its `cases` array:
    ]
    ```
 
-2. Add it to `cases/index.js` — import it and insert it into the `caseModules` array wherever
-   it reads best in the narrative (that array's order *is* the display order).
+2. Add it to `cases/index.js` — import it and insert it into the `caseModules` array wherever it reads best in the narrative (that array's order *is* the display order).
 
 ## Fixtures
 
-- `fixtures.js` re-exports `avatars`/`required` from `assets.js`, so most case files only need
-  one import: `import { avatars, base, text } from '../fixtures.js'`.
+- `fixtures.js` re-exports `avatars`/`required` from `assets.js`, so most case files only need one import: `import { avatars, base, text } from '../fixtures.js'`.
 - Need the library itself (`MiQ`, `MiQChain`, `FONT_CATALOGUE`, …)? `import { MiQ } from '../library.js'`.
-- Text samples are published, so keep them things a person might plausibly have said out of
-  context — public domain prose or neutral statements about the library, nothing that reads as
-  a real quotation from a real person.
+- Text samples are published, so keep them things a person might plausibly have said out of context — public domain prose or neutral statements about the library, nothing that reads as a real quotation from a real person.
