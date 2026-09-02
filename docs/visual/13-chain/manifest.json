@@ -1,0 +1,39 @@
+{
+  "name": "13-chain",
+  "title": "Chain",
+  "cases": [
+    {
+      "name": "dark (default) — original on top, reply below",
+      "file": "13-chain/dark-default-original-on-top-reply-below.png",
+      "note": "default pairing: top's avatar on the right, bottom's on the left",
+      "format": "png",
+      "width": 1200,
+      "height": 1260,
+      "bytes": 242333,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "flip — swaps which side each avatar sits on",
+      "file": "13-chain/flip-swaps-which-side-each-avatar-sits-on.png",
+      "note": null,
+      "format": "png",
+      "width": 1200,
+      "height": 1260,
+      "bytes": 197811,
+      "ok": true,
+      "error": null
+    },
+    {
+      "name": "each half keeps its own theme",
+      "file": "13-chain/each-half-keeps-its-own-theme.png",
+      "note": "MiQChain only decides avatar side — theme, color, bold and markdown stay per-half",
+      "format": "png",
+      "width": 1200,
+      "height": 1260,
+      "bytes": 523250,
+      "ok": true,
+      "error": null
+    }
+  ]
+}
