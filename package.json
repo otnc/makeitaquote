@@ -66,7 +66,7 @@
     "check": "biome check --write",
     "ci": "biome ci",
     "check:build": "node scripts/check-build.js",
-    "visual": "node scripts/visual-check.js",
+    "visual": "node scripts/visual-check/index.js",
     "prepublishOnly": "npm run build",
     "checkupdates": "ncu -u -t minor",
     "migrate": "biome migrate --write"
