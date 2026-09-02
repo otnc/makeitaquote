@@ -962,6 +962,8 @@ otoneko. https://github.com/otnc
 
 - Make it a Quote (Twitter) https://twitter.com/MakeItAQuote
 - Make it a Quote (Discord / Misskey / Bluesky) https://miq.moe/
+- Voids https://voids.top/
+- MiqX https://miqx.jp/
 
 ## Licence
 
