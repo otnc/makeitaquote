@@ -281,7 +281,6 @@ function toStyledNode(node: Node, style: TextStyle | undefined): StyledRun[] {
     // Leaves: nothing further to walk, the content is already what a reader saw.
     case 'text':
     case 'code_inline':
-    case 'image':
       return [style ? { value: node.content, style } : { value: node.content }]
 
     // A line break a reader actually saw, whether CommonMark calls it soft
