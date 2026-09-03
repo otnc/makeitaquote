@@ -158,4 +158,42 @@ describe('applyInput watermark handling', () => {
 
     expect(next.watermark).toBe('kept')
   })
+
+  it('round-trips an image watermark through getData()-shaped input', () => {
+    // What getData() actually produces for an image watermark: watermark is
+    // '', not undefined, so applyInput can't use "watermark is absent" to
+    // decide watermarkImage should apply instead.
+    const bytes = new Uint8Array([1, 2, 3])
+    const data = { ...emptyQuote(), watermark: '', watermarkImage: bytes }
+
+    const next = applyInput(emptyQuote(), data)
+
+    expect(next.watermark).toBe('')
+    expect(next.watermarkImage).toBe(bytes)
+  })
+
+  it('round-trips a text watermark through getData()-shaped input', () => {
+    const data = { ...emptyQuote(), watermark: 'kept', watermarkImage: null }
+
+    const next = applyInput(emptyQuote(), data)
+
+    expect(next.watermark).toBe('kept')
+    expect(next.watermarkImage).toBeNull()
+  })
+
+  it('accepts watermarkImage on its own, with no watermark field at all', () => {
+    const url = new URL('https://example.test/logo.png')
+    const next = applyInput({ ...emptyQuote(), watermark: 'old text' }, { watermarkImage: url })
+
+    expect(next.watermark).toBe('')
+    expect(next.watermarkImage).toBe(url)
+  })
+
+  it('clears the watermark when watermarkImage is explicitly null and watermark is absent', () => {
+    const target = { ...emptyQuote(), watermark: 'kept' }
+    const next = applyInput(target, { watermarkImage: null })
+
+    expect(next.watermark).toBe('')
+    expect(next.watermarkImage).toBeNull()
+  })
 })
