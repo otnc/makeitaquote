@@ -9,7 +9,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 228904,
+      "bytes": 230238,
       "ok": true,
       "error": null
     },
@@ -20,7 +20,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 235612,
+      "bytes": 236864,
       "ok": true,
       "error": null
     },
@@ -31,7 +31,7 @@
       "format": "png",
       "width": 1200,
       "height": 630,
-      "bytes": 311249,
+      "bytes": 312746,
       "ok": true,
       "error": null
     },
@@ -42,7 +42,7 @@
       "format": "png",
       "width": 630,
       "height": 790,
-      "bytes": 147168,
+      "bytes": 149017,
       "ok": true,
       "error": null
     },
@@ -53,7 +53,7 @@
       "format": "png",
       "width": 630,
       "height": 790,
-      "bytes": 154971,
+      "bytes": 157047,
       "ok": true,
       "error": null
     }
