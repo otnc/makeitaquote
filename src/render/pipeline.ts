@@ -424,7 +424,8 @@ function drawWatermark(
   if (invisible(theme.watermark.color, 'theme.watermark.color')) return
 
   const size = toPixels(theme.watermark.size, theme.height)
-  const margin = theme.width * 0.04
+  const marginX = toPixels(theme.watermark.margin, theme.width)
+  const marginY = toPixels(theme.watermark.margin, theme.height)
 
   ctx.font = font(theme.watermark.weight, size, theme.watermark.font)
   ctx.fillStyle = toCSS(parseColor(theme.watermark.color, 'theme.watermark.color'))
@@ -436,18 +437,18 @@ function drawWatermark(
     familyFor(theme.watermark.font),
     size,
   )
-  const y = theme.height * 0.96
+  const y = theme.height - marginY
   const corner = watermarkCorner(theme)
 
   if (corner === 'bottom-left') {
     ctx.textAlign = 'left'
-    fillText(ctx, data.watermark, margin, y, stroke)
+    fillText(ctx, data.watermark, marginX, y, stroke)
   } else if (corner === 'bottom-center') {
     ctx.textAlign = 'center'
     fillText(ctx, data.watermark, theme.width / 2, y, stroke)
   } else {
     ctx.textAlign = 'right'
-    fillText(ctx, data.watermark, theme.width - margin, y, stroke)
+    fillText(ctx, data.watermark, theme.width - marginX, y, stroke)
   }
 }
 
@@ -457,16 +458,17 @@ function drawWatermark(
 function drawWatermarkImage(ctx: SKRSContext2D, image: Image, theme: Theme): void {
   const height = toPixels(theme.watermark.imageSize ?? theme.watermark.size, theme.height)
   const width = height * (image.width / Math.max(1, image.height))
-  const margin = theme.width * 0.04
-  const y = theme.height * 0.96 - height
+  const marginX = toPixels(theme.watermark.margin, theme.width)
+  const marginY = toPixels(theme.watermark.margin, theme.height)
+  const y = theme.height - marginY - height
   const corner = watermarkCorner(theme)
 
   const x =
     corner === 'bottom-left'
-      ? margin
+      ? marginX
       : corner === 'bottom-center'
         ? (theme.width - width) / 2
-        : theme.width - margin - width
+        : theme.width - marginX - width
 
   ctx.drawImage(image, x, y, width, height)
 }
