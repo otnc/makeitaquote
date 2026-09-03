@@ -74,22 +74,16 @@ export class MiQChain {
 }
 
 /**
- * A clone of `miq` with `avatar.position` overridden, everything else about
- * its theme untouched — plus the resulting theme itself, so a caller that
- * needs a field off it (`assertChainable`'s `.layout` check) doesn't have to
- * pay for another `getTheme()` clone to get one already computed here.
+ * A clone of `miq` with `avatar.position` overridden, plus its resolved
+ * theme, so a caller needing a field off it (`assertChainable`'s `.layout`
+ * check) doesn't pay for another `getTheme()` clone.
  *
- * `MiQ#setTheme()` doesn't merge onto the instance's current theme — it
- * resolves a fresh one from `{ extends, layout }` plus whatever the input
- * sets (see `defineTheme()`), so `clone().setTheme({ avatar: { position } })`
- * would silently reset every other theme field (palette, `layout`, sizes, …)
- * to the `'dark'`/`'side'` defaults. Round-tripping through a full
- * `getTheme()` snapshot — mutating just `avatar.position` on it — keeps
- * `defineTheme()`'s merge a no-op for every field except this one, since a
- * complete `Theme` object supplies its own value for all of them, `layout`
- * included (the one field `defineTheme()` reads before merging, to pick
- * which preset shape to start from) — so `theme` below is still accurate
- * after `setTheme()` resolves it.
+ * `MiQ#setTheme()` doesn't merge onto the current theme — it resolves a
+ * fresh one from `{ extends, layout }` (see `defineTheme()`), so passing a
+ * partial theme like `{ avatar: { position } }` would silently reset every
+ * other field to the `'dark'`/`'side'` defaults. Round-tripping a full
+ * `getTheme()` snapshot with just `avatar.position` mutated keeps that merge
+ * a no-op for everything else.
  */
 function withAvatarPosition(miq: MiQ, position: 'left' | 'right'): { miq: MiQ; theme: Theme } {
   const clone = miq.clone()

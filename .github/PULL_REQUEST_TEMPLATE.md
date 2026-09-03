@@ -11,7 +11,4 @@
 - [ ] Tests cover the change
 - [ ] README updated, if the public API changed
 
-<!--
-If this changes what an image looks like, please attach a before/after —
-rendering output isn't something the test suite can meaningfully diff.
--->
+<!-- If this changes what an image looks like, please attach a before/after — rendering output isn't something the test suite can meaningfully diff. -->

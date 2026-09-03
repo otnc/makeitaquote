@@ -934,7 +934,7 @@ On a platform without a binary, use [`@makeitaquote/voids`](https://github.com/o
 
 ## Migrating
 
-v12 removes the `makeitaquote/api` subpath: the Voids API client moved out to its own package, [`@makeitaquote/voids`](https://github.com/otnc/makeitaquote-voids) — or use [`@makeitaquote/miqx`](https://github.com/otnc/makeitaquote-miqx) for the MiqX API instead. v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
+v12 removes the `makeitaquote/api` subpath (see the notice near the top). v10 moved the default font/Twemoji cache from a location shared by every project on the machine to one inside your own project. v9 was a rewrite: the API changed, and images render locally by default. See [MIGRATING.md](MIGRATING.md) for the full guide, including the v8 → v9 method table.
 
 ---
 
