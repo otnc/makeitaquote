@@ -408,6 +408,26 @@ describe('render', () => {
 
     expect(buffer.subarray(0, 8)).toEqual(PNG_SIGNATURE)
   })
+
+  it('sizes an image watermark from imageSize instead of size, when set', async () => {
+    // Both corners are square (the stub logo is), so a taller imageSize also
+    // reaches further left — sampling near the top of that taller square,
+    // where the default-size image (size: 0.024) doesn't reach at all.
+    const x = 1150
+    const y = 560
+
+    const [, , , defaultAlpha] = await pixelAt(quote().setWatermark(redSquare()), x, y)
+    const [r, g, b] = await pixelAt(
+      quote()
+        .setWatermark(redSquare())
+        .setTheme({ watermark: { imageSize: 0.1 } }),
+      x,
+      y,
+    )
+
+    expect(defaultAlpha).toBe(255) // background, not the (much smaller) default watermark
+    expect([r, g, b]).toEqual([255, 0, 0]) // the logo itself, once large enough to reach here
+  })
 })
 
 describe('backgroundGradient', () => {

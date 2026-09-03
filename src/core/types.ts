@@ -35,6 +35,14 @@ export interface QuoteInput {
    * (a logo, say) instead — the two are mutually exclusive, same as `avatar`.
    */
   watermark?: string | AvatarSource | null
+  /**
+   * The image half of `QuoteData.watermark`/`.watermarkImage`, accepted
+   * symmetrically so a round trip through `getData()` → `setFromObject()`
+   * doesn't need to be reassembled by hand. Wins over `watermark` when both
+   * are present (as `getData()`'s own output always is) and truthy; ignored
+   * when it's `undefined`.
+   */
+  watermarkImage?: AvatarSource | null
   /** How `text` is treated. Default `'raw'`. See `MarkdownMode`. */
   markdown?: MarkdownMode
   /**

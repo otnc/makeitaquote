@@ -125,6 +125,7 @@ const dark: Theme = {
     font: SANS,
     weight: 'normal',
     size: 0.024,
+    imageSize: null,
     position: 'auto',
   },
   emoji: { sideMarginRatio: 0.08, topMarginRatio: 0.1, size: 64 },

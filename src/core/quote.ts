@@ -122,10 +122,19 @@ export function applyInput(
     next.username = normalizeString(input.username, 'username', MAX_NAME_LENGTH)
   if (input.displayName !== undefined)
     next.displayName = normalizeString(input.displayName, 'displayName', MAX_NAME_LENGTH)
-  if (input.watermark !== undefined) {
+  if (input.watermarkImage) {
+    next.watermark = ''
+    next.watermarkImage = normalizeAvatarSource(
+      input.watermarkImage,
+      'watermarkImage',
+    ) as AvatarSource | null
+  } else if (input.watermark !== undefined) {
     const resolved = normalizeWatermarkInput(input.watermark)
     next.watermark = resolved.watermark
     next.watermarkImage = resolved.watermarkImage
+  } else if (input.watermarkImage === null) {
+    next.watermark = ''
+    next.watermarkImage = null
   }
 
   return next
