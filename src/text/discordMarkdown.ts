@@ -29,12 +29,25 @@ const WRAPPER_ELEMENTS = new Set<ParsedElement>([
   'list',
 ])
 
+/**
+ * Element kinds whose delimiters are the whole point — `.content` strips exactly the `<`/`>` that later stages (`segment.ts`'s `splitDiscord()`, for `emoji`) need to recognize the construct, so `.raw` has to survive instead. `code`/`codeBlock` are the opposite: their fence is not meant to display, so `.content` (the body without it) is correct for those.
+ */
+const RAW_ELEMENTS = new Set<ParsedElement>([
+  'emoji',
+  'mention',
+  'globalMention',
+  'roleMention',
+  'gameMention',
+  'channelMention',
+  'slashCommand',
+])
+
 function parseInto(text: string, style: TextStyle | undefined): StyledRun[] {
   const out: StyledRun[] = []
 
   for (const token of parse(text)) {
     if (!WRAPPER_ELEMENTS.has(token.element)) {
-      pushStyledRun(out, token.content, style)
+      pushStyledRun(out, RAW_ELEMENTS.has(token.element) ? token.raw : token.content, style)
       continue
     }
     const addedStyle = styleFor(token.element)

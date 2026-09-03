@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseDiscordMarkdown, stripDiscordMarkdown } from './discordMarkdown'
+import { segmentStyledText } from './segment'
 
 describe('stripDiscordMarkdown', () => {
   it('leaves plain text alone', () => {
@@ -201,5 +202,45 @@ describe('parseDiscordMarkdown', () => {
 
   it('reveals a spoiler as plain, unstyled text', () => {
     expect(parseDiscordMarkdown('||spoiler||')).toEqual([{ value: 'spoiler' }])
+  })
+
+  it('keeps a custom emoji bracketed, not stripped to its bare shortcode:id', () => {
+    expect(parseDiscordMarkdown('<:blob_x:1245750752115167293>')).toEqual([
+      { value: '<:blob_x:1245750752115167293>' },
+    ])
+    expect(parseDiscordMarkdown('<a:spin:123456789012345678>')).toEqual([
+      { value: '<a:spin:123456789012345678>' },
+    ])
+  })
+
+  it('keeps a mention bracketed, not stripped to its bare id', () => {
+    expect(parseDiscordMarkdown('<@123456789012345678>')).toEqual([
+      { value: '<@123456789012345678>' },
+    ])
+    expect(parseDiscordMarkdown('<@!123456789012345678>')).toEqual([
+      { value: '<@!123456789012345678>' },
+    ])
+    expect(parseDiscordMarkdown('<@&123456789012345678>')).toEqual([
+      { value: '<@&123456789012345678>' },
+    ])
+    expect(parseDiscordMarkdown('<#123456789012345678>')).toEqual([
+      { value: '<#123456789012345678>' },
+    ])
+  })
+
+  it('keeps a custom emoji bracketed within stripDiscordMarkdown too', () => {
+    expect(stripDiscordMarkdown('<:blob_x:1245750752115167293> hi')).toBe(
+      '<:blob_x:1245750752115167293> hi',
+    )
+  })
+
+  it('resolves to an actual emoji segment once fed through segmentStyledText, matching the raw path', () => {
+    const raw = segmentStyledText([{ value: '<:blob_x:1245750752115167293> hi' }])
+    const viaDiscordMode = segmentStyledText(
+      parseDiscordMarkdown('<:blob_x:1245750752115167293> hi'),
+    )
+
+    expect(viaDiscordMode).toEqual(raw)
+    expect(viaDiscordMode[0]).toMatchObject({ kind: 'emoji', source: 'discord' })
   })
 })
