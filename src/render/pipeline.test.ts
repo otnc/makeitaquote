@@ -402,7 +402,7 @@ describe('render', () => {
   })
 
   it('sizes an image watermark from imageSize instead of size, when set', async () => {
-    // Both corners are square (the stub logo is), so a taller imageSize also reaches further left — sampling near the top of that taller square, where the default-size image (size: 0.024) doesn't reach at all.
+    // Both corners are square (the stub logo is), so a taller imageSize also reaches further left — sampling near the top of that taller square, where the default-size image doesn't reach at all.
     const x = 1150
     const y = 560
 
@@ -417,6 +417,29 @@ describe('render', () => {
 
     expect(defaultAlpha).toBe(255) // background, not the (much smaller) default watermark
     expect([r, g, b]).toEqual([255, 0, 0]) // the logo itself, once large enough to reach here
+  })
+
+  it('moves an image watermark away from the corner as margin grows', async () => {
+    const x = 1140
+    const y = 590
+
+    const [r, g, b] = await pixelAt(
+      quote()
+        .setWatermark(redSquare())
+        .setTheme({ watermark: { imageSize: 0.05 } }),
+      x,
+      y,
+    )
+    const [, , , movedAlpha] = await pixelAt(
+      quote()
+        .setWatermark(redSquare())
+        .setTheme({ watermark: { imageSize: 0.05, margin: 0.15 } }),
+      x,
+      y,
+    )
+
+    expect([r, g, b]).toEqual([255, 0, 0]) // the logo, at the default corner margin
+    expect(movedAlpha).toBe(255) // background — the wider margin pulled it well clear of this point
   })
 })
 
