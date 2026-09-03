@@ -402,7 +402,7 @@ new MiQ().setWatermark(new URL('https://example.com/logo.png')) // image — not
 new MiQ().setWatermark(readFileSync('./logo.png'))               // image — Buffer/Uint8Array
 ```
 
-The two are mutually exclusive — the last one set wins. An image is drawn at the same height `theme.watermark.size` would give the text, keeping the scale consistent when switching between them; `theme.watermark.color`/`font`/`weight` only apply to the text form. `theme.watermark.position` (`'auto'`/`'bottom-left'`/`'bottom-center'`/`'bottom-right'`) works the same for both.
+The two are mutually exclusive — the last one set wins. An image is drawn at `theme.watermark.imageSize` if set, or `theme.watermark.size` otherwise (the same height the text form would use); `theme.watermark.color`/`font`/`weight` only apply to the text form. A logo tends to read small at the text-tuned default — `imageSize: 0.03`–`0.05` or so is a reasonable starting point. `theme.watermark.position` (`'auto'`/`'bottom-left'`/`'bottom-center'`/`'bottom-right'`) works the same for both.
 
 **Supported image formats** (same decoder as `setAvatar()`/`backgroundImage`, courtesy of `@napi-rs/canvas`'s Skia backend): PNG, JPEG, WebP, AVIF, GIF (first frame only — not animated), BMP, and SVG. SVG only decodes from bytes or a `data:` URL, not a bare SVG string.
 

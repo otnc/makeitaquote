@@ -158,6 +158,13 @@ export interface WatermarkTheme {
   weight: FontWeight
   size: number
   /**
+   * Height of an image watermark, in place of `size`. `null` (default): the
+   * image uses `size` too, same as before this existed. `size` is tuned for
+   * a short text tag and reads small for a logo, so this exists to size the
+   * two forms independently without one dragging the other along.
+   */
+  imageSize: number | null
+  /**
    * `'auto'` keeps it clear of the avatar: opposite side for `side` layouts,
    * bottom right for `new` ones.
    */

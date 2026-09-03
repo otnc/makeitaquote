@@ -469,14 +469,15 @@ function drawWatermark(
 }
 
 /**
- * Draws a watermark image at the same corner/scale the text watermark would
- * use — `theme.watermark.size` becomes the image's height (instead of a font
- * size) so switching between text and image keeps the same visual scale;
- * width follows from the image's own aspect ratio. `color`/`font`/`weight`
- * don't apply to an image and are ignored.
+ * Draws a watermark image at the same corner the text watermark would use.
+ * Its height comes from `theme.watermark.imageSize` when set (`size` is
+ * tuned for a short text tag and reads small for a logo), falling back to
+ * `size` so the two forms share one scale until told otherwise; width
+ * follows from the image's own aspect ratio. `color`/`font`/`weight` don't
+ * apply to an image and are ignored.
  */
 function drawWatermarkImage(ctx: SKRSContext2D, image: Image, theme: Theme): void {
-  const height = toPixels(theme.watermark.size, theme.height)
+  const height = toPixels(theme.watermark.imageSize ?? theme.watermark.size, theme.height)
   const width = height * (image.width / Math.max(1, image.height))
   const margin = theme.width * 0.04
   const y = theme.height * 0.96 - height
