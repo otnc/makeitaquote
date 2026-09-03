@@ -6,8 +6,7 @@ export type EmojiCacheOptions = AssetCacheOptions
 /**
  * The cache shared by every `MiQ` instance in the process.
  *
- * Emoji are the same everywhere, so caching them per instance would mean a bot
- * re-downloading the same images for every message.
+ * Emoji are the same everywhere, so caching them per instance would mean a bot re-downloading the same images for every message.
  */
 export const emojiCache = createAssetCache<Image>({
   maxEntries: 256,

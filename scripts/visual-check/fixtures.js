@@ -3,10 +3,7 @@ import { MiQ } from './library.js'
 
 export { avatars, discordEmoji, misskeyEmoji, required }
 
-// This gallery is published, so every sample has to read as something a
-// person might plausibly have said out of context. Public-domain prose
-// (Sōseki's *I Am a Cat*) and neutral statements about the library only —
-// no lorem ipsum, nothing that reads as a real quotation from a real person.
+// This gallery is published, so every sample has to read as something a person might plausibly have said out of context. Public-domain prose (Sōseki's *I Am a Cat*) and neutral statements about the library only — no lorem ipsum, nothing that reads as a real quotation from a real person.
 export const text = {
   short: '猫は液体である',
   ja: '吾輩は猫である。名前はまだ無い。',

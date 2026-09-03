@@ -26,10 +26,7 @@ import { boldAdvance, fillText, resolvedWeight, syntheticBoldWidth } from './tex
 /**
  * Turns `data.text` into styled runs per `data.markdown`.
  *
- * `'raw'` is the one case with nothing to parse — the text is drawn exactly
- * as written, one unstyled run. Every other mode's dialect is picked by the
- * mode itself, independent of how the quote was built (`setFromMessage()`
- * and `setText()` can both ask for `'discord'` rendering, say).
+ * `'raw'` is the one case with nothing to parse — the text is drawn exactly as written, one unstyled run. Every other mode's dialect is picked by the mode itself, independent of how the quote was built (`setFromMessage()` and `setText()` can both ask for `'discord'` rendering, say).
  */
 function styledRunsFor(data: QuoteData): StyledRun[] {
   switch (data.markdown) {
@@ -53,9 +50,7 @@ export interface RenderOptions extends MiQOptions {
 /**
  * Renders a quote to a canvas.
  *
- * Every asset is fetched before anything is drawn, so the drawing pass itself
- * is synchronous and a quote with twenty emoji costs one parallel round of
- * requests rather than twenty sequential ones.
+ * Every asset is fetched before anything is drawn, so the drawing pass itself is synchronous and a quote with twenty emoji costs one parallel round of requests rather than twenty sequential ones.
  */
 export async function renderQuote(data: QuoteData, options: RenderOptions): Promise<Canvas> {
   assertRenderable(data)
@@ -76,16 +71,14 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
     loadAvatar(data.watermarkImage, options.signal ? { signal: options.signal } : {}),
   ])
 
-  // Emoji that could not be fetched become plain text now, so layout and
-  // drawing agree on their width from here on.
+  // Emoji that could not be fetched become plain text now, so layout and drawing agree on their width from here on.
   const resolved = resolveEmojiSegments(
     segments,
     (url) => images.get(url) !== undefined,
     options.onAssetError ?? 'text',
   )
 
-  // Reshaping happens after the avatar is known, since its native size is the
-  // whole input to the decision.
+  // Reshaping happens after the avatar is known, since its native size is the whole input to the decision.
   const theme = sizeToAvatar(requested, avatar, options.sizeToAvatar)
 
   const canvas = createCanvas(theme.width, theme.height)
@@ -118,8 +111,7 @@ export async function renderQuote(data: QuoteData, options: RenderOptions): Prom
 /**
  * Makes sure something can draw the requested text.
  *
- * Only downloads when the theme's families are genuinely unavailable — on a
- * machine with Japanese fonts installed this never touches the network.
+ * Only downloads when the theme's families are genuinely unavailable — on a machine with Japanese fonts installed this never touches the network.
  */
 async function prepareFonts(theme: Theme, text: string, options: RenderOptions): Promise<void> {
   const requests = [
@@ -137,8 +129,7 @@ async function prepareFonts(theme: Theme, text: string, options: RenderOptions):
 
     await Promise.all([...new Set(requests)].map((request) => ensureStack(request, autoOptions)))
 
-    // A display font may cover no Japanese at all, so the default family has
-    // to be present as well — it is what the quote falls through to.
+    // A display font may cover no Japanese at all, so the default family has to be present as well — it is what the quote falls through to.
     if (needsGlyphFallback(text)) await ensureDefaultFonts(autoOptions)
 
     if (requests.some((request) => resolveFamily(request) === null)) {
@@ -153,10 +144,7 @@ async function prepareFonts(theme: Theme, text: string, options: RenderOptions):
 /**
  * Makes the first usable family in a CSS font stack available.
  *
- * Walks the stack in order and stops at the first one that works, so a theme
- * asking for `'Dela Gothic One, Noto Sans JP, sans-serif'` actually gets Dela
- * Gothic One — checking only whether *something* in the stack resolves would
- * silently settle for the fallback that happens to be installed already.
+ * Walks the stack in order and stops at the first one that works, so a theme asking for `'Dela Gothic One, Noto Sans JP, sans-serif'` actually gets Dela Gothic One — checking only whether *something* in the stack resolves would silently settle for the fallback that happens to be installed already.
  */
 async function ensureStack(request: string, options: object): Promise<void> {
   for (const family of candidateFamilies(request)) {
@@ -209,9 +197,7 @@ function drawQuote(
   const area = layout.text
   const quoted = applyInlineQuotes(segments, theme)
 
-  // A display font with no Japanese coverage would otherwise draw the quote as
-  // a row of boxes. Anything it cannot handle falls through to a family that
-  // can, while its own glyphs are still used for everything else.
+  // A display font with no Japanese coverage would otherwise draw the quote as a row of boxes. Anything it cannot handle falls through to a family that can, while its own glyphs are still used for everything else.
   const stack = coveringStack(theme.text.font, plainText(quoted), DEFAULT_FONT_FAMILIES)
 
   const result = fitText(quoted, {
@@ -359,10 +345,7 @@ function drawDivider(ctx: SKRSContext2D, theme: Theme, layout: Layout, top: numb
 }
 
 /**
- * Draws one centred, prefixed attribution line (display name or username) —
- * both are a `LabelTheme`, styled and positioned identically — and returns
- * the y position its own text baseline landed on, for the next line to
- * stack under.
+ * Draws one centred, prefixed attribution line (display name or username) — both are a `LabelTheme`, styled and positioned identically — and returns the y position its own text baseline landed on, for the next line to stack under.
  */
 function drawAttributionLine(
   ctx: SKRSContext2D,
@@ -469,12 +452,7 @@ function drawWatermark(
 }
 
 /**
- * Draws a watermark image at the same corner the text watermark would use.
- * Its height comes from `theme.watermark.imageSize` when set (`size` is
- * tuned for a short text tag and reads small for a logo), falling back to
- * `size` so the two forms share one scale until told otherwise; width
- * follows from the image's own aspect ratio. `color`/`font`/`weight` don't
- * apply to an image and are ignored.
+ * Draws a watermark image at the same corner the text watermark would use. Its height comes from `theme.watermark.imageSize` when set (`size` is tuned for a short text tag and reads small for a logo), falling back to `size` so the two forms share one scale until told otherwise; width follows from the image's own aspect ratio. `color`/`font`/`weight` don't apply to an image and are ignored.
  */
 function drawWatermarkImage(ctx: SKRSContext2D, image: Image, theme: Theme): void {
   const height = toPixels(theme.watermark.imageSize ?? theme.watermark.size, theme.height)

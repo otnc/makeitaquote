@@ -60,9 +60,7 @@ export interface TwemojiInfo {
 /**
  * Where installed Twemoji images live.
  *
- * A sibling of the font cache rather than inside it: the font cache is
- * `rm -rf`'d wholesale by `uninstallFonts()`, and Twemoji surviving that (or
- * the other way round) is what lets the two be managed separately.
+ * A sibling of the font cache rather than inside it: the font cache is `rm -rf`'d wholesale by `uninstallFonts()`, and Twemoji surviving that (or the other way round) is what lets the two be managed separately.
  */
 export function resolveTwemojiDir(override?: string): string {
   if (override) return override
@@ -76,10 +74,7 @@ export function resolveTwemojiDir(override?: string): string {
 /**
  * The local file name a Twemoji CDN url maps to, or `null` for anything else.
  *
- * `@twemoji/parser` builds `…/twemoji@<tag>/assets/72x72/<codepoints>.png`,
- * where `<tag>` is whatever version tag it was configured with — the tag is
- * dropped here so a locally installed file matches the url whatever tag the
- * parser currently emits.
+ * `@twemoji/parser` builds `…/twemoji@<tag>/assets/72x72/<codepoints>.png`, where `<tag>` is whatever version tag it was configured with — the tag is dropped here so a locally installed file matches the url whatever tag the parser currently emits.
  */
 export function twemojiFileName(url: string): string | null {
   let parsed: URL
@@ -99,8 +94,7 @@ export function twemojiFileName(url: string): string | null {
 /**
  * The path of a locally installed copy of a Twemoji CDN url, or `null`.
  *
- * This is the seam the emoji loader consults before the network: a file put
- * there by `miq install twemoji` makes rendering work with no connection.
+ * This is the seam the emoji loader consults before the network: a file put there by `miq install twemoji` makes rendering work with no connection.
  */
 export function localTwemojiFile(url: string, dir = resolveTwemojiDir()): string | null {
   const name = twemojiFileName(url)
@@ -117,10 +111,7 @@ export function localTwemojiFile(url: string, dir = resolveTwemojiDir()): string
 /**
  * Downloads every Twemoji image to the local store.
  *
- * Idempotent: a file already on disk is left alone, so an interrupted install
- * resumes rather than starts over. Re-running after a new Twemoji release
- * keeps the existing files — `miq uninstall twemoji` first if a clean
- * re-download is wanted.
+ * Idempotent: a file already on disk is left alone, so an interrupted install resumes rather than starts over. Re-running after a new Twemoji release keeps the existing files — `miq uninstall twemoji` first if a clean re-download is wanted.
  */
 export async function installTwemoji(
   options: InstallTwemojiOptions = {},
@@ -235,9 +226,7 @@ async function fetchLatestVersion(): Promise<string> {
 /**
  * Every image in the newest Twemoji release, via the jsDelivr data API.
  *
- * The CDN itself serves files but not a directory listing, so the file list
- * comes from the API beside it. `@twemoji/parser` can parse emoji but cannot
- * enumerate them, so there is no offline source for the list.
+ * The CDN itself serves files but not a directory listing, so the file list comes from the API beside it. `@twemoji/parser` can parse emoji but cannot enumerate them, so there is no offline source for the list.
  */
 async function listTwemojiFiles(): Promise<TwemojiListing> {
   const version = await fetchLatestVersion()

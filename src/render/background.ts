@@ -13,9 +13,7 @@ import { createCanvas, type Image, type SKRSContext2D } from './canvasFactory'
 import { gradientLine } from './layout'
 
 /**
- * Loads `theme.backgroundImage`'s source, going through the same fetch path
- * an avatar uses but its own cache (`backgroundImageCache`) — it's the same
- * kind of asset, just drawn somewhere else and reused very differently.
+ * Loads `theme.backgroundImage`'s source, going through the same fetch path an avatar uses but its own cache (`backgroundImageCache`) — it's the same kind of asset, just drawn somewhere else and reused very differently.
  */
 export function loadBackgroundImage(
   theme: Theme,
@@ -26,12 +24,9 @@ export function loadBackgroundImage(
 }
 
 /**
- * Fills the background color, lays `backgroundGradient` over it, then
- * `backgroundImage` over that.
+ * Fills the background color, lays `backgroundGradient` over it, then `backgroundImage` over that.
  *
- * The color is not a fallback for either — all three can be set at once, the
- * layer below showing through wherever the one above is translucent or, with
- * `backgroundImage.fit: 'contain'`, letterboxed.
+ * The color is not a fallback for either — all three can be set at once, the layer below showing through wherever the one above is translucent or, with `backgroundImage.fit: 'contain'`, letterboxed.
  */
 export function drawBackground(
   ctx: SKRSContext2D,
@@ -65,11 +60,7 @@ export function drawBackground(
 /**
  * Draws `theme.backgroundGradient`, if set.
  *
- * A generated alternative to a flat `background` color or a pre-made
- * `backgroundImage` — a `'linear'` gradient runs edge-to-edge along
- * `direction`; a `'radial'` one fades outward from the canvas centre out to
- * its farthest corner, so it always reaches every edge regardless of aspect
- * ratio.
+ * A generated alternative to a flat `background` color or a pre-made `backgroundImage` — a `'linear'` gradient runs edge-to-edge along `direction`; a `'radial'` one fades outward from the canvas centre out to its farthest corner, so it always reaches every edge regardless of aspect ratio.
  */
 function drawBackgroundGradient(ctx: SKRSContext2D, theme: Theme): void {
   const { backgroundGradient: gradient, width, height } = theme
@@ -114,14 +105,9 @@ function backgroundGradientLine(
 }
 
 /**
- * Draws the avatar, fading it into `background`/`backgroundGradient`/
- * `backgroundImage` when `theme.gradient` is enabled. Sideways for `side`,
- * downwards for `new`; mirrored when the avatar is on the right.
+ * Draws the avatar, fading it into `background`/`backgroundGradient`/`backgroundImage` when `theme.gradient` is enabled. Sideways for `side`, downwards for `new`; mirrored when the avatar is on the right.
  *
- * Drawn onto its own offscreen canvas first, then faded there
- * (`destination-out`) before compositing onto the main one — a canvas has
- * no layers, so erasing the avatar in place on the main canvas would just
- * punch a transparent hole rather than reveal what's behind it.
+ * Drawn onto its own offscreen canvas first, then faded there (`destination-out`) before compositing onto the main one — a canvas has no layers, so erasing the avatar in place on the main canvas would just punch a transparent hole rather than reveal what's behind it.
  */
 export function drawAvatarWithFade(
   ctx: SKRSContext2D,
@@ -131,16 +117,14 @@ export function drawAvatarWithFade(
 ): void {
   const { box } = options
 
-  // Fading into a transparent background would only make the avatar vanish,
-  // which is not what a gradient is for.
+  // Fading into a transparent background would only make the avatar vanish, which is not what a gradient is for.
   const background = parseColor(theme.background, 'theme.background')
   if (!theme.gradient.enabled || background.a <= 0) {
     drawAvatar(ctx, image, options)
     return
   }
 
-  // Sized to the box, not the whole canvas — its bounds already confine the
-  // fade to the avatar's own area, so nothing past its edge is ever touched.
+  // Sized to the box, not the whole canvas — its bounds already confine the fade to the avatar's own area, so nothing past its edge is ever touched.
   const width = Math.ceil(box.width)
   const height = Math.ceil(box.height)
   const layer = createCanvas(width, height)
@@ -154,8 +138,7 @@ export function drawAvatarWithFade(
   const [x0, y0, x1, y1] = gradientLine(theme)
   const fill = layerCtx.createLinearGradient(x0 - box.x, y0 - box.y, x1 - box.x, y1 - box.y)
 
-  // Only the alpha channel matters under 'destination-out' below — the color
-  // itself is never seen.
+  // Only the alpha channel matters under 'destination-out' below — the color itself is never seen.
   for (const [offset, alpha] of theme.gradient.stops) {
     fill.addColorStop(clamp01(offset), `rgba(0, 0, 0, ${clamp01(alpha)})`)
   }

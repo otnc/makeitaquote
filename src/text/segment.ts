@@ -5,23 +5,16 @@ import { styleKey } from './measure'
 /**
  * Discord custom emoji: `<:name:id>`, or `<a:name:id>` when animated.
  *
- * The `<...>` delimiters plus the numeric ID already make this unambiguous,
- * unlike a bare Misskey `:name:` floating in plain text — so unlike that one,
- * a single-character name is still matched. The upper bound and the ID's
- * length still keep this from matching arbitrary angle-bracketed text.
+ * The `<...>` delimiters plus the numeric ID already make this unambiguous, unlike a bare Misskey `:name:` floating in plain text — so unlike that one, a single-character name is still matched. The upper bound and the ID's length still keep this from matching arbitrary angle-bracketed text.
  */
 const DISCORD_EMOJI = /<(a)?:(\w{1,32}):(\d{17,20})>/g
 
 /**
  * Misskey custom emoji: `:name:` locally, `:name@host:` for a remote instance.
  *
- * The shortcode may not follow an ASCII alphanumeric, which is what keeps
- * `12:30:45` and `http://…` from being read as emoji — in a timestamp the
- * inner `:30:` always sits directly after a digit. `テキスト:emoji:` still
- * matches, since that is how people actually write them.
+ * The shortcode may not follow an ASCII alphanumeric, which is what keeps `12:30:45` and `http://…` from being read as emoji — in a timestamp the inner `:30:` always sits directly after a digit. `テキスト:emoji:` still matches, since that is how people actually write them.
  *
- * Names of two or more characters only; purely numeric names are rejected
- * separately, as a second guard against clock-like text.
+ * Names of two or more characters only; purely numeric names are rejected separately, as a second guard against clock-like text.
  */
 const MISSKEY_EMOJI = /(?<![A-Za-z0-9_]):([a-z0-9_+-]{2,64})(?:@([a-z0-9.-]+\.[a-z]{2,}|\.))?:/gi
 
@@ -44,9 +37,7 @@ interface ResolvedMisskey {
 /**
  * Misskey emoji are recognised by default.
  *
- * `:name@host:` carries its own host, so it resolves with no configuration at
- * all. A bare `:name:` needs an instance to point at, so without one it is
- * simply left as text.
+ * `:name@host:` carries its own host, so it resolves with no configuration at all. A bare `:name:` needs an instance to point at, so without one it is simply left as text.
  */
 function resolveMisskey(options: SegmentOptions): ResolvedMisskey {
   const config = options.misskey
@@ -87,27 +78,21 @@ function hostOf(value: string): string | null {
   } catch {
     return null
   }
-  // A URL can still parse with a host that isn't a hostname at all — reject
-  // anything with characters a hostname cannot contain rather than trust it.
+  // A URL can still parse with a host that isn't a hostname at all — reject anything with characters a hostname cannot contain rather than trust it.
   return HOSTNAME_LIKE.test(host) ? host.toLowerCase() : null
 }
 
 /**
  * Splits text into runs of characters and emoji to be drawn as images.
  *
- * Standard emoji come from `@twemoji/parser`, which reports absolute indices
- * into the original string, so the runs between them are plain slices. Each of
- * those runs is then scanned for the custom emoji syntaxes.
+ * Standard emoji come from `@twemoji/parser`, which reports absolute indices into the original string, so the runs between them are plain slices. Each of those runs is then scanned for the custom emoji syntaxes.
  */
 export function segmentText(text: string, options: SegmentOptions = {}): Segment[] {
   return segmentRuns([{ value: text }], options)
 }
 
 /**
- * Same as `segmentText()`, but for text that already carries style — the
- * output of a dialect parser (`parseMarkdown()`, `parseDiscordMarkdown()`,
- * `parseMfm()`, `parseTwitterText()`). Every text segment cut from a run
- * inherits that run's style.
+ * Same as `segmentText()`, but for text that already carries style — the output of a dialect parser (`parseMarkdown()`, `parseDiscordMarkdown()`, `parseMfm()`, `parseTwitterText()`). Every text segment cut from a run inherits that run's style.
  */
 export function segmentStyledText(
   runs: readonly StyledRun[],
@@ -119,8 +104,7 @@ export function segmentStyledText(
 /**
  * Flattens styled runs back to plain text, discarding style.
  *
- * The shared basis for every `stripX()`: stripping is rendering's styled
- * parse with the style thrown away, not a separate implementation.
+ * The shared basis for every `stripX()`: stripping is rendering's styled parse with the style thrown away, not a separate implementation.
  */
 export function plainTextOf(runs: readonly StyledRun[]): string {
   return runs.map((run) => run.value).join('')
@@ -129,9 +113,7 @@ export function plainTextOf(runs: readonly StyledRun[]): string {
 /**
  * Appends a run, merging into the previous one when it is the same style.
  *
- * Shared by every dialect parser's tree walk (`parseMarkdown()`,
- * `parseMfm()`, `parseTwitterText()`) so each produces compact, already-
- * merged `StyledRun[]` rather than one run per leaf node.
+ * Shared by every dialect parser's tree walk (`parseMarkdown()`, `parseMfm()`, `parseTwitterText()`) so each produces compact, already-merged `StyledRun[]` rather than one run per leaf node.
  */
 export function pushStyledRun(out: StyledRun[], value: string, style: TextStyle | undefined): void {
   if (value.length === 0) return
@@ -216,9 +198,7 @@ function splitDiscord(value: string, options: SegmentOptions): Array<string | Se
 /**
  * Splits a run on Misskey shortcodes.
  *
- * Anything that does not resolve — a numeric name, a bare `:name:` with no
- * instance configured, a federated one when `remote` is off — is left exactly
- * as written and drawn as text.
+ * Anything that does not resolve — a numeric name, a bare `:name:` with no instance configured, a federated one when `remote` is off — is left exactly as written and drawn as text.
  */
 function pushMisskey(
   out: Segment[],
@@ -249,8 +229,7 @@ function pushMisskey(
       out.push({ kind: 'text', value: value.slice(cursor, index), ...(style ? { style } : {}) })
     }
 
-    // Several configured instances means the shortcode could belong to any of
-    // them; the loader tries each in turn.
+    // Several configured instances means the shortcode could belong to any of them; the loader tries each in turn.
     const alternativeUrls = hosts.slice(1).map((other) => misskeyEmojiURL(other, name))
 
     out.push({
@@ -271,8 +250,7 @@ function pushMisskey(
 }
 
 /**
- * Animated emoji are requested as GIF because that is the only format Discord
- * serves them in; only the first frame ends up being drawn.
+ * Animated emoji are requested as GIF because that is the only format Discord serves them in; only the first frame ends up being drawn.
  */
 export function discordEmojiURL(id: string, animated: boolean, size = 64): string {
   const extension = animated ? 'gif' : 'png'
@@ -282,9 +260,7 @@ export function discordEmojiURL(id: string, animated: boolean, size = 64): strin
 /**
  * Misskey serves custom emoji from `/emoji/{name}.webp` on the owning host.
  *
- * A remote emoji is fetched from the instance it belongs to rather than from
- * the local proxy, so the URL works without knowing anything about the caller's
- * own instance.
+ * A remote emoji is fetched from the instance it belongs to rather than from the local proxy, so the URL works without knowing anything about the caller's own instance.
  */
 export function misskeyEmojiURL(host: string, name: string): string {
   return `https://${host}/emoji/${encodeURIComponent(name)}.webp`
@@ -298,11 +274,7 @@ export function segmentSource(segment: Segment): string {
 /**
  * Replaces emoji whose image could not be fetched.
  *
- * Run after prefetching and before layout, so that everything downstream deals
- * only in segments that will actually draw as themselves. Doing it here rather
- * than at draw time is what keeps wrapping honest: a shortcode that fell back
- * to text is far wider than the square it stood in for, and — being ordinary
- * text — can now be broken across lines like any other long token.
+ * Run after prefetching and before layout, so that everything downstream deals only in segments that will actually draw as themselves. Doing it here rather than at draw time is what keeps wrapping honest: a shortcode that fell back to text is far wider than the square it stood in for, and — being ordinary text — can now be broken across lines like any other long token.
  */
 export function resolveEmojiSegments(
   segments: readonly Segment[],

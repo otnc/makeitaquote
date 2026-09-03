@@ -23,14 +23,11 @@ const SIDE_GAP = 0.04
 /**
  * The default quote area for a layout.
  *
- * Derived rather than hard-coded so that flipping `avatar.position`, or
- * narrowing `avatar.widthRatio`, moves the text to match instead of leaving it
- * overlapping the avatar.
+ * Derived rather than hard-coded so that flipping `avatar.position`, or narrowing `avatar.widthRatio`, moves the text to match instead of leaving it overlapping the avatar.
  */
 export function autoArea(theme: Theme): Area {
   if (theme.layout === 'new') {
-    // The quote sits over the faded lower part of the avatar. Leaving the
-    // bottom fifth free gives the divider and attribution somewhere to go.
+    // The quote sits over the faded lower part of the avatar. Leaving the bottom fifth free gives the divider and attribution somewhere to go.
     return { x: 0.08, y: 0.56, width: 0.84, height: 0.18 }
   }
 
@@ -43,9 +40,7 @@ export function autoArea(theme: Theme): Area {
 /**
  * Rescales a theme so the avatar box matches the image's native size.
  *
- * The whole canvas scales by one factor, so the layout keeps its proportions
- * and only the resolution changes — the avatar simply stops being resampled.
- * Returns the theme untouched when there is nothing to match.
+ * The whole canvas scales by one factor, so the layout keeps its proportions and only the resolution changes — the avatar simply stops being resampled. Returns the theme untouched when there is nothing to match.
  */
 export function sizeToAvatar(
   theme: Theme,
@@ -94,8 +89,7 @@ export function computeLayout(theme: Theme): Layout {
 /**
  * Gradient endpoints in pixels, as `[x0, y0, x1, y1]`.
  *
- * A horizontal gradient is mirrored when the avatar is on the right, so the
- * fade always runs away from the avatar rather than into it.
+ * A horizontal gradient is mirrored when the avatar is on the right, so the fade always runs away from the avatar rather than into it.
  */
 export function gradientLine(theme: Theme): [number, number, number, number] {
   const { gradient, width, height } = theme
@@ -114,8 +108,7 @@ export function gradientLine(theme: Theme): [number, number, number, number] {
 /**
  * Resolves `watermark.position: 'auto'` to a concrete corner.
  *
- * A `side` layout puts it away from the avatar, so flipping the avatar doesn't
- * bury the watermark in it.
+ * A `side` layout puts it away from the avatar, so flipping the avatar doesn't bury the watermark in it.
  */
 export function watermarkCorner(theme: Theme): 'bottom-right' | 'bottom-left' | 'bottom-center' {
   if (theme.watermark.position !== 'auto') return theme.watermark.position
@@ -126,10 +119,7 @@ export function watermarkCorner(theme: Theme): 'bottom-right' | 'bottom-left' | 
 /**
  * Builds the CSS font shorthand a canvas context expects.
  *
- * `italic` is the one style keyword this package sets from markdown — Skia
- * (`@napi-rs/canvas`) synthesizes an oblique for it even when a family has no
- * dedicated italic face, the same way browsers do, so there is no
- * bold-style `syntheticBoldWidth()`-equivalent detection needed for it.
+ * `italic` is the one style keyword this package sets from markdown — Skia (`@napi-rs/canvas`) synthesizes an oblique for it even when a family has no dedicated italic face, the same way browsers do, so there is no bold-style `syntheticBoldWidth()`-equivalent detection needed for it.
  */
 export function fontString(
   weight: string | number,

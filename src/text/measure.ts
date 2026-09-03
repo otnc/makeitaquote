@@ -3,20 +3,16 @@ import type { Segment, TextStyle } from '../core/types'
 /**
  * The slice of the canvas context that measurement needs.
  *
- * Narrow on purpose: tests inject a fake with predictable widths instead of
- * standing up a real canvas and depending on whatever fonts the machine has.
+ * Narrow on purpose: tests inject a fake with predictable widths instead of standing up a real canvas and depending on whatever fonts the machine has.
  *
- * `style` is optional so a plain `{ measureText(text) }` fake (as most tests
- * already write) keeps working — omitting it is the same as passing no style.
+ * `style` is optional so a plain `{ measureText(text) }` fake (as most tests already write) keeps working — omitting it is the same as passing no style.
  */
 export interface TextMeasurer {
   measureText(text: string, style?: TextStyle): { width: number }
 }
 
 /**
- * A stable string key for a style, so two segments can be compared for
- * "draws the same way" without a deep-equal — and so a style-aware cache can
- * key on it alongside the text.
+ * A stable string key for a style, so two segments can be compared for "draws the same way" without a deep-equal — and so a style-aware cache can key on it alongside the text.
  */
 export function styleKey(style: TextStyle | undefined): string {
   if (!style) return ''
@@ -41,9 +37,7 @@ export function emojiWidth(metrics: EmojiMetrics): number {
 /**
  * How wide a segment will be drawn.
  *
- * Every emoji reaching this point has an image — ones that failed are turned
- * into text segments before layout starts, by `resolveEmojiSegments`, so that
- * measurement and drawing can never disagree about their width.
+ * Every emoji reaching this point has an image — ones that failed are turned into text segments before layout starts, by `resolveEmojiSegments`, so that measurement and drawing can never disagree about their width.
  */
 export function segmentWidth(
   segment: Segment,
@@ -66,11 +60,9 @@ export function measureSegments(
 }
 
 /**
- * Memoizes `measureText`, which dominates the cost of the auto-fit search:
- * the same substrings are measured over and over as the font size steps down.
+ * Memoizes `measureText`, which dominates the cost of the auto-fit search: the same substrings are measured over and over as the font size steps down.
  *
- * The cache is keyed by string alone, so a new one is needed whenever the font
- * or size on the context changes.
+ * The cache is keyed by string alone, so a new one is needed whenever the font or size on the context changes.
  */
 export function memoizeMeasurer(measurer: TextMeasurer): TextMeasurer {
   const cache = new Map<string, number>()

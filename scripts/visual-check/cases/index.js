@@ -16,9 +16,7 @@ import * as markdown from './15-markdown.js'
 import * as twitter from './16-twitter.js'
 import * as allThemes from './17-all-themes.js'
 
-// This order is the gallery's display order — a curated narrative, not the
-// numeric filenames. Add a group by adding a file above and one entry here,
-// wherever it reads best.
+// This order is the gallery's display order — a curated narrative, not the numeric filenames. Add a group by adding a file above and one entry here, wherever it reads best.
 export const caseModules = [
   themes,
   layout,

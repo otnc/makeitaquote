@@ -7,8 +7,7 @@ import type { MiQ } from './MiQ'
 import type { ChainOptions, EncodeOptions, OutputFormat } from './types'
 
 /**
- * Stacks two already-built `MiQ` quotes into one image — a reply/quote pair,
- * the way Discord, X and Misskey all have one.
+ * Stacks two already-built `MiQ` quotes into one image — a reply/quote pair, the way Discord, X and Misskey all have one.
  *
  * ```ts
  * const png = await new MiQChain(
@@ -17,11 +16,7 @@ import type { ChainOptions, EncodeOptions, OutputFormat } from './types'
  * ).toBuffer('png')
  * ```
  *
- * Each `MiQ` keeps whatever it was already configured with — theme, bold,
- * color, `markdown`, everything — `MiQChain` only decides which side each
- * one's avatar sits on (see `ChainOptions`); neither `MiQ` passed in is
- * mutated. Nothing is drawn, fetched or downloaded until an output method is
- * called.
+ * Each `MiQ` keeps whatever it was already configured with — theme, bold, color, `markdown`, everything — `MiQChain` only decides which side each one's avatar sits on (see `ChainOptions`); neither `MiQ` passed in is mutated. Nothing is drawn, fetched or downloaded until an output method is called.
  */
 export class MiQChain {
   #top: MiQ
@@ -74,16 +69,9 @@ export class MiQChain {
 }
 
 /**
- * A clone of `miq` with `avatar.position` overridden, plus its resolved
- * theme, so a caller needing a field off it (`assertChainable`'s `.layout`
- * check) doesn't pay for another `getTheme()` clone.
+ * A clone of `miq` with `avatar.position` overridden, plus its resolved theme, so a caller needing a field off it (`assertChainable`'s `.layout` check) doesn't pay for another `getTheme()` clone.
  *
- * `MiQ#setTheme()` doesn't merge onto the current theme — it resolves a
- * fresh one from `{ extends, layout }` (see `defineTheme()`), so passing a
- * partial theme like `{ avatar: { position } }` would silently reset every
- * other field to the `'dark'`/`'side'` defaults. Round-tripping a full
- * `getTheme()` snapshot with just `avatar.position` mutated keeps that merge
- * a no-op for everything else.
+ * `MiQ#setTheme()` doesn't merge onto the current theme — it resolves a fresh one from `{ extends, layout }` (see `defineTheme()`), so passing a partial theme like `{ avatar: { position } }` would silently reset every other field to the `'dark'`/`'side'` defaults. Round-tripping a full `getTheme()` snapshot with just `avatar.position` mutated keeps that merge a no-op for everything else.
  */
 function withAvatarPosition(miq: MiQ, position: 'left' | 'right'): { miq: MiQ; theme: Theme } {
   const clone = miq.clone()
@@ -96,8 +84,7 @@ function withAvatarPosition(miq: MiQ, position: 'left' | 'right'): { miq: MiQ; t
 /**
  * The `avatar.position` for one half.
  *
- * A per-side override (`topFlip`/`bottomFlip`) wins outright. Otherwise the
- * default pairing is top=`'right'`, bottom=`'left'` — `flip` swaps that.
+ * A per-side override (`topFlip`/`bottomFlip`) wins outright. Otherwise the default pairing is top=`'right'`, bottom=`'left'` — `flip` swaps that.
  */
 export function resolvePosition(options: ChainOptions, isTop: boolean): 'left' | 'right' {
   const override = isTop ? options.topFlip : options.bottomFlip

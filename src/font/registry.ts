@@ -6,8 +6,7 @@ import { GENERIC_FONT_FAMILIES, unquoteFontFamily } from './catalogue'
 const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.ttc', '.woff', '.woff2'])
 
 /**
- * Buffers handed to `GlobalFonts.register` are referenced, not copied, so
- * letting one be collected would leave Skia reading freed memory.
+ * Buffers handed to `GlobalFonts.register` are referenced, not copied, so letting one be collected would leave Skia reading freed memory.
  *
  * See https://github.com/Brooooooklyn/canvas/issues/1006.
  */
@@ -52,8 +51,7 @@ export const fonts = {
   /**
    * Registers a font from memory.
    *
-   * The buffer is retained for the lifetime of the process — see the note on
-   * `retainedBuffers`. Prefer `registerFromPath` when the font is on disk.
+   * The buffer is retained for the lifetime of the process — see the note on `retainedBuffers`. Prefer `registerFromPath` when the font is on disk.
    */
   register(data: Buffer, alias: string): boolean {
     const ok = Boolean(GlobalFonts.register(data, alias))
@@ -113,8 +111,7 @@ export const fonts = {
 /**
  * Resolves a CSS-style font-family list against what is actually available.
  *
- * Returns the first family that can be drawn, or `null` when none can — the
- * caller decides whether that is a warning or an error.
+ * Returns the first family that can be drawn, or `null` when none can — the caller decides whether that is a warning or an error.
  */
 export function resolveFamily(request: string): string | null {
   for (const part of request.split(',')) {

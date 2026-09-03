@@ -15,14 +15,7 @@ function isTweetLike(value: unknown): value is TweetLike {
 /**
  * Derives a quote from a tweet/post.
  *
- * The X/Twitter counterpart to `fromMessage()`/`fromNote()`: quote what a
- * reader saw, which is the text exactly as written by default — X does not
- * expand a tweet's `t.co` links or `@handle` mentions into anything else in
- * its own timeline either, so there is nothing here to resolve. `markdown`
- * is the one thing worth opting into: a tweet has no markup syntax, but
- * "Twitter bold/italic" written in Unicode Mathematical Alphanumeric Symbols
- * is common enough to be worth rendering (or normalizing back to ASCII) on
- * request. See `MarkdownMode`.
+ * The X/Twitter counterpart to `fromMessage()`/`fromNote()`: quote what a reader saw, which is the text exactly as written by default — X does not expand a tweet's `t.co` links or `@handle` mentions into anything else in its own timeline either, so there is nothing here to resolve. `markdown` is the one thing worth opting into: a tweet has no markup syntax, but "Twitter bold/italic" written in Unicode Mathematical Alphanumeric Symbols is common enough to be worth rendering (or normalizing back to ASCII) on request. See `MarkdownMode`.
  */
 export function fromTweet(
   tweet: unknown,

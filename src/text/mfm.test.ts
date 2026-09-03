@@ -37,9 +37,7 @@ describe('stripMfm', () => {
       expect(stripMfm('あ <small>ね</small>')).toBe('あ ね')
     })
 
-    // Checked against the reference parser, misskey-dev/mfm.js: it reads
-    // `<center>` as a block only at the start of a line, and as literal text
-    // anywhere else.
+    // Checked against the reference parser, misskey-dev/mfm.js: it reads `<center>` as a block only at the start of a line, and as literal text anywhere else.
     it('unwraps <center> when it opens a line', () => {
       expect(stripMfm('<center>middle</center>')).toBe('middle')
       expect(stripMfm('あ\n<center>ね</center>')).toBe('あ\nね')
@@ -64,8 +62,7 @@ describe('stripMfm', () => {
   })
 
   describe('links', () => {
-    // Unlike Discord, MFM really does render these as links, so the label is
-    // what a reader saw and the URL is the part to drop.
+    // Unlike Discord, MFM really does render these as links, so the label is what a reader saw and the URL is the part to drop.
     it('keeps the label and drops the url', () => {
       expect(stripMfm('[Misskey](https://misskey.io)')).toBe('Misskey')
     })
@@ -95,8 +92,7 @@ describe('stripMfm', () => {
     })
 
     it('keeps the line break where a block meets its neighbour', () => {
-      // The parser treats that newline as block syntax and consumes it;
-      // putting it back is what keeps two lines from running together.
+      // The parser treats that newline as block syntax and consumes it; putting it back is what keeps two lines from running together.
       expect(stripMfm('あ\n<center>ね</center>')).toBe('あ\nね')
       expect(stripMfm('> q\nあ')).toBe('q\nあ')
     })

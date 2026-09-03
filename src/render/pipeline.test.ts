@@ -53,9 +53,7 @@ beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => {})
   vi.spyOn(console, 'info').mockImplementation(() => {})
 
-  // Emoji and remote avatars go through fetch. Stub it so the suite never
-  // depends on Twemoji or Discord being reachable — hosts containing
-  // "invalid" still fail, so the fallback paths stay testable.
+  // Emoji and remote avatars go through fetch. Stub it so the suite never depends on Twemoji or Discord being reachable — hosts containing "invalid" still fail, so the fallback paths stay testable.
   vi.stubGlobal('fetch', async (input: string | URL | Request) => {
     const url = input instanceof Request ? input.url : String(input)
     if (url.includes('invalid')) throw new TypeError('fetch failed')
@@ -131,10 +129,7 @@ describe('render', () => {
       backgroundImage: { source: 'https://cdn.test/bg.png', fit: 'contain', opacity: 1 },
     })
 
-    // The square source, scaled into 1200x630, lands at x∈[285,915]. The
-    // gradient covers up to x=600 though, so only a point past both that and
-    // the image's own edge reads the plain background, and only a point past
-    // the gradient but still inside the image reads the image untouched.
+    // The square source, scaled into 1200x630, lands at x∈[285,915]. The gradient covers up to x=600 though, so only a point past both that and the image's own edge reads the plain background, and only a point past the gradient but still inside the image reads the image untouched.
     const [barR, barG, barB] = await pixelAt(miq, 1100, 5) // right of the image
     expect([barR, barG, barB]).toEqual([0, 0, 0])
 
@@ -179,8 +174,7 @@ describe('render', () => {
         .render()
       expect(backgroundImageCacheInfo().images).toBe(1)
 
-      // A 1-entry avatar cache overflows on the second distinct avatar; if it
-      // shared storage with the background image, this would evict it too.
+      // A 1-entry avatar cache overflows on the second distinct avatar; if it shared storage with the background image, this would evict it too.
       configureAvatarCache({ maxEntries: 1 })
       await quote().setAvatar('https://cdn.test/avatar-a.png').render()
       await quote().setAvatar('https://cdn.test/avatar-b.png').render()
@@ -211,8 +205,7 @@ describe('render', () => {
   it('desaturates the avatar', async () => {
     const [r, g, b] = await pixelAt(quote().setAvatar(redSquare()), 100, 315)
 
-    // Pure red at Rec.709 luma is a mid-dark grey; what matters is that the
-    // channels now agree.
+    // Pure red at Rec.709 luma is a mid-dark grey; what matters is that the channels now agree.
     expect(r).toBe(g)
     expect(g).toBe(b)
     expect(r).toBeGreaterThan(0)
@@ -244,8 +237,7 @@ describe('render', () => {
   })
 
   it('clips the avatar box to a circle', async () => {
-    // Dark theme, side layout: box is {x:0, y:0, width:600, height:630}, so
-    // its corner sits well outside the largest inscribed circle (r=300).
+    // Dark theme, side layout: box is {x:0, y:0, width:600, height:630}, so its corner sits well outside the largest inscribed circle (r=300).
     const miq = quote()
       .setAvatar(redSquare())
       .setTheme({ avatar: { shape: 'circle' } })
@@ -410,9 +402,7 @@ describe('render', () => {
   })
 
   it('sizes an image watermark from imageSize instead of size, when set', async () => {
-    // Both corners are square (the stub logo is), so a taller imageSize also
-    // reaches further left — sampling near the top of that taller square,
-    // where the default-size image (size: 0.024) doesn't reach at all.
+    // Both corners are square (the stub logo is), so a taller imageSize also reaches further left — sampling near the top of that taller square, where the default-size image (size: 0.024) doesn't reach at all.
     const x = 1150
     const y = 560
 
@@ -431,9 +421,7 @@ describe('render', () => {
 })
 
 describe('backgroundGradient', () => {
-  // The dark preset's avatar covers the left half (x < 600), so every sample
-  // point below stays clear of it, the same way the plain background-color
-  // tests above do.
+  // The dark preset's avatar covers the left half (x < 600), so every sample point below stays clear of it, the same way the plain background-color tests above do.
 
   it('interpolates a linear gradient across its stops', async () => {
     const miq = quote().setTheme({
@@ -535,10 +523,7 @@ describe('backgroundGradient', () => {
 })
 
 describe('avatar fade over a generated background', () => {
-  // The dark preset's avatar box is x:0-600, and its fade line runs x:264-600
-  // — so a point near its visible centre (100) still shows the avatar
-  // untouched, while a point right at its far edge (598) is almost fully
-  // faded, and should show whatever is behind it rather than a flat wash.
+  // The dark preset's avatar box is x:0-600, and its fade line runs x:264-600 — so a point near its visible centre (100) still shows the avatar untouched, while a point right at its far edge (598) is almost fully faded, and should show whatever is behind it rather than a flat wash.
 
   it('fades into a backgroundGradient, not a flat wash of the flat background color', async () => {
     const miq = quote()
@@ -594,8 +579,7 @@ describe('avatar fade over a generated background', () => {
         },
       })
 
-    // Box corner: outside the circle even before any fade, so it should
-    // already be the gradient's own color at that position, not the avatar.
+    // Box corner: outside the circle even before any fade, so it should already be the gradient's own color at that position, not the avatar.
     const [cornerR, cornerG, cornerB] = await pixelAt(miq, 10, 10)
     expect(cornerG).toBeLessThan(50)
     expect(cornerR).toBeGreaterThan(200)
@@ -619,9 +603,7 @@ describe('named color themes', () => {
       backgroundGradient: colorThemeGradient(key),
     })
 
-    // Near the gradient's own "to" end (#151738), not the base dark
-    // preset's plain black — proves the catalogue's gradient actually made
-    // it onto the canvas rather than falling back to the flat background.
+    // Near the gradient's own "to" end (#151738), not the base dark preset's plain black — proves the catalogue's gradient actually made it onto the canvas rather than falling back to the flat background.
     const [r, , b] = await pixelAt(miq, 1100, 5)
     expect(r).toBeGreaterThan(10)
     expect(r).toBeLessThan(40)
@@ -759,8 +741,7 @@ describe.skipIf(!hasDrawableFont())('font weight', () => {
 
 describe.skipIf(!hasDrawableFont())('divider and block quote marks', () => {
   it('draws a rule when the divider is enabled', async () => {
-    // A color nothing else in the image uses, so it can be counted directly
-    // without depending on where the divider lands.
+    // A color nothing else in the image uses, so it can be counted directly without depending on where the divider lands.
     expect(await countRed({ divider: { enabled: true, color: '#FF0000' } })).toBeGreaterThan(0)
   })
 
@@ -861,8 +842,7 @@ describe('output formats', () => {
 })
 
 describe('font asset errors', () => {
-  // Not on the machine, not in Google Fonts, not registered by hand — always
-  // "missing", regardless of what fonts the host actually has installed.
+  // Not on the machine, not in Google Fonts, not registered by hand — always "missing", regardless of what fonts the host actually has installed.
   const MISSING_FONT = 'Definitely Not A Real Font 12345'
 
   function withMissingFont(options: ConstructorParameters<typeof MiQ>[0] = {}) {
@@ -950,11 +930,7 @@ describe('MiQ', () => {
   })
 
   it('adopts a different preset size when nothing was set explicitly first', () => {
-    // Regression: `layout: 'new'` alone used to keep the previous
-    // theme's 1200x630 instead of picking up the new-layout preset's own
-    // 630x790, because "the object didn't set width/height" was read as
-    // "keep whatever the canvas currently is" rather than "use this
-    // preset's own size".
+    // Regression: `layout: 'new'` alone used to keep the previous theme's 1200x630 instead of picking up the new-layout preset's own 630x790, because "the object didn't set width/height" was read as "keep whatever the canvas currently is" rather than "use this preset's own size".
     const miq = new MiQ().setTheme({ layout: 'new', avatar: { grayscale: true } })
 
     expect(miq.getTheme().width).toBe(630)

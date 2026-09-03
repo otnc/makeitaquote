@@ -4,20 +4,16 @@ import type { LayoutMode, Theme, ThemePalette } from './types'
 /**
  * The default stack.
  *
- * M PLUS Rounded 1c first, Noto Sans JP behind it for anything the rounded
- * face does not cover. Skia resolves a stack per glyph, so this is a genuine
- * fallback rather than an either/or.
+ * M PLUS Rounded 1c first, Noto Sans JP behind it for anything the rounded face does not cover. Skia resolves a stack per glyph, so this is a genuine fallback rather than an either/or.
  *
- * Built from `DEFAULT_FONT_FAMILIES` rather than retyping the same two names,
- * so the two can't quietly drift apart.
+ * Built from `DEFAULT_FONT_FAMILIES` rather than retyping the same two names, so the two can't quietly drift apart.
  */
 const SANS = [...DEFAULT_FONT_FAMILIES, FALLBACK_FAMILY].join(', ')
 
 /**
  * The default palettes.
  *
- * Exported so a custom theme can pick them up rather than re-typing hex, and
- * so the two presets are visibly one decision rather than two.
+ * Exported so a custom theme can pick them up rather than re-typing hex, and so the two presets are visibly one decision rather than two.
  */
 export const palettes = {
   dark: {
@@ -37,9 +33,7 @@ export const palettes = {
 } as const
 
 /**
- * What `api.voids.top` actually renders at, verified by calling it directly.
- * Not 16:9 — close, but a real bot generates the images this package is
- * named after, so its size is the one that matters here, not a round ratio.
+ * What `api.voids.top` actually renders at, verified by calling it directly. Not 16:9 — close, but a real bot generates the images this package is named after, so its size is the one that matters here, not a round ratio.
  */
 const LANDSCAPE = { width: 1200, height: 630 }
 
@@ -47,8 +41,7 @@ const LANDSCAPE = { width: 1200, height: 630 }
 const NEW_LAYOUT_SIZE = { width: 630, height: 790 }
 
 /**
- * The original Make it a Quote look: black background, desaturated avatar on
- * the left fading into it, centred white quote on the right.
+ * The original Make it a Quote look: black background, desaturated avatar on the left fading into it, centred white quote on the right.
  */
 const dark: Theme = {
   layout: 'side',
@@ -68,8 +61,7 @@ const dark: Theme = {
     enabled: true,
     direction: 'horizontal',
     startRatio: 0.22,
-    // Reaches the background color exactly at the avatar's edge
-    // (avatar.widthRatio), so the edge itself never shows as a hard line.
+    // Reaches the background color exactly at the avatar's edge (avatar.widthRatio), so the edge itself never shows as a hard line.
     endRatio: 0.5,
     stops: [
       [0, 0],
@@ -143,9 +135,7 @@ const light: Theme = {
 }
 
 /**
- * The `new` layout: the avatar fills the canvas and fades downwards, with big
- * quote marks, the quote, a rule and the attribution laid over the bottom of
- * it.
+ * The `new` layout: the avatar fills the canvas and fades downwards, with big quote marks, the quote, a rule and the attribution laid over the bottom of it.
  */
 const darkNew: Theme = {
   ...clone(dark),
@@ -155,10 +145,7 @@ const darkNew: Theme = {
   gradient: {
     ...clone(dark).gradient,
     direction: 'vertical',
-    // The avatar is the top half of a `new`-layout quote, so it has to stay
-    // legible there. Fading from 12% swallowed the subject's face before the
-    // text needed the space; this keeps the fade below it and only reaches the
-    // background where the quote actually sits.
+    // The avatar is the top half of a `new`-layout quote, so it has to stay legible there. Fading from 12% swallowed the subject's face before the text needed the space; this keeps the fade below it and only reaches the background where the quote actually sits.
     startRatio: 0.38,
     endRatio: 0.74,
     stops: [
@@ -187,9 +174,7 @@ const lightNew: Theme = {
 /**
  * A blank slate: everything transparent, for compositing over something else.
  *
- * The avatar and its gradient still draw — it is the background and the text
- * that start invisible, so you set exactly the colors you want and nothing
- * else shows up uninvited.
+ * The avatar and its gradient still draw — it is the background and the text that start invisible, so you set exactly the colors you want and nothing else shows up uninvited.
  */
 const custom: Theme = {
   ...clone(dark),
@@ -235,11 +220,7 @@ export function presetFor(palette: ThemePalette, layout: LayoutMode): Theme {
 /**
  * A deep copy, so presets can never be mutated by a caller.
  *
- * `structuredClone` can't handle every `BackgroundImageSource`: a `URL`
- * throws ("Cannot clone object of unsupported type"), and a `Buffer` clones
- * but is silently demoted to a plain `Uint8Array`. Carried through by
- * reference instead when present — nothing here ever mutates it, so sharing
- * the same instance across a clone is safe.
+ * `structuredClone` can't handle every `BackgroundImageSource`: a `URL` throws ("Cannot clone object of unsupported type"), and a `Buffer` clones but is silently demoted to a plain `Uint8Array`. Carried through by reference instead when present — nothing here ever mutates it, so sharing the same instance across a clone is safe.
  */
 export function clone(value: Theme): Theme {
   const image = value.backgroundImage

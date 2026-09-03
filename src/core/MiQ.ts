@@ -59,9 +59,7 @@ export class MiQ {
   #theme: Theme
   #options: MiQOptions
   /**
-   * A size picked explicitly (this, `setSize()`, `setScale()`), as opposed
-   * to a preset's own — only this survives a later `setTheme()` with no
-   * size of its own. See `#applyExplicitSize()`.
+   * A size picked explicitly (this, `setSize()`, `setScale()`), as opposed to a preset's own — only this survives a later `setTheme()` with no size of its own. See `#applyExplicitSize()`.
    */
   #explicitWidth: number | null = null
   #explicitHeight: number | null = null
@@ -74,8 +72,7 @@ export class MiQ {
   }
 
   /**
-   * `markdown` defaults to `MiQOptions.markdown`, falling back to `'raw'` —
-   * quoted exactly as written unless you opt in. See `MarkdownMode`.
+   * `markdown` defaults to `MiQOptions.markdown`, falling back to `'raw'` — quoted exactly as written unless you opt in. See `MarkdownMode`.
    */
   setText(text: string, options?: { markdown?: MarkdownMode }): this {
     const normalized = normalizeString(text, 'text', MAX_TEXT_LENGTH)
@@ -102,8 +99,7 @@ export class MiQ {
   }
 
   /**
-   * A string is drawn as text; a URL/Buffer/Uint8Array (a logo, say) is
-   * drawn as an image instead, in the same spot.
+   * A string is drawn as text; a URL/Buffer/Uint8Array (a logo, say) is drawn as an image instead, in the same spot.
    */
   setWatermark(watermark: string | AvatarSource): this {
     const resolved = normalizeWatermarkInput(watermark)
@@ -120,8 +116,7 @@ export class MiQ {
   /**
    * Reads a Misskey note the way `setFromMessage()` reads a Discord message.
    *
-   * Takes what the API returns for a note, unchanged. MFM is stripped by
-   * default — see `NoteSourceOptions`.
+   * Takes what the API returns for a note, unchanged. MFM is stripped by default — see `NoteSourceOptions`.
    */
   setFromNote(note: NoteLike, options?: NoteSourceOptions): this {
     this.#data = fromNote(note, options, this.#options.markdown)
@@ -131,9 +126,7 @@ export class MiQ {
   /**
    * Reads a tweet/post the way `setFromMessage()` reads a Discord message.
    *
-   * `TweetLike` has no adapter this package fetches through directly —
-   * `fromTwitterApiV2Tweet()`/`fromFxTwitterStatus()` turn a real API
-   * response into one first.
+   * `TweetLike` has no adapter this package fetches through directly — `fromTwitterApiV2Tweet()`/`fromFxTwitterStatus()` turn a real API response into one first.
    */
   setFromTweet(tweet: TweetLike, options?: TweetSourceOptions): this {
     this.#data = fromTweet(tweet, options, this.#options.markdown)
@@ -143,8 +136,7 @@ export class MiQ {
   /**
    * Merges a partial quote.
    *
-   * `color: true` is accepted for symmetry with the API client, where it is a
-   * wire field; here it keeps the avatar in color instead of desaturating it.
+   * `color: true` is accepted for symmetry with the API client, where it is a wire field; here it keeps the avatar in color instead of desaturating it.
    */
   setFromObject(input: QuoteInput): this {
     this.#data = applyInput(this.#data, input, this.#options.markdown)
@@ -161,11 +153,7 @@ export class MiQ {
   /**
    * Reconciles the new theme's size with an explicit one from earlier.
    *
-   * A theme picked by name, or an object setting its own `width`/`height`,
-   * wins outright and becomes the new explicit size. An object that sets
-   * neither means "keep changing other things" — so each dimension set
-   * explicitly before carries over instead of being replaced by whatever
-   * the new preset happens to have.
+   * A theme picked by name, or an object setting its own `width`/`height`, wins outright and becomes the new explicit size. An object that sets neither means "keep changing other things" — so each dimension set explicitly before carries over instead of being replaced by whatever the new preset happens to have.
    */
   #applyExplicitSize(theme: ThemePalette | ThemeInput): void {
     if (typeof theme !== 'object') {
@@ -182,12 +170,9 @@ export class MiQ {
   }
 
   /**
-   * @deprecated Setting both dimensions by hand fights the theme: every size
-   * in a theme is a fraction of the canvas, so an arbitrary aspect ratio moves
-   * the avatar, the gradient and the text out of proportion with each other.
+   * @deprecated Setting both dimensions by hand fights the theme: every size in a theme is a fraction of the canvas, so an arbitrary aspect ratio moves the avatar, the gradient and the text out of proportion with each other.
    *
-   * Use {@link setScale} to make the same layout bigger or smaller, or set
-   * `width`/`height` on a theme if you genuinely want a different shape.
+   * Use {@link setScale} to make the same layout bigger or smaller, or set `width`/`height` on a theme if you genuinely want a different shape.
    */
   setSize(width: number, height: number): this {
     deprecate(
@@ -202,9 +187,7 @@ export class MiQ {
   /**
    * Scales the canvas, keeping the layout identical.
    *
-   * Every measurement in a theme is a fraction of the canvas, so this is a
-   * true zoom: a 2× image is the 1× image at twice the resolution, not a
-   * differently-composed one.
+   * Every measurement in a theme is a fraction of the canvas, so this is a true zoom: a 2× image is the 1× image at twice the resolution, not a differently-composed one.
    */
   setScale(factor: number): this {
     if (!Number.isFinite(factor) || factor <= 0) {

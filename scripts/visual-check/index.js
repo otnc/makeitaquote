@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// Renders a curated set of option combinations and builds a contact sheet, so
-// the visible behaviour of the library can be eyeballed in one page.
+// Renders a curated set of option combinations and builds a contact sheet, so the visible behaviour of the library can be eyeballed in one page.
 //
 //   npm run build          # visual-check reads dist/, so build first
 //   npm run visual         # writes docs/visual/ and its manifest

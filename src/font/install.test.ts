@@ -152,8 +152,7 @@ describe('uninstallFonts', () => {
   })
 
   it('rethrows a real deletion failure instead of swallowing it', async () => {
-    // A directory where a cache file is expected: unlink fails with EISDIR/EPERM,
-    // never ENOENT, so this must propagate rather than being counted as "already gone".
+    // A directory where a cache file is expected: unlink fails with EISDIR/EPERM, never ENOENT, so this must propagate rather than being counted as "already gone".
     await mkdir(join(dir, M_PLUS_400), { recursive: true })
 
     await expect(uninstallFonts(['M PLUS Rounded 1c'], dir)).rejects.toThrow()

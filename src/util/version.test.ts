@@ -29,8 +29,7 @@ describe('isNewerVersion', () => {
   })
 
   it('falls back to treating an unparseable segment as zero', () => {
-    // "not-a-version" has no digits at all, so every segment is 0 — the same
-    // as comparing against "0.0.0".
+    // "not-a-version" has no digits at all, so every segment is 0 — the same as comparing against "0.0.0".
     expect(isNewerVersion('1.0.0', 'not-a-version')).toBe(false)
     expect(isNewerVersion('not-a-version', '1.0.0')).toBe(true)
   })
@@ -40,8 +39,7 @@ describe('isNewerVersion', () => {
   })
 
   it('does not treat a release as newer than its own prerelease', () => {
-    // Not full semver — a prerelease and its release compare as equal here —
-    // but it must never flip in the wrong direction (see the previous case).
+    // Not full semver — a prerelease and its release compare as equal here — but it must never flip in the wrong direction (see the previous case).
     expect(isNewerVersion('12.0.0-rc.1', '12.0.0')).toBe(false)
   })
 

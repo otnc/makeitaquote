@@ -25,8 +25,7 @@ export async function renderCases(cases, { offline, only, outDir }) {
 
   await mkdir(outDir, { recursive: true })
 
-  // Only the groups actually being (re)rendered are cleared — `--only` runs
-  // leave every other group untouched.
+  // Only the groups actually being (re)rendered are cleared — `--only` runs leave every other group untouched.
   const groupsToRender = [...new Set(selected.map((testCase) => testCase.group))]
   for (const group of groupsToRender) {
     await rm(join(outDir, group), { recursive: true, force: true })

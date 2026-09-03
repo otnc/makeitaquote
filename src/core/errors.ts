@@ -11,8 +11,7 @@ export interface FontNotAvailableErrorOptions extends MiQErrorOptions {
 /**
  * A requested font family could not be resolved.
  *
- * Only thrown when `strictFonts` is enabled — by default a missing font is a
- * warning and rendering falls back to whatever the system provides.
+ * Only thrown when `strictFonts` is enabled — by default a missing font is a warning and rendering falls back to whatever the system provides.
  */
 export class FontNotAvailableError extends MiQError {
   readonly family: string | undefined

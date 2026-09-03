@@ -4,11 +4,7 @@ import type { Image } from './canvasFactory'
 export type BackgroundImageCacheOptions = AssetCacheOptions
 
 /**
- * The cache for `theme.backgroundImage`, kept separate from `avatarCache`
- * (see `assetCache.ts` for why unrelated asset kinds get their own instance):
- * a background is typically one of a handful of fixed, reused assets rather
- * than a different picture per user, so it gets a longer TTL and far fewer
- * slots than avatars — and a burst of avatar fetches can no longer evict it.
+ * The cache for `theme.backgroundImage`, kept separate from `avatarCache` (see `assetCache.ts` for why unrelated asset kinds get their own instance): a background is typically one of a handful of fixed, reused assets rather than a different picture per user, so it gets a longer TTL and far fewer slots than avatars — and a burst of avatar fetches can no longer evict it.
  */
 export const backgroundImageCache = createAssetCache<Image>({
   maxEntries: 16,

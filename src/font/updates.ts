@@ -11,12 +11,9 @@ export interface FontUpdateStatus {
 }
 
 /**
- * Compares each installed family's cached version against what Google Fonts
- * currently serves.
+ * Compares each installed family's cached version against what Google Fonts currently serves.
  *
- * Only a CSS request per family — the same lookup `useFont`/`installFont`
- * already make before downloading anything — so this never fetches font
- * bytes just to check.
+ * Only a CSS request per family — the same lookup `useFont`/`installFont` already make before downloading anything — so this never fetches font bytes just to check.
  */
 export async function checkFontUpdates(
   installed: readonly InstalledFont[],

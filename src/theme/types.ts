@@ -1,18 +1,15 @@
 import type { ColorInput } from './color'
 
 /**
- * A built-in color palette — combined with `layout` to pick a base preset.
- * `'custom'` starts fully transparent, for compositing your own colors over.
+ * A built-in color palette — combined with `layout` to pick a base preset. `'custom'` starts fully transparent, for compositing your own colors over.
  */
 export type ThemePalette = 'dark' | 'light' | 'custom'
 
 /**
  * How the avatar and the quote are arranged.
  *
- * - `side` puts them next to each other, the avatar fading sideways into the
- *   background.
- * - `new` fills the canvas with the avatar and fades it downwards, with the
- *   quote sitting over the bottom of it. Suits a tall canvas.
+ * - `side` puts them next to each other, the avatar fading sideways into the background.
+ * - `new` fills the canvas with the avatar and fades it downwards, with the quote sitting over the bottom of it. Suits a tall canvas.
  */
 export type LayoutMode = 'side' | 'new'
 
@@ -37,16 +34,13 @@ export interface AvatarTheme {
    * - `cover` crops to fill it, the usual choice
    * - `contain` fits the whole image inside, leaving background either side
    *
-   * See also `MiQOptions.sizeToAvatar`, which reshapes the canvas around the
-   * image instead of reshaping the image.
+   * See also `MiQOptions.sizeToAvatar`, which reshapes the canvas around the image instead of reshaping the image.
    */
   fit: 'cover' | 'contain'
   /**
    * The mask the avatar (and its fallback tile) is clipped to.
    *
-   * `circle` inscribes the largest circle that fits the box, centred — for a
-   * wide or tall box that leaves background showing at the sides or top and
-   * bottom, same as a round profile picture would on any other card shape.
+   * `circle` inscribes the largest circle that fits the box, centred — for a wide or tall box that leaves background showing at the sides or top and bottom, same as a round profile picture would on any other card shape.
    */
   shape: 'rectangle' | 'circle'
   /** Drawn when there is no avatar, or fetching one failed. `null` leaves it blank. */
@@ -80,8 +74,7 @@ export interface Area {
 /**
  * Where the quote goes.
  *
- * `'auto'` derives it from the layout and the avatar's side, so flipping the
- * avatar moves the text with it.
+ * `'auto'` derives it from the layout and the avatar's side, so flipping the avatar moves the text with it.
  */
 export type AreaSetting = Area | 'auto'
 
@@ -92,8 +85,7 @@ export interface TextTheme {
   /**
    * Starting font size.
    *
-   * Values in `(0, 1]` are read as a fraction of the canvas height; anything
-   * larger is taken as pixels.
+   * Values in `(0, 1]` are read as a fraction of the canvas height; anything larger is taken as pixels.
    */
   size: number
   /** Lower bound for the auto-fit search, same units as `size`. */
@@ -102,8 +94,7 @@ export interface TextTheme {
   /**
    * Hard cap on the number of lines, independent of the box height.
    *
-   * Defaults to 13 for `side`, 5 for `new`; can be raised up to 20 for `side`
-   * or 10 for `new`.
+   * Defaults to 13 for `side`, 5 for `new`; can be raised up to 20 for `side` or 10 for `new`.
    */
   maxLines: number
   align: 'left' | 'center' | 'right'
@@ -158,15 +149,11 @@ export interface WatermarkTheme {
   weight: FontWeight
   size: number
   /**
-   * Height of an image watermark, in place of `size`. `null` (default): the
-   * image uses `size` too, same as before this existed. `size` is tuned for
-   * a short text tag and reads small for a logo, so this exists to size the
-   * two forms independently without one dragging the other along.
+   * Height of an image watermark, in place of `size`. `null` (default): the image uses `size` too, same as before this existed. `size` is tuned for a short text tag and reads small for a logo, so this exists to size the two forms independently without one dragging the other along.
    */
   imageSize: number | null
   /**
-   * `'auto'` keeps it clear of the avatar: opposite side for `side` layouts,
-   * bottom right for `new` ones.
+   * `'auto'` keeps it clear of the avatar: opposite side for `side` layouts, bottom right for `new` ones.
    */
   position: 'auto' | 'bottom-right' | 'bottom-left' | 'bottom-center'
 }
@@ -182,9 +169,7 @@ export interface EmojiTheme {
 /**
  * Anything that can stand in for a background image.
  *
- * The same shape as `AvatarSource` in `core/types.ts`, restated here rather
- * than imported — `core/types.ts` imports `Theme` from this module, so the
- * other way round would be circular.
+ * The same shape as `AvatarSource` in `core/types.ts`, restated here rather than imported — `core/types.ts` imports `Theme` from this module, so the other way round would be circular.
  */
 export type BackgroundImageSource = string | URL | Buffer | Uint8Array
 
@@ -208,8 +193,7 @@ export interface BackgroundGradientTheme {
   type: 'linear' | 'radial'
   direction: BackgroundGradientDirection
   /**
-   * Color at each stop, 0–1 along the gradient — two or more, in any order.
-   * A translucent color lets `background` show through underneath it.
+   * Color at each stop, 0–1 along the gradient — two or more, in any order. A translucent color lets `background` show through underneath it.
    */
   stops: ReadonlyArray<readonly [color: ColorInput, offset: number]>
 }
@@ -222,8 +206,7 @@ export interface Theme {
   /** Drawn over `background` and behind everything else. `null` (default): none. */
   backgroundImage: BackgroundImageTheme | null
   /**
-   * A generated gradient fill, drawn over `background` and behind
-   * `backgroundImage`. `null` (default): none.
+   * A generated gradient fill, drawn over `background` and behind `backgroundImage`. `null` (default): none.
    */
   backgroundGradient: BackgroundGradientTheme | null
   avatar: AvatarTheme

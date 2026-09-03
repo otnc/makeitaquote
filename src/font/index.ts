@@ -7,8 +7,7 @@ import { fonts as registry } from './registry'
 /**
  * The font API.
  *
- * Composed here rather than in `registry.ts` because the download side needs
- * the registry, and having the registry reach back for it would be circular.
+ * Composed here rather than in `registry.ts` because the download side needs the registry, and having the registry reach back for it would be circular.
  */
 export const fonts = {
   ...registry,
@@ -22,9 +21,7 @@ export const fonts = {
    * await fonts.use('Noto Sans JP', { weights: [400, 700] }) // real bold
    * ```
    *
-   * Only families Google Fonts serves can be fetched by name — which are all
-   * openly licensed. For anything else, use `registerFromPath` or
-   * `registerFromURL`.
+   * Only families Google Fonts serves can be fetched by name — which are all openly licensed. For anything else, use `registerFromPath` or `registerFromURL`.
    */
   use: (family: string, options?: EnsureOptions) => useFont(family, options),
 
@@ -34,8 +31,7 @@ export const fonts = {
   /**
    * Makes the default families available.
    *
-   * Call this at startup, or at image-build time with `MIQ_FONT_CACHE_DIR`
-   * set, so no render ever has to wait for a download.
+   * Call this at startup, or at image-build time with `MIQ_FONT_CACHE_DIR` set, so no render ever has to wait for a download.
    */
   ensureDefaults: (options?: EnsureOptions) => ensureDefaultFonts(options),
 
@@ -48,8 +44,7 @@ export const fonts = {
   /**
    * Looks up where Google currently serves a family, without downloading it.
    *
-   * Throws `AssetFetchError` when Google does not serve it, which is also how
-   * paid or otherwise-licensed fonts are rejected.
+   * Throws `AssetFetchError` when Google does not serve it, which is also how paid or otherwise-licensed fonts are rejected.
    */
   resolve: resolveGoogleFont,
 

@@ -40,8 +40,7 @@ const NETWORK_HOSTS = [
 /**
  * Whether `dir` (or the nearest parent that exists) can be written to.
  *
- * Only checks — never creates `dir` itself, so running `miq env` doesn't
- * conjure a cache directory into existence just to ask about it.
+ * Only checks — never creates `dir` itself, so running `miq env` doesn't conjure a cache directory into existence just to ask about it.
  */
 async function checkWritable(dir: string): Promise<boolean> {
   try {
@@ -61,10 +60,7 @@ async function checkWritable(dir: string): Promise<boolean> {
 /**
  * A response, even an error one, means the network and TLS are fine.
  *
- * HEAD rather than GET: this only asks whether the host is reachable, not
- * for anything in the body, so there's no reason to download one — even an
- * error status or a 405 for HEAD itself still proves the network and TLS
- * are fine, which is all this checks.
+ * HEAD rather than GET: this only asks whether the host is reachable, not for anything in the body, so there's no reason to download one — even an error status or a 405 for HEAD itself still proves the network and TLS are fine, which is all this checks.
  */
 async function checkReachable(url: string): Promise<boolean> {
   try {

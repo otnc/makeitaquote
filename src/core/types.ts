@@ -8,8 +8,7 @@ export type AvatarSource = string | URL | Buffer | Uint8Array
 /**
  * The normalized quote, after validation.
  *
- * Every input path — a Discord message, a Misskey note, a tweet, a plain
- * object — lands here before anything is drawn.
+ * Every input path — a Discord message, a Misskey note, a tweet, a plain object — lands here before anything is drawn.
  */
 export interface QuoteData {
   text: string
@@ -31,16 +30,11 @@ export interface QuoteInput {
   username?: string
   displayName?: string
   /**
-   * A string is drawn as text; a URL/Buffer/Uint8Array is drawn as an image
-   * (a logo, say) instead — the two are mutually exclusive, same as `avatar`.
+   * A string is drawn as text; a URL/Buffer/Uint8Array is drawn as an image (a logo, say) instead — the two are mutually exclusive, same as `avatar`.
    */
   watermark?: string | AvatarSource | null
   /**
-   * The image half of `QuoteData.watermark`/`.watermarkImage`, accepted
-   * symmetrically so a round trip through `getData()` → `setFromObject()`
-   * doesn't need to be reassembled by hand. Wins over `watermark` when both
-   * are present (as `getData()`'s own output always is) and truthy; ignored
-   * when it's `undefined`.
+   * The image half of `QuoteData.watermark`/`.watermarkImage`, accepted symmetrically so a round trip through `getData()` → `setFromObject()` doesn't need to be reassembled by hand. Wins over `watermark` when both are present (as `getData()`'s own output always is) and truthy; ignored when it's `undefined`.
    */
   watermarkImage?: AvatarSource | null
   /** How `text` is treated. Default `'raw'`. See `MarkdownMode`. */
@@ -56,8 +50,7 @@ export interface QuoteInput {
 /**
  * The shape of a Discord message that `setFromMessage()` understands.
  *
- * Structural on purpose: discord.js v13, v14 and discord.js-selfbot-v13 all
- * satisfy it, so this package needs no dependency on any of them.
+ * Structural on purpose: discord.js v13, v14 and discord.js-selfbot-v13 all satisfy it, so this package needs no dependency on any of them.
  */
 export interface MessageLike {
   content: string
@@ -66,11 +59,7 @@ export interface MessageLike {
     globalName?: string | null
     global_name?: string | null
     discriminator?: string | null
-    // Method shorthand, not `displayAvatarURL?: (options?: unknown) => string`.
-    // TS checks a property's function type contravariantly under strict mode,
-    // so a real `(options?: ImageURLOptions) => string` from discord.js would
-    // not satisfy a `(options?: unknown) => string` property — only a
-    // shorthand method gets the bivariant check that accepts it.
+    // Method shorthand, not `displayAvatarURL?: (options?: unknown) => string`. TS checks a property's function type contravariantly under strict mode, so a real `(options?: ImageURLOptions) => string` from discord.js would not satisfy a `(options?: unknown) => string` property — only a shorthand method gets the bivariant check that accepts it.
     displayAvatarURL?(options?: unknown): string
   }
   member?: {
@@ -79,24 +68,18 @@ export interface MessageLike {
     displayAvatarURL?(options?: unknown): string
   } | null
   /**
-   * discord.js's per-message mention Collections. Optional, and each
-   * Collection independently so — a `Message` always has all four in
-   * practice, but nothing here requires it.
+   * discord.js's per-message mention Collections. Optional, and each Collection independently so — a `Message` always has all four in practice, but nothing here requires it.
    */
   mentions?: {
     /**
-     * Backing `<@!?id>`. Guild nickname wins over the account username.
-     * `null`, not just absent, in a DM — discord.js has no guild to resolve
-     * a member against there.
+     * Backing `<@!?id>`. Guild nickname wins over the account username. `null`, not just absent, in a DM — discord.js has no guild to resolve a member against there.
      */
     members?: {
       get(id: string): { displayName?: string; nickname?: string | null } | undefined
     } | null
     users?: { get(id: string): { username?: string } | undefined }
     /**
-     * Backing `<#id>`. `id` is here only so a DM channel — which carries no
-     * `name` at all, not even `null` — still structurally overlaps this type;
-     * only `name` is actually read.
+     * Backing `<#id>`. `id` is here only so a DM channel — which carries no `name` at all, not even `null` — still structurally overlaps this type; only `name` is actually read.
      */
     channels?: { get(id: string): { id?: string; name?: string | null } | undefined }
     /** Backing `<@&id>`. */
@@ -107,9 +90,7 @@ export interface MessageLike {
 /**
  * How `<t:…>` timestamps are rendered when mentions are resolved.
  *
- * A timestamp is the one token whose text depends on who is looking: Discord
- * renders it in the reader's own locale and zone. An image has no reader to
- * ask, so it renders in UTC and `en-GB` unless told otherwise.
+ * A timestamp is the one token whose text depends on who is looking: Discord renders it in the reader's own locale and zone. An image has no reader to ask, so it renders in UTC and `en-GB` unless told otherwise.
  */
 export interface MentionOptions {
   /** BCP 47 tag, e.g. `'ja-JP'`. Default `'en-GB'`. */
@@ -123,8 +104,7 @@ export interface MentionOptions {
 /**
  * Which version of a Discord user's avatar and name to quote.
  *
- * Both default to the server's, since that is what a reader of that server
- * actually saw. Whichever you pick, the other is the fallback.
+ * Both default to the server's, since that is what a reader of that server actually saw. Whichever you pick, the other is the fallback.
  */
 export interface MessageSourceOptions {
   /** `'guild'` (default) prefers a per-server avatar; `'global'` the account's. */
@@ -132,30 +112,19 @@ export interface MessageSourceOptions {
   /** `'nickname'` (default) prefers a per-server nickname; `'global'` the account's. */
   name?: 'nickname' | 'global'
   /**
-   * Runs `message.content` through `stripDiscordMarkdown()` before quoting
-   * it. Default false — the content is quoted exactly as written unless you
-   * opt in.
+   * Runs `message.content` through `stripDiscordMarkdown()` before quoting it. Default false — the content is quoted exactly as written unless you opt in.
    *
-   * @deprecated Use `markdown: false` (equivalent to `true` here) or
-   * `markdown: 'discord'` (render the formatting instead of stripping it).
-   * Ignored when `markdown` is set.
+   * @deprecated Use `markdown: false` (equivalent to `true` here) or `markdown: 'discord'` (render the formatting instead of stripping it). Ignored when `markdown` is set.
    */
   stripDiscordMarkdown?: boolean
   /**
-   * How Discord-flavoured markup in `message.content` is treated. Default
-   * `'raw'` — quoted exactly as written, matching the historical default.
-   * See `MarkdownMode`.
+   * How Discord-flavoured markup in `message.content` is treated. Default `'raw'` — quoted exactly as written, matching the historical default. See `MarkdownMode`.
    */
   markdown?: MarkdownMode
   /**
-   * Expands Discord's raw tokens into the text a reader saw: user, role and
-   * channel mentions, slash commands, `<t:…>` timestamps and guild
-   * navigation tabs. Default true.
+   * Expands Discord's raw tokens into the text a reader saw: user, role and channel mentions, slash commands, `<t:…>` timestamps and guild navigation tabs. Default true.
    *
-   * Names come from `message.mentions`, so a mention whose target isn't
-   * there (someone who has since left) is left exactly as written; the rest
-   * carry what they need in the token and resolve regardless. Pass an object
-   * to control how timestamps are rendered.
+   * Names come from `message.mentions`, so a mention whose target isn't there (someone who has since left) is left exactly as written; the rest carry what they need in the token and resolve regardless. Pass an object to control how timestamps are rendered.
    */
   resolveMentions?: boolean | MentionOptions
 }
@@ -163,8 +132,7 @@ export interface MessageSourceOptions {
 /**
  * The shape of a Misskey note that `setFromNote()` understands.
  *
- * Structural, like `MessageLike`: this is what the API actually returns for
- * a note, so a response passed straight through fits without adaptation.
+ * Structural, like `MessageLike`: this is what the API actually returns for a note, so a response passed straight through fits without adaptation.
  */
 export interface NoteLike {
   text?: string | null
@@ -182,30 +150,21 @@ export interface NoteLike {
 
 export interface NoteSourceOptions {
   /**
-   * Runs the note through `stripMfm()` before quoting it. Default **true**,
-   * unlike `stripDiscordMarkdown` for Discord.
+   * Runs the note through `stripMfm()` before quoting it. Default **true**, unlike `stripDiscordMarkdown` for Discord.
    *
-   * The two differ because the markup does. `**bold**` still reads as its
-   * own text with the asterisks left in; `$[jelly ぷりん]` does not — the
-   * function name and brackets are scaffolding that was never meant to be
-   * read, so leaving them in a picture is just noise.
+   * The two differ because the markup does. `**bold**` still reads as its own text with the asterisks left in; `$[jelly ぷりん]` does not — the function name and brackets are scaffolding that was never meant to be read, so leaving them in a picture is just noise.
    *
-   * @deprecated Use `markdown: false` (the default, equivalent to `true`
-   * here) or `markdown: 'misskey'` (render the formatting instead of
-   * stripping it). Ignored when `markdown` is set.
+   * @deprecated Use `markdown: false` (the default, equivalent to `true` here) or `markdown: 'misskey'` (render the formatting instead of stripping it). Ignored when `markdown` is set.
    */
   stripMfm?: boolean
   /**
-   * How MFM in the note's text is treated. Default `false` (stripped),
-   * matching `stripMfm`'s historical default. See `MarkdownMode`.
+   * How MFM in the note's text is treated. Default `false` (stripped), matching `stripMfm`'s historical default. See `MarkdownMode`.
    */
   markdown?: MarkdownMode
   /**
    * Quote the content warning instead of the text it hides. Default false.
    *
-   * A CW is what a reader saw *before* choosing to open the note, so it is
-   * occasionally the honest thing to quote — but the note itself is the
-   * usual intent.
+   * A CW is what a reader saw *before* choosing to open the note, so it is occasionally the honest thing to quote — but the note itself is the usual intent.
    */
   preferCw?: boolean
 }
@@ -213,13 +172,7 @@ export interface NoteSourceOptions {
 /**
  * The shape of a tweet/post that `setFromTweet()` understands.
  *
- * Structural, like `MessageLike`/`NoteLike` — but unlike either, there is no
- * dedicated adapter this package ships that a raw API response passes
- * straight through to: the official API splits a tweet from its author
- * (`author_id`, resolved through a separate `includes.users` array), and
- * FxTwitter spells the fields differently (`screen_name`, `avatar_url`).
- * `fromTwitterApiV2Tweet()` and `fromFxTwitterStatus()` adapt each into this
- * shape.
+ * Structural, like `MessageLike`/`NoteLike` — but unlike either, there is no dedicated adapter this package ships that a raw API response passes straight through to: the official API splits a tweet from its author (`author_id`, resolved through a separate `includes.users` array), and FxTwitter spells the fields differently (`screen_name`, `avatar_url`). `fromTwitterApiV2Tweet()` and `fromFxTwitterStatus()` adapt each into this shape.
  */
 export interface TweetLike {
   text: string
@@ -234,11 +187,7 @@ export interface TweetLike {
 
 export interface TweetSourceOptions {
   /**
-   * How the tweet's text is treated. Default `'raw'` — a tweet has no markup
-   * syntax of its own, so it is quoted exactly as written unless you opt in
-   * to `'twitter'` (render Unicode bold/italic as real bold/italic) or
-   * `false` (normalize those Unicode characters back to plain ASCII). See
-   * `MarkdownMode`.
+   * How the tweet's text is treated. Default `'raw'` — a tweet has no markup syntax of its own, so it is quoted exactly as written unless you opt in to `'twitter'` (render Unicode bold/italic as real bold/italic) or `false` (normalize those Unicode characters back to plain ASCII). See `MarkdownMode`.
    */
   markdown?: MarkdownMode
 }
@@ -254,10 +203,7 @@ export interface TextStyle {
 /**
  * One run of same-styled text, before emoji segmentation.
  *
- * The common currency between a dialect parser (`parseMarkdown()`,
- * `parseDiscordMarkdown()`, `parseMfm()`, `parseTwitterText()`) and
- * `segmentStyledText()`: concatenating every run's `.value` reproduces the
- * same plain text the matching `stripX()` returns.
+ * The common currency between a dialect parser (`parseMarkdown()`, `parseDiscordMarkdown()`, `parseMfm()`, `parseTwitterText()`) and `segmentStyledText()`: concatenating every run's `.value` reproduces the same plain text the matching `stripX()` returns.
  */
 export interface StyledRun {
   value: string
@@ -267,27 +213,19 @@ export interface StyledRun {
 /**
  * How markup in quoted text is treated.
  *
- * - `false` — stripped to plain text with the dialect-appropriate parser
- *   (what `stripDiscordMarkdown()`/`stripMfm()`/`stripMarkdown()` already do).
- * - `'raw'` — left completely untouched; markup characters are drawn as
- *   literal text.
- * - `true` — rendered as standard CommonMark+GFM: bold, italic, strikethrough,
- *   plus the `<u>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<s>`/`<del>` raw HTML tags.
- * - `'discord'` / `'misskey'` / `'twitter'` — rendered using that dialect's
- *   own bold/italic/underline/strikethrough.
+ * - `false` — stripped to plain text with the dialect-appropriate parser (what `stripDiscordMarkdown()`/`stripMfm()`/`stripMarkdown()` already do).
+ * - `'raw'` — left completely untouched; markup characters are drawn as literal text.
+ * - `true` — rendered as standard CommonMark+GFM: bold, italic, strikethrough, plus the `<u>`, `<b>`/`<strong>`, `<i>`/`<em>`, `<s>`/`<del>` raw HTML tags.
+ * - `'discord'` / `'misskey'` / `'twitter'` — rendered using that dialect's own bold/italic/underline/strikethrough.
  *
- * Constructs that change font size (headings, MFM `small`/`center`) are not
- * covered — they draw as structural plain text, same as the stripped modes.
+ * Constructs that change font size (headings, MFM `small`/`center`) are not covered — they draw as structural plain text, same as the stripped modes.
  */
 export type MarkdownMode = true | 'discord' | 'twitter' | 'misskey' | 'raw' | false
 
 /**
  * `QuoteData.markdown` after a `false` request has been resolved away.
  *
- * `false` is handled entirely at the point a quote is built — it strips with
- * the right dialect's parser immediately, and stores `'raw'` here, since the
- * dialect that would strip it is no longer recoverable from the mode alone
- * once the text has left that call.
+ * `false` is handled entirely at the point a quote is built — it strips with the right dialect's parser immediately, and stores `'raw'` here, since the dialect that would strip it is no longer recoverable from the mode alone once the text has left that call.
  */
 export type RenderMarkdownMode = Exclude<MarkdownMode, false>
 
@@ -315,8 +253,7 @@ export type Segment =
       /**
        * Further instances to try if `url` does not serve it.
        *
-       * Only set for a bare `:name:` when several instances are configured —
-       * the shortcode alone does not say which one it belongs to.
+       * Only set for a bare `:name:` when several instances are configured — the shortcode alone does not say which one it belongs to.
        */
       alternativeUrls?: string[]
     }
@@ -324,25 +261,17 @@ export type Segment =
 /**
  * Misskey custom emoji, written `:name:` or `:name@host:`.
  *
- * Recognised by default. A shortcode is only read as an emoji when it does not
- * follow an ASCII alphanumeric and its name is not purely numeric, which is
- * what keeps `12:30:45` and `http://…` intact. Anything that does not resolve
- * is drawn as the text it was written as.
+ * Recognised by default. A shortcode is only read as an emoji when it does not follow an ASCII alphanumeric and its name is not purely numeric, which is what keeps `12:30:45` and `http://…` intact. Anything that does not resolve is drawn as the text it was written as.
  */
 export interface MisskeyOptions {
   /**
-   * The instance bare `:name:` shortcodes belong to, e.g.
-   * `https://misskey.example`. Without it, only `:name@host:` resolves and
-   * bare shortcodes are left as text.
+   * The instance bare `:name:` shortcodes belong to, e.g. `https://misskey.example`. Without it, only `:name@host:` resolves and bare shortcodes are left as text.
    *
-   * Several may be given, in which case each is tried in order and the first
-   * that actually serves the emoji is used — handy for a bot spanning more
-   * than one instance, where a shortcode could belong to any of them.
+   * Several may be given, in which case each is tried in order and the first that actually serves the emoji is used — handy for a bot spanning more than one instance, where a shortcode could belong to any of them.
    */
   instance?: string | string[]
   /**
-   * Resolve `:name@host:` against the host named in the shortcode.
-   * Default true.
+   * Resolve `:name@host:` against the host named in the shortcode. Default true.
    */
   remote?: boolean
 }
@@ -365,8 +294,7 @@ export interface FontSource {
 
 export interface AutoFontOptions {
   /**
-   * Default true. Set false to never fetch a font, using only what is already
-   * registered, in the disk cache, or installed on the system.
+   * Default true. Set false to never fetch a font, using only what is already registered, in the disk cache, or installed on the system.
    */
   online?: boolean
   /** Alias for `online`, kept because it reads better on `MiQOptions`. */
@@ -398,9 +326,7 @@ export interface MiQOptions {
   /**
    * Throw `FontNotAvailableError` instead of warning when a font is missing.
    *
-   * A font-specific override for `onAssetError`: with this unset, a missing
-   * font follows `onAssetError` too (`'text'` warns and falls through,
-   * `'ignore'` does neither, `'throw'` raises `FontNotAvailableError`).
+   * A font-specific override for `onAssetError`: with this unset, a missing font follows `onAssetError` too (`'text'` warns and falls through, `'ignore'` does neither, `'throw'` raises `FontNotAvailableError`).
    */
   strictFonts?: boolean
   /**
@@ -409,53 +335,38 @@ export interface MiQOptions {
    * - `'height'` matches the avatar box's height to the image's
    * - `'width'` matches its width
    *
-   * The theme's aspect ratio is kept, so the whole layout scales with it —
-   * nothing is stretched. Useful when the avatar is the point and you would
-   * rather not resample it at all. Ignored when there is no avatar.
+   * The theme's aspect ratio is kept, so the whole layout scales with it — nothing is stretched. Useful when the avatar is the point and you would rather not resample it at all. Ignored when there is no avatar.
    */
   sizeToAvatar?: 'width' | 'height' | false
   /**
    * What to do when an emoji, avatar or font can't be fetched.
    *
-   * - `'text'` (default) draws the raw text an emoji came from, and warns
-   *   once for a missing font
-   * - `'ignore'` drops it silently — an emoji or avatar just doesn't draw,
-   *   and a missing font warns not at all
-   * - `'throw'` raises `AssetFetchError` for an emoji or avatar, or
-   *   `FontNotAvailableError` for a font
+   * - `'text'` (default) draws the raw text an emoji came from, and warns once for a missing font
+   * - `'ignore'` drops it silently — an emoji or avatar just doesn't draw, and a missing font warns not at all
+   * - `'throw'` raises `AssetFetchError` for an emoji or avatar, or `FontNotAvailableError` for a font
    *
    * `strictFonts` overrides this for fonts specifically.
    */
   onAssetError?: 'ignore' | 'text' | 'throw'
   signal?: AbortSignal
   /**
-   * Default `markdown` for every `setFromMessage()`/`setFromNote()`/
-   * `setFromTweet()`/`setText()`/`setFromObject()` call that doesn't specify
-   * its own. Falls back to each call's own historical default when this is
-   * unset too. See `MarkdownMode`.
+   * Default `markdown` for every `setFromMessage()`/`setFromNote()`/`setFromTweet()`/`setText()`/`setFromObject()` call that doesn't specify its own. Falls back to each call's own historical default when this is unset too. See `MarkdownMode`.
    */
   markdown?: MarkdownMode
 }
 
 /**
- * Options for `MiQChain` — stacking two already-built `MiQ` quotes into one
- * image, a reply/quote pair the way Discord, X and Misskey all have one.
+ * Options for `MiQChain` — stacking two already-built `MiQ` quotes into one image, a reply/quote pair the way Discord, X and Misskey all have one.
  *
- * Only the `avatar.position` ("which side the avatar sits on", see the
- * README's "Flipping sides") pairing is `MiQChain`'s own concern — everything
- * else (theme, bold, color, markdown, …) is already baked into each `MiQ`
- * instance by the time it's passed in.
+ * Only the `avatar.position` ("which side the avatar sits on", see the README's "Flipping sides") pairing is `MiQChain`'s own concern — everything else (theme, bold, color, markdown, …) is already baked into each `MiQ` instance by the time it's passed in.
  */
 export interface ChainOptions {
   /**
-   * Swaps which half gets which side. Default `false`: the top quote's
-   * avatar goes on the right, the bottom's on the left. `true` inverts that
-   * pairing.
+   * Swaps which half gets which side. Default `false`: the top quote's avatar goes on the right, the bottom's on the left. `true` inverts that pairing.
    */
   flip?: boolean
   /**
-   * Forces the top quote's avatar to a specific side, overriding `flip`'s
-   * pairing for this half only.
+   * Forces the top quote's avatar to a specific side, overriding `flip`'s pairing for this half only.
    */
   topFlip?: boolean
   /** Same as `topFlip`, for the bottom quote. */

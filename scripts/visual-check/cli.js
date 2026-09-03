@@ -1,7 +1,6 @@
 import { parseArgs } from 'node:util'
 
-// `parseArgs` reports an unknown flag rather than ignoring it — a typo in
-// `--only` used to just render nothing.
+// `parseArgs` reports an unknown flag rather than ignoring it — a typo in `--only` used to just render nothing.
 export function parseCli() {
   const { values } = parseArgs({
     options: {

@@ -35,8 +35,7 @@ describe('drawnLineWidth / drawLine agreement', () => {
 
     drawLine(ctx, line, 0, 50, options(), widths)
 
-    // pipeline.ts computes `widths` once (for alignedX) and passes it here —
-    // drawLine must not measure the same segment a second time on top of that.
+    // pipeline.ts computes `widths` once (for alignedX) and passes it here — drawLine must not measure the same segment a second time on top of that.
     expect(spy).not.toHaveBeenCalled()
   })
 
@@ -80,8 +79,7 @@ describe('drawnLineWidth / drawLine agreement', () => {
     const opts = options()
     const weight = resolvedWeight(opts.baseWeight, true)
 
-    // The same primitives applyFont() uses internally, so this is an
-    // independent check of measureLine()'s formula rather than a tautology.
+    // The same primitives applyFont() uses internally, so this is an independent check of measureLine()'s formula rather than a tautology.
     ctx.font = fontString(weight, opts.fontSize, opts.family, false)
     const stroke = syntheticBoldWidth(ctx, weight, opts.family, opts.fontSize)
     const textWidth = ctx.measureText('bold text').width

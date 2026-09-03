@@ -6,8 +6,7 @@ import { graphemeBoundaries } from '../util/grapheme'
 /**
  * How good a break position is.
  *
- * Wrapping prefers the rightmost `phrase` that fits, falling back to `char`
- * only when there is no phrase boundary on the line.
+ * Wrapping prefers the rightmost `phrase` that fits, falling back to `char` only when there is no phrase boundary on the line.
  */
 export const BreakPriority = {
   none: 0,
@@ -81,9 +80,7 @@ export interface BreakpointOptions {
 /**
  * Scores every position in `text` for how willing we are to break there.
  *
- * Index `i` describes a break *before* `text[i]`, so index 0 and `text.length`
- * are never candidates. Positions that would split a grapheme cluster are left
- * at `none`, as are ones forbidden by kinsoku rules.
+ * Index `i` describes a break *before* `text[i]`, so index 0 and `text.length` are never candidates. Positions that would split a grapheme cluster are left at `none`, as are ones forbidden by kinsoku rules.
  */
 const breakpointCache = lru<BreakPriority[]>(512, 5 * 60_000)
 
@@ -144,9 +141,7 @@ export function findBreakpoints(text: string, options: BreakpointOptions = {}): 
 }
 
 /**
- * Japanese line-breaking rules: some characters may not start a line, and some
- * may not end one. Both are enforced by demoting the offending position to
- * `none`, which pushes the break to the next-best candidate.
+ * Japanese line-breaking rules: some characters may not start a line, and some may not end one. Both are enforced by demoting the offending position to `none`, which pushes the break to the next-best candidate.
  */
 function applyKinsoku(text: string, priorities: BreakPriority[]): void {
   for (let i = 1; i < text.length; i++) {

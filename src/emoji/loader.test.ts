@@ -34,8 +34,7 @@ describe('the local Twemoji store', () => {
     // A codepoint the CDN does not have, so only the local file can answer.
     await writeFile(join(dir, 'fffef.png'), pixel)
     vi.stubEnv('MIQ_TWEMOJI_CACHE_DIR', dir)
-    // If the wiring broke, the fetch stub turns the CDN attempt into a
-    // failure rather than real network traffic.
+    // If the wiring broke, the fetch stub turns the CDN attempt into a failure rather than real network traffic.
     vi.stubGlobal('fetch', async () => {
       throw new Error('should not be called')
     })

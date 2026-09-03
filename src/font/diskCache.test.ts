@@ -5,10 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cachedFontPath, resolveCacheDir, writeCachedFont } from './diskCache'
 
 /**
- * `open()`'s handle normally passes straight through to the real one; a test
- * flips `failNextWrite` to make the next handle's `write()` reject, so
- * `writeCachedFont()`'s failure-cleanup path can be exercised without
- * actually running the disk out of space.
+ * `open()`'s handle normally passes straight through to the real one; a test flips `failNextWrite` to make the next handle's `write()` reject, so `writeCachedFont()`'s failure-cleanup path can be exercised without actually running the disk out of space.
  */
 let failNextWrite = false
 

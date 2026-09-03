@@ -11,12 +11,9 @@ export function isBold(weight: FontWeight): boolean {
 }
 
 /**
- * The weight to actually draw a run at, given the theme's base weight and
- * whether markdown asked this particular run to be bold.
+ * The weight to actually draw a run at, given the theme's base weight and whether markdown asked this particular run to be bold.
  *
- * Not bold: unchanged. Bold: `base` already, if it is already heavy enough
- * (`isBold`) — a theme deliberately set to 900 stays 900 rather than being
- * pulled down to 700 — otherwise bumped to `700`.
+ * Not bold: unchanged. Bold: `base` already, if it is already heavy enough (`isBold`) — a theme deliberately set to 900 stays 900 rather than being pulled down to 700 — otherwise bumped to `700`.
  */
 export function resolvedWeight(base: FontWeight, bold: boolean | undefined): FontWeight {
   if (!bold) return base
@@ -26,10 +23,7 @@ export function resolvedWeight(base: FontWeight, bold: boolean | undefined): Fon
 /**
  * Families whose bold is faked, keyed by family name.
  *
- * Variable fonts registered through `GlobalFonts` — including the Noto Sans JP
- * this package downloads — expose only their default instance to Skia, so
- * `ctx.font = 'bold …'` measures and draws identically to regular. Detected
- * once per family by measuring both.
+ * Variable fonts registered through `GlobalFonts` — including the Noto Sans JP this package downloads — expose only their default instance to Skia, so `ctx.font = 'bold …'` measures and draws identically to regular. Detected once per family by measuring both.
  */
 const syntheticFamilies = new Map<string, boolean>()
 
@@ -44,8 +38,7 @@ function detect(ctx: SKRSContext2D, family: string): boolean {
   const bold = ctx.measureText(PROBE).width
   ctx.font = previous
 
-  // A real bold face is wider. Anything within a rounding error of regular
-  // means the weight was ignored.
+  // A real bold face is wider. Anything within a rounding error of regular means the weight was ignored.
   const synthetic = regular > 0 && bold <= regular * 1.001
   syntheticFamilies.set(family, synthetic)
   return synthetic
@@ -54,8 +47,7 @@ function detect(ctx: SKRSContext2D, family: string): boolean {
 /**
  * How wide to stroke text to fake bold, in pixels. `0` means don't.
  *
- * Stroking the glyph outline in the fill color thickens it, which is the
- * standard way to emulate bold on a canvas when no bold face is available.
+ * Stroking the glyph outline in the fill color thickens it, which is the standard way to emulate bold on a canvas when no bold face is available.
  */
 export function syntheticBoldWidth(
   ctx: SKRSContext2D,
@@ -73,8 +65,7 @@ export function syntheticBoldWidth(
 /**
  * Fills text, thickening it first if bold has to be faked.
  *
- * `strokeWidth` comes from `syntheticBoldWidth`; passing 0 makes this a plain
- * `fillText`.
+ * `strokeWidth` comes from `syntheticBoldWidth`; passing 0 makes this a plain `fillText`.
  */
 export function fillText(
   ctx: SKRSContext2D,
@@ -84,8 +75,7 @@ export function fillText(
   strokeWidth: number,
 ): void {
   if (strokeWidth > 0) {
-    // Restoring by hand rather than with save()/restore(): this build of the
-    // canvas does not put strokeStyle back.
+    // Restoring by hand rather than with save()/restore(): this build of the canvas does not put strokeStyle back.
     const previousStroke = ctx.strokeStyle
     const previousWidth = ctx.lineWidth
     const previousJoin = ctx.lineJoin

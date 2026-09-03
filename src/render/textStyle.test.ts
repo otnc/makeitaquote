@@ -61,8 +61,7 @@ describe('syntheticBoldWidth', () => {
     const small = syntheticBoldWidth(ctx, 'bold', 'sans-serif', 20)
     const large = syntheticBoldWidth(ctx, 'bold', 'sans-serif', 80)
 
-    // Either the family has a real bold (both zero) or it is faked, in which
-    // case the stroke has to grow with the text.
+    // Either the family has a real bold (both zero) or it is faked, in which case the stroke has to grow with the text.
     if (small > 0) expect(large).toBeCloseTo(small * 4)
     else expect(large).toBe(0)
   })

@@ -3,8 +3,7 @@ import { ValidationError } from './errors'
 import { fromFxTwitterStatus, fromTwitterApiV2Tweet } from './tweetAdapters'
 
 describe('fromFxTwitterStatus', () => {
-  // Captured from a live `FxTwitterV2#getStatus('20')` call — Jack Dorsey's
-  // first tweet — trimmed to the fields the adapter actually reads.
+  // Captured from a live `FxTwitterV2#getStatus('20')` call — Jack Dorsey's first tweet — trimmed to the fields the adapter actually reads.
   const status = {
     text: 'just setting up my twttr',
     author: {

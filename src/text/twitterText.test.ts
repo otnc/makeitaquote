@@ -9,8 +9,7 @@ describe('parseTwitterText', () => {
   })
 
   it('decodes sans-serif bold letters and digits back to ASCII, styled bold', () => {
-    // 𝗕𝗼𝗹𝗱 𝟭𝟮𝟯 — the space between them is an ordinary ASCII space, not a
-    // math symbol, so it comes back as its own unstyled run.
+    // 𝗕𝗼𝗹𝗱 𝟭𝟮𝟯 — the space between them is an ordinary ASCII space, not a math symbol, so it comes back as its own unstyled run.
     expect(parseTwitterText('𝗕𝗼𝗹𝗱 𝟭𝟮𝟯')).toEqual([
       { value: 'Bold', style: { bold: true } },
       { value: ' ' },

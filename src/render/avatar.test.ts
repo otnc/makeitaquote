@@ -142,9 +142,7 @@ describe('loadAvatar', () => {
     expect(fetcher.calls).toEqual(['https://cdn.test/a.png'])
   })
 
-  // Last, matching emoji/loader.test.ts's convention — afterEach only merges
-  // options back, so a test that disables caching must run after every test
-  // that depends on caching being on.
+  // Last, matching emoji/loader.test.ts's convention — afterEach only merges options back, so a test that disables caching must run after every test that depends on caching being on.
   it('always refetches once caching is disabled', async () => {
     configureAvatarCache({ enabled: false })
     const fetcher = countingFetcher()
@@ -258,8 +256,7 @@ describe('drawAvatar grayscale fallback (no ctx.filter support)', () => {
         shape: 'rectangle',
         fallback: null,
       },
-      // A non-integer box: painting/desaturating must cover pixel (4, 4) too,
-      // not just the 4x4 region a truncated width/height would leave.
+      // A non-integer box: painting/desaturating must cover pixel (4, 4) too, not just the 4x4 region a truncated width/height would leave.
       box: { x: 0, y: 0, width: 4.9, height: 4.9 },
     })
 
@@ -273,8 +270,7 @@ describe('drawAvatar grayscale fallback (no ctx.filter support)', () => {
 
     const canvas = createCanvas(10, 10)
     const ctx = canvas.getContext('2d')
-    // A colored "card background" painted before the avatar, standing in for
-    // whatever sits behind the box's corners once the circle clip excludes them.
+    // A colored "card background" painted before the avatar, standing in for whatever sits behind the box's corners once the circle clip excludes them.
     ctx.fillStyle = '#3366CC'
     ctx.fillRect(0, 0, 10, 10)
     const image = await loadAvatar(redSquare())

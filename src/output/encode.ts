@@ -60,9 +60,7 @@ export async function encode(
 /**
  * The image as a stream.
  *
- * A quote is a small, already-buffered image, so this wraps the buffer rather
- * than genuinely streaming — it exists so callers that want a stream don't
- * have to build one themselves.
+ * A quote is a small, already-buffered image, so this wraps the buffer rather than genuinely streaming — it exists so callers that want a stream don't have to build one themselves.
  */
 export async function encodeStream(
   canvas: Canvas,

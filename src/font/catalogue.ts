@@ -2,15 +2,9 @@ import { distance } from 'fastest-levenshtein'
 import { buildAliasMap, buildNormalizedKeyMap } from '../util/aliasCatalogue'
 
 /**
- * Fonts this package can fetch by name, one row each — the single source
- * `FONT_CATALOGUE` and `FONT_ALIASES` are both built from. `alias` is a
- * short option name; `null` for none.
+ * Fonts this package can fetch by name, one row each — the single source `FONT_CATALOGUE` and `FONT_ALIASES` are both built from. `alias` is a short option name; `null` for none.
  *
- * Everything here is served by Google Fonts, which only distributes SIL
- * Open Font License, Apache 2.0 or Ubuntu Font Licence fonts — a paid or
- * otherwise-licensed font isn't on Google Fonts and can't be requested by
- * name here. The list is a convenience, not a limit: any Google Fonts
- * family works.
+ * Everything here is served by Google Fonts, which only distributes SIL Open Font License, Apache 2.0 or Ubuntu Font Licence fonts — a paid or otherwise-licensed font isn't on Google Fonts and can't be requested by name here. The list is a convenience, not a limit: any Google Fonts family works.
  */
 const FONTS = [
   // Japanese
@@ -46,20 +40,14 @@ export type CataloguedFont = (typeof FONTS)[number]['family']
 export const FONT_CATALOGUE: readonly CataloguedFont[] = FONTS.map((entry) => entry.family)
 
 /**
- * The catalogued families with no alias — installed automatically as script
- * fallback (`font/sources.ts`), but never picked by name through `font=`.
- * `miq install all --no-fallback` skips these.
+ * The catalogued families with no alias — installed automatically as script fallback (`font/sources.ts`), but never picked by name through `font=`. `miq install all --no-fallback` skips these.
  */
 export const FONT_CATALOGUE_FALLBACK_ONLY: readonly CataloguedFont[] = FONTS.filter(
   (entry) => entry.alias === null,
 ).map((entry) => entry.family)
 
 /**
- * CSS generic family keywords, resolved by the system rather than by name.
- * Shared with `resolveFamily()` (registry.ts) and `candidateFamilies()`
- * (render/pipeline.ts), and skipped by `resolveFontStack()` below so an
- * alias never shadows one — `FONT_ALIASES.serif` is `Zen Old Mincho`, and
- * `serif` is also this generic keyword.
+ * CSS generic family keywords, resolved by the system rather than by name. Shared with `resolveFamily()` (registry.ts) and `candidateFamilies()` (render/pipeline.ts), and skipped by `resolveFontStack()` below so an alias never shadows one — `FONT_ALIASES.serif` is `Zen Old Mincho`, and `serif` is also this generic keyword.
  */
 export const GENERIC_FONT_FAMILIES = new Set([
   'sans-serif',
@@ -77,10 +65,7 @@ export function isCatalogued(family: string): boolean {
 }
 
 /**
- * Short, typing-friendly names for the catalogue, built from `FONTS` above —
- * handy for exposing font choice through something like a command option.
- * Keys are lower-cased; use `resolveFontAlias()` rather than indexing this
- * directly if the input isn't already normalized.
+ * Short, typing-friendly names for the catalogue, built from `FONTS` above — handy for exposing font choice through something like a command option. Keys are lower-cased; use `resolveFontAlias()` rather than indexing this directly if the input isn't already normalized.
  */
 export const FONT_ALIASES: Readonly<Record<string, CataloguedFont>> = buildAliasMap(
   FONTS,
@@ -95,9 +80,7 @@ const CATALOGUE_BY_LOWERCASE = buildNormalizedKeyMap(
 )
 
 /**
- * Turns an alias, or a catalogued family name in any case, into the exact
- * spelling `fonts.use()` expects. `undefined` for anything neither table
- * recognizes — pair with `suggestionFor()` for a "did you mean" hint.
+ * Turns an alias, or a catalogued family name in any case, into the exact spelling `fonts.use()` expects. `undefined` for anything neither table recognizes — pair with `suggestionFor()` for a "did you mean" hint.
  */
 export function resolveFontAlias(input: string): string | undefined {
   const key = input.trim().toLowerCase()
@@ -116,11 +99,7 @@ export function unquoteFontFamily(part: string): string {
 }
 
 /**
- * Resolves every alias in a CSS-style, comma-separated font stack, so
- * `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end up identical.
- * A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even when
- * it's also an alias key; anything else unrecognized passes through as
- * typed, just trimmed and unquoted.
+ * Resolves every alias in a CSS-style, comma-separated font stack, so `'pop, sans-serif'` and `'Hachi Maru Pop, sans-serif'` end up identical. A generic keyword (`GENERIC_FONT_FAMILIES`) is left untouched even when it's also an alias key; anything else unrecognized passes through as typed, just trimmed and unquoted.
  */
 export function resolveFontStack(stack: string): string {
   return stack
@@ -145,8 +124,7 @@ const KNOWN_UNAVAILABLE: Record<string, string> = {
 /**
  * Near-misses the edit distance below does not catch on its own.
  *
- * Mostly rewordings rather than typos — a dropped `PLUS`, a trailing
- * `regular` — which are further from the real name than a misspelling is.
+ * Mostly rewordings rather than typos — a dropped `PLUS`, a trailing `regular` — which are further from the real name than a misspelling is.
  */
 const SUGGESTIONS: Record<string, string> = {
   'noto sans jp regular': 'Noto Sans JP',
@@ -165,8 +143,7 @@ function normalize(family: string): string {
 /**
  * How far off a name may be and still be worth suggesting.
  *
- * Proportional to length, so a long family name tolerates a couple of typos
- * while a short one does not get matched to something unrelated.
+ * Proportional to length, so a long family name tolerates a couple of typos while a short one does not get matched to something unrelated.
  */
 function tolerance(query: string): number {
   return Math.max(2, Math.floor(query.length / 3))
@@ -175,8 +152,7 @@ function tolerance(query: string): number {
 /**
  * The catalogued family a misspelling most likely meant.
  *
- * The explicit table above wins; anything else is matched on edit distance,
- * which covers ordinary typos without having to list them one by one.
+ * The explicit table above wins; anything else is matched on edit distance, which covers ordinary typos without having to list them one by one.
  */
 export function suggestionFor(family: string): string | undefined {
   const listed = SUGGESTIONS[family.trim().toLowerCase()]

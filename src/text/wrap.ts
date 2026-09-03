@@ -12,8 +12,7 @@ export interface WrapOptions extends BreakpointOptions {
 }
 
 /**
- * A unit that is never split further, plus how willing we are to break in
- * front of it.
+ * A unit that is never split further, plus how willing we are to break in front of it.
  */
 interface Token {
   segment: Segment
@@ -25,10 +24,7 @@ interface Token {
 /**
  * Breaks segments into lines that fit `maxWidth`.
  *
- * Hard newlines always split. Within a paragraph the rightmost phrase boundary
- * that fits wins; if the line has none, a character boundary is used; and if a
- * single token is wider than the whole line on its own, it is cut at grapheme
- * boundaries so it can never overflow.
+ * Hard newlines always split. Within a paragraph the rightmost phrase boundary that fits wins; if the line has none, a character boundary is used; and if a single token is wider than the whole line on its own, it is cut at grapheme boundaries so it can never overflow.
  */
 export function wrapSegments(segments: readonly Segment[], options: WrapOptions): Line[] {
   const lines: Line[] = []
@@ -84,8 +80,7 @@ function wrapParagraph(segments: readonly Segment[], options: WrapOptions): Line
         // Nothing on this line may be broken before, so the line ends here.
         flush()
       } else {
-        // Everything from `at` onwards moves down to the next line. When `at`
-        // is the end, that is nothing and the incoming token starts it alone.
+        // Everything from `at` onwards moves down to the next line. When `at` is the end, that is nothing and the incoming token starts it alone.
         const carried = current.splice(at)
         flush()
         current = carried
@@ -116,9 +111,7 @@ function wrapParagraph(segments: readonly Segment[], options: WrapOptions): Line
 /**
  * Index in `current` at which to start the next line.
  *
- * Prefers the rightmost phrase boundary, then the rightmost character
- * boundary. `current.length` means the incoming token starts the next line.
- * `null` means there is nowhere legal to break.
+ * Prefers the rightmost phrase boundary, then the rightmost character boundary. `current.length` means the incoming token starts the next line. `null` means there is nowhere legal to break.
  */
 function lastBreakPoint(current: Token[], incoming: Token): number | null {
   let best: number | null = null
@@ -142,17 +135,14 @@ function lastBreakPoint(current: Token[], incoming: Token): number | null {
 }
 
 /**
- * Turns segments into tokens, splitting text at every legal break position so
- * the wrapper only has to decide between them.
+ * Turns segments into tokens, splitting text at every legal break position so the wrapper only has to decide between them.
  */
 function tokenize(segments: readonly Segment[], options: WrapOptions): Token[] {
   const tokens: Token[] = []
 
   for (const segment of segments) {
     if (segment.kind !== 'text') {
-      // An emoji may always start a line, and a line may always end before one.
-      // Its width comes from segmentWidth so that an emoji which fell back to
-      // its source text is measured as that text, not as a square.
+      // An emoji may always start a line, and a line may always end before one. Its width comes from segmentWidth so that an emoji which fell back to its source text is measured as that text, not as a square.
       tokens.push({
         segment,
         width: segmentWidth(segment, options.measurer, options.metrics),

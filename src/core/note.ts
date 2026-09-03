@@ -14,10 +14,7 @@ function isNoteLike(value: unknown): value is NoteLike {
 /**
  * The handle, minus its leading `@`.
  *
- * `username.prefix` on the theme supplies that — the same contract
- * `fromMessage()` works to — so including it here would draw `@@otoneko`.
- * A remote author keeps the `@host` half, which is part of the handle
- * rather than decoration.
+ * `username.prefix` on the theme supplies that — the same contract `fromMessage()` works to — so including it here would draw `@@otoneko`. A remote author keeps the `@host` half, which is part of the handle rather than decoration.
  */
 function handle(user: NoteLike['user']): string {
   return user.host ? `${user.username}@${user.host}` : user.username
@@ -26,14 +23,9 @@ function handle(user: NoteLike['user']): string {
 /**
  * Derives a quote from a Misskey note.
  *
- * The Misskey counterpart to `fromMessage()`, and shaped by the same rule:
- * quote what a reader saw. That means the display name over the handle, the
- * author's own avatar, and — by default — the note with its MFM scaffolding
- * taken off.
+ * The Misskey counterpart to `fromMessage()`, and shaped by the same rule: quote what a reader saw. That means the display name over the handle, the author's own avatar, and — by default — the note with its MFM scaffolding taken off.
  *
- * Unlike Discord there is nothing here to resolve by id. A Misskey mention
- * is written `@user@host` in the note text already, so it is readable as it
- * stands and is left exactly alone.
+ * Unlike Discord there is nothing here to resolve by id. A Misskey mention is written `@user@host` in the note text already, so it is readable as it stands and is left exactly alone.
  */
 export function fromNote(
   note: unknown,

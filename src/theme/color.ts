@@ -10,9 +10,7 @@ import { ValidationError } from '../core/errors'
  * - `'transparent'`, and any CSS colour name (`'rebeccapurple'`)
  * - `rgb()` / `rgba()` / `hsl()` / `hwb()` and the rest of CSS's functions
  *
- * Strings go through `culori`, so the whole CSS colour syntax is accepted
- * rather than the handful of shapes a local regex could keep up with.
- * Numbers and arrays are this package's own conventions and are read here.
+ * Strings go through `culori`, so the whole CSS colour syntax is accepted rather than the handful of shapes a local regex could keep up with. Numbers and arrays are this package's own conventions and are read here.
  */
 export type ColorInput = string | number | readonly number[]
 
@@ -37,8 +35,7 @@ function clampAlpha(value: number): number {
 /**
  * Alpha given as either 0–1 or 0–255.
  *
- * `1` is ambiguous — it could be "fully opaque" or "all but invisible". It is
- * read as fully opaque, which is what anyone writing `[255, 0, 0, 1]` means.
+ * `1` is ambiguous — it could be "fully opaque" or "all but invisible". It is read as fully opaque, which is what anyone writing `[255, 0, 0, 1]` means.
  */
 function readAlpha(value: number): number {
   if (!Number.isFinite(value)) return 1
@@ -61,13 +58,9 @@ export function parseColor(input: ColorInput, field = 'color'): RGBA {
 /**
  * `0xRRGGBB` or `0xRRGGBBAA`.
  *
- * Told apart by magnitude: anything above 0xFFFFFF must carry an alpha byte.
- * That makes `0xFF0000` red rather than transparent green, which is what
- * people write.
+ * Told apart by magnitude: anything above 0xFFFFFF must carry an alpha byte. That makes `0xFF0000` red rather than transparent green, which is what people write.
  *
- * A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` —
- * so a color with a red channel of 0 and an alpha byte has to be written as
- * a string, where the length is part of the value.
+ * A number cannot carry a leading zero byte — `0x00FF0000` *is* `0xFF0000` — so a color with a red channel of 0 and an alpha byte has to be written as a string, where the length is part of the value.
  */
 function fromNumber(value: number, field: string): RGBA {
   if (!Number.isInteger(value) || value < 0 || value > 0xffffffff) {
@@ -104,13 +97,10 @@ function fromArray(value: readonly number[], field: string): RGBA {
 function fromString(input: string, field: string): RGBA {
   const value = input.trim()
 
-  // `0xRRGGBB` as a string, which is easy to end up with coming back out of
-  // JSON. Not CSS, so the library would rightly reject it.
+  // `0xRRGGBB` as a string, which is easy to end up with coming back out of JSON. Not CSS, so the library would rightly reject it.
   if (/^0x[0-9a-f]{6,8}$/i.test(value)) return fromNumber(Number(value), field)
 
-  // CSS identifiers and function names are ASCII case-insensitive by spec
-  // (`RED`, `RGB(...)` are as valid as their lowercase forms), but culori's
-  // own keyword/function matching only recognises the lowercase spelling.
+  // CSS identifiers and function names are ASCII case-insensitive by spec (`RED`, `RGB(...)` are as valid as their lowercase forms), but culori's own keyword/function matching only recognises the lowercase spelling.
   const parsed = parseCssColor(value.toLowerCase())
   if (!parsed) {
     throw new ValidationError(
@@ -120,10 +110,7 @@ function fromString(input: string, field: string): RGBA {
     )
   }
 
-  // culori keeps a colour in whatever space it was written (hsl(), lab(), …)
-  // rather than normalizing on parse, so every notation is routed through
-  // the same rgb() conversion regardless of which one it started as.
-  // Channels come back 0–1, this package's own convention is 0–255.
+  // culori keeps a colour in whatever space it was written (hsl(), lab(), …) rather than normalizing on parse, so every notation is routed through the same rgb() conversion regardless of which one it started as. Channels come back 0–1, this package's own convention is 0–255.
   const { r, g, b, alpha } = toRgb(parsed)
   return {
     r: clampChannel(r * 255),

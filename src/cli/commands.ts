@@ -35,10 +35,7 @@ import { checkPackageUpdate, type PackageUpdateStatus } from './updateCheck'
 /**
  * Everything the commands do, injectable so tests need no disk or network.
  *
- * These functions are the entire testable surface of the CLI: argv parsing,
- * aliases and `--help`/`--version` are cleye's job (see `index.ts`), and
- * aren't re-tested here — only what each command actually does once cleye
- * has already worked out which one was asked for.
+ * These functions are the entire testable surface of the CLI: argv parsing, aliases and `--help`/`--version` are cleye's job (see `index.ts`), and aren't re-tested here — only what each command actually does once cleye has already worked out which one was asked for.
  */
 export interface CliDeps {
   installTwemoji?: (options?: {
@@ -92,10 +89,7 @@ interface Targets {
 /**
  * Reads target words off a command line.
  *
- * `all`, `twemoji`/`emoji` and `fonts`/`font` are keywords; everything else
- * is a family name, so `miq install fonts "Dela Gothic One"` installs one
- * family and `miq install "Dela Gothic One"` does exactly the same. `all`
- * means the same as no target: everything.
+ * `all`, `twemoji`/`emoji` and `fonts`/`font` are keywords; everything else is a family name, so `miq install fonts "Dela Gothic One"` installs one family and `miq install "Dela Gothic One"` does exactly the same. `all` means the same as no target: everything.
  */
 export function parseTargets(args: readonly string[]): Targets {
   const targets: Targets = { all: false, twemoji: false, families: [], defaultFonts: false }
@@ -115,9 +109,7 @@ export function parseTargets(args: readonly string[]): Targets {
 /** Options specific to `install`. */
 export interface InstallOptions {
   /**
-   * Skip `FONT_CATALOGUE_FALLBACK_ONLY` — the script-fallback fonts fetched
-   * automatically but never picked by name. Only affects a broad target
-   * (no target, `all`, or `fonts`): a family named explicitly always installs.
+   * Skip `FONT_CATALOGUE_FALLBACK_ONLY` — the script-fallback fonts fetched automatically but never picked by name. Only affects a broad target (no target, `all`, or `fonts`): a family named explicitly always installs.
    */
   noFallback?: boolean
 }
@@ -138,8 +130,7 @@ export async function installCommand(
     failed ||= !ok
   }
 
-  // `all` means every catalogued font, not just the smaller default set —
-  // otherwise it would just be another way to spell "no target".
+  // `all` means every catalogued font, not just the smaller default set — otherwise it would just be another way to spell "no target".
   const families = targets.all
     ? [...FONT_CATALOGUE]
     : bare || targets.defaultFonts
@@ -247,9 +238,7 @@ export function searchCommand(
   options: OutputOptions = {},
 ): number {
   const trimmed = query?.trim()
-  // A query might be an alias (`pop`) rather than a substring of the real
-  // name — checked separately, since e.g. `mplus` isn't a substring of
-  // "M PLUS Rounded 1c".
+  // A query might be an alias (`pop`) rather than a substring of the real name — checked separately, since e.g. `mplus` isn't a substring of "M PLUS Rounded 1c".
   const aliasHit = trimmed ? resolveFontAlias(trimmed) : undefined
   const substringMatches: string[] = trimmed
     ? FONT_CATALOGUE.filter((family) => family.toLowerCase().includes(trimmed.toLowerCase()))
@@ -291,8 +280,7 @@ export async function outdatedCommand(
   io: CliIo,
   options: OutputOptions = {},
 ): Promise<number> {
-  // Each check is independent — only twemojiLatest depends on twemoji's own
-  // result — so they run concurrently instead of one round-trip at a time.
+  // Each check is independent — only twemojiLatest depends on twemoji's own result — so they run concurrently instead of one round-trip at a time.
   const [packageStatus, { twemoji, twemojiLatest }, { fonts, fontStatuses }] = await Promise.all([
     (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion()),
     (async () => {
@@ -355,21 +343,13 @@ export async function outdatedCommand(
 /**
  * Applies what `outdated` only reports.
  *
- * Never touches the miq install itself — a newer miq is a hint to run
- * `npm install` yourself, not something this process should do to its own
- * package manager. Twemoji and fonts are miq's own managed files, so those
- * it updates directly: an outdated Twemoji release is uninstalled and
- * reinstalled clean (a plain re-run only adds new files, see
- * `installTwemoji`'s doc comment), and an outdated font family is
- * re-installed and then pruned so the stale version doesn't linger.
+ * Never touches the miq install itself — a newer miq is a hint to run `npm install` yourself, not something this process should do to its own package manager. Twemoji and fonts are miq's own managed files, so those it updates directly: an outdated Twemoji release is uninstalled and reinstalled clean (a plain re-run only adds new files, see `installTwemoji`'s doc comment), and an outdated font family is re-installed and then pruned so the stale version doesn't linger.
  */
 export async function updateCommand(deps: CliDeps, io: CliIo): Promise<number> {
   let failed = false
   let didAnything = false
 
-  // Gathering what needs updating is read-only and each check is
-  // independent, so it runs concurrently; the actual updates below stay
-  // sequential so their output keeps the same package → Twemoji → fonts order.
+  // Gathering what needs updating is read-only and each check is independent, so it runs concurrently; the actual updates below stay sequential so their output keeps the same package → Twemoji → fonts order.
   const [packageStatus, twemoji, fonts] = await Promise.all([
     (deps.checkPackageUpdate ?? checkPackageUpdate)(currentVersion()),
     (deps.twemojiInfo ?? twemojiInfo)(),

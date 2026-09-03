@@ -2,23 +2,11 @@ import type { StyledRun, TextStyle } from '../core/types'
 import { pushStyledRun } from './segment'
 
 /**
- * Parses "Twitter bold/italic" — Unicode Mathematical Alphanumeric Symbols —
- * into styled runs, decoding each character back to plain ASCII.
+ * Parses "Twitter bold/italic" — Unicode Mathematical Alphanumeric Symbols — into styled runs, decoding each character back to plain ASCII.
  *
- * X has no real rich-text markup for a tweet's body (confirmed against both
- * the official API v2 and FxTwitter: `text` is always plain). What reads as
- * bold or italic there is one of the six Latin-alphabet blocks Unicode
- * assigned in the Mathematical Alphanumeric Symbols range (U+1D400–U+1D7FF) —
- * serif and sans-serif, each in bold, italic and bold-italic — that a client
- * or third-party tool substitutes character-by-character. Two of those six
- * (the serif and sans-serif *bold* blocks) also have their own digit range;
- * italic has none in Unicode, so a styled number stays plain ASCII already.
- * `ℎ` (U+210E, PLANCK CONSTANT) is a Unicode compatibility carry-over
- * standing in for italic lowercase h, which the main block never assigned.
+ * X has no real rich-text markup for a tweet's body (confirmed against both the official API v2 and FxTwitter: `text` is always plain). What reads as bold or italic there is one of the six Latin-alphabet blocks Unicode assigned in the Mathematical Alphanumeric Symbols range (U+1D400–U+1D7FF) — serif and sans-serif, each in bold, italic and bold-italic — that a client or third-party tool substitutes character-by-character. Two of those six (the serif and sans-serif *bold* blocks) also have their own digit range; italic has none in Unicode, so a styled number stays plain ASCII already. `ℎ` (U+210E, PLANCK CONSTANT) is a Unicode compatibility carry-over standing in for italic lowercase h, which the main block never assigned.
  *
- * Anything outside these ranges — including plain (unstyled) sans-serif and
- * monospace, which exist in the same block but were never a "bold/italic"
- * convention — passes through unstyled.
+ * Anything outside these ranges — including plain (unstyled) sans-serif and monospace, which exist in the same block but were never a "bold/italic" convention — passes through unstyled.
  */
 export function parseTwitterText(text: string): StyledRun[] {
   const out: StyledRun[] = []

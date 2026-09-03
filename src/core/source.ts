@@ -21,13 +21,9 @@ function isMessageLike(value: unknown): value is MessageLike {
 /**
  * Derives a quote from anything shaped like a Discord message.
  *
- * By default the server's view wins for both the avatar and the name — a
- * per-server avatar and nickname are what someone reading that server saw, so
- * they are what a quote from it should show. Both can be switched to the
- * account-wide version.
+ * By default the server's view wins for both the avatar and the name — a per-server avatar and nickname are what someone reading that server saw, so they are what a quote from it should show. Both can be switched to the account-wide version.
  *
- * Whichever is chosen, the other is still the fallback: asking for a guild
- * avatar on a message with none gets the global one rather than nothing.
+ * Whichever is chosen, the other is still the fallback: asking for a guild avatar on a message with none gets the global one rather than nothing.
  */
 export function fromMessage(
   message: unknown,

@@ -34,9 +34,7 @@ export async function resolveAvatar(value: string): Promise<AvatarSource> {
 }
 
 /**
- * Same resolution as `resolveAvatar()`, but never returns a bare string —
- * `QuoteInput.watermark` reads a `string` as text, so the remote/data URL
- * case has to be wrapped in a real `URL` to be read as an image instead.
+ * Same resolution as `resolveAvatar()`, but never returns a bare string — `QuoteInput.watermark` reads a `string` as text, so the remote/data URL case has to be wrapped in a real `URL` to be read as an image instead.
  */
 export async function resolveWatermarkImage(value: string): Promise<Buffer | URL> {
   if (value === '-') return readStdin()
@@ -45,9 +43,7 @@ export async function resolveWatermarkImage(value: string): Promise<Buffer | URL
 }
 
 /**
- * The real renderer behind `miq render` — builds a `MiQ` from flag values and
- * encodes it. Kept separate from `renderCommand` (in `commands.ts`) so tests
- * can inject a fake here instead of actually drawing a canvas.
+ * The real renderer behind `miq render` — builds a `MiQ` from flag values and encodes it. Kept separate from `renderCommand` (in `commands.ts`) so tests can inject a fake here instead of actually drawing a canvas.
  */
 export async function renderToBuffer(input: RenderInput): Promise<Buffer> {
   const theme =

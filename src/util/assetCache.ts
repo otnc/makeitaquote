@@ -27,12 +27,9 @@ export interface AssetCache<V> {
 }
 
 /**
- * A positive/negative LRU plus in-flight de-duplication — the shape every
- * "fetch this, decode it, remember the result" cache in this package needs.
+ * A positive/negative LRU plus in-flight de-duplication — the shape every "fetch this, decode it, remember the result" cache in this package needs.
  *
- * Emoji and avatars each get their own instance rather than sharing one: a
- * burst of avatar fetches evicting emoji a bot just downloaded (or the
- * reverse) would be a strange coupling between two unrelated kinds of asset.
+ * Emoji and avatars each get their own instance rather than sharing one: a burst of avatar fetches evicting emoji a bot just downloaded (or the reverse) would be a strange coupling between two unrelated kinds of asset.
  */
 export function createAssetCache<V>(defaults: Required<AssetCacheOptions>): AssetCache<V> {
   let settings: Required<AssetCacheOptions> = { ...defaults }
@@ -41,11 +38,7 @@ export function createAssetCache<V>(defaults: Required<AssetCacheOptions>): Asse
   const inFlight = new Map<string, Promise<V | null>>()
 
   /**
-   * `tiny-lru`'s `max: 0` means unlimited, the opposite of `maxEntries: 0`
-   * here, so that case returns `null` instead — every read/write below
-   * treats that as a miss. `ttl: 0` already means "never expires" in
-   * `tiny-lru`, matching this cache's own convention, so `ttlMs` passes
-   * through as-is.
+   * `tiny-lru`'s `max: 0` means unlimited, the opposite of `maxEntries: 0` here, so that case returns `null` instead — every read/write below treats that as a miss. `ttl: 0` already means "never expires" in `tiny-lru`, matching this cache's own convention, so `ttlMs` passes through as-is.
    */
   function build<T>(maxEntries: number, ttlMs: number): LRU<T> | null {
     if (maxEntries <= 0) return null

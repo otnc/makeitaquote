@@ -160,9 +160,7 @@ describe('applyInput watermark handling', () => {
   })
 
   it('round-trips an image watermark through getData()-shaped input', () => {
-    // What getData() actually produces for an image watermark: watermark is
-    // '', not undefined, so applyInput can't use "watermark is absent" to
-    // decide watermarkImage should apply instead.
+    // What getData() actually produces for an image watermark: watermark is '', not undefined, so applyInput can't use "watermark is absent" to decide watermarkImage should apply instead.
     const bytes = new Uint8Array([1, 2, 3])
     const data = { ...emptyQuote(), watermark: '', watermarkImage: bytes }
 

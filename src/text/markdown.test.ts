@@ -121,8 +121,7 @@ describe('stripMarkdown', () => {
   })
 
   it('trims a trailing blank line left by an invisible construct', () => {
-    // The gap before a link reference definition is real source, but the
-    // definition itself renders nothing — so nothing should trail after it.
+    // The gap before a link reference definition is real source, but the definition itself renders nothing — so nothing should trail after it.
     expect(stripMarkdown('text\n\n[ref]: https://example.com')).toBe('text')
   })
 })

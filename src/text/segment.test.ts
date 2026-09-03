@@ -220,8 +220,7 @@ describe('Misskey custom emoji', () => {
   })
 
   it('still matches after a non-ASCII character', () => {
-    // The rule is about ASCII alphanumerics, so Japanese text before a
-    // shortcode must not block it.
+    // The rule is about ASCII alphanumerics, so Japanese text before a shortcode must not block it.
     expect(segmentText('たのしい:alice_i:', misskey)[1]).toMatchObject({ source: 'misskey' })
   })
 
@@ -230,8 +229,7 @@ describe('Misskey custom emoji', () => {
   })
 
   it('draws an unresolvable shortcode as its own text, mid-sentence', () => {
-    // No instance configured, so `:alice_i:` cannot resolve — but the rest of
-    // the line still segments normally.
+    // No instance configured, so `:alice_i:` cannot resolve — but the rest of the line still segments normally.
     expect(raws('わーい :alice_i: 👼')).toEqual(['わーい :alice_i: ', '👼'])
   })
 

@@ -43,8 +43,7 @@ function countingFetcher(bytes = Buffer.from('font-bytes')): FontFetcher & { cal
 }
 
 /**
- * `useFont` resolves through the real CSS API, so tests stub `fetch` at the
- * global level to keep the whole path — including URL building — under test.
+ * `useFont` resolves through the real CSS API, so tests stub `fetch` at the global level to keep the whole path — including URL building — under test.
  */
 function stubGoogleFonts(css: string, status = 200) {
   vi.stubGlobal('fetch', async (input: string | URL | Request) => {
@@ -241,8 +240,7 @@ describe('ensureDefaultFonts', () => {
   })
 
   it('fetches each configured family', async () => {
-    // Each family has to resolve to its own file, or the second one correctly
-    // hits the cache written by the first.
+    // Each family has to resolve to its own file, or the second one correctly hits the cache written by the first.
     vi.stubGlobal('fetch', async (input: string | URL | Request) => {
       const url = input instanceof Request ? input.url : String(input)
       const requested = new URL(url).searchParams.get('family') ?? 'x'
@@ -402,8 +400,7 @@ describe('cached fonts on disk', () => {
 
   it('does not match a cached file whose family merely shares a name prefix', async () => {
     const base = unusedFamily()
-    // e.g. "Noto Sans" vs "Noto Sans JP" — the base family's slug is a
-    // string-prefix of the longer one's, but they are different families.
+    // e.g. "Noto Sans" vs "Noto Sans JP" — the base family's slug is a string-prefix of the longer one's, but they are different families.
     const longer = `${base} JP`
     const wrongFile = fileNameFor({ family: longer, weight: 400, style: 'normal', url: '' })
     await writeFile(join(cacheDir, wrongFile), 'font-bytes')

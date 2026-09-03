@@ -8,16 +8,9 @@ import { findProjectRoot } from '../util/projectRoot'
 /**
  * Where downloaded fonts live, in order of preference.
  *
- * Project-local by default — the nearest ancestor `package.json` to the
- * current working directory, not a directory shared by every project on the
- * machine. Sharing one cache across unrelated projects means one project's
- * `uninstall` can remove files another still expects, and different
- * `makeitaquote` versions on the same machine would fight over the same
- * files. `MIQ_FONT_CACHE_DIR` opts back into sharing a location explicitly,
- * cache or otherwise.
+ * Project-local by default — the nearest ancestor `package.json` to the current working directory, not a directory shared by every project on the machine. Sharing one cache across unrelated projects means one project's `uninstall` can remove files another still expects, and different `makeitaquote` versions on the same machine would fight over the same files. `MIQ_FONT_CACHE_DIR` opts back into sharing a location explicitly, cache or otherwise.
  *
- * A cache that survives restarts is what keeps the "downloads a font on first
- * use" behaviour from meaning "downloads a font on every boot".
+ * A cache that survives restarts is what keeps the "downloads a font on first use" behaviour from meaning "downloads a font on every boot".
  */
 export function resolveCacheDir(override?: string): string {
   if (override) return override
@@ -71,12 +64,7 @@ export function isCached(dir: string, fileName: string): boolean {
 /**
  * Writes a font to the cache atomically.
  *
- * Writes to a uniquely-named temp file in the same directory, fsyncs it, then
- * renames it into place — an interrupted download can never leave a
- * half-written font that the next run would happily try to register, and the
- * rename is atomic on the same filesystem. Two writers racing for the same
- * filename are both writing the same bytes (the content is a pure function of
- * the filename), so whichever rename lands last is still correct.
+ * Writes to a uniquely-named temp file in the same directory, fsyncs it, then renames it into place — an interrupted download can never leave a half-written font that the next run would happily try to register, and the rename is atomic on the same filesystem. Two writers racing for the same filename are both writing the same bytes (the content is a pure function of the filename), so whichever rename lands last is still correct.
  */
 export async function writeCachedFont(
   dir: string,
@@ -97,9 +85,7 @@ export async function writeCachedFont(
       await handle.close()
     }
   } catch (cause) {
-    // A failed write still leaves the temp file on disk — clean it up rather
-    // than leaking a growing pile of half-written `.tmp` files on every
-    // interrupted download.
+    // A failed write still leaves the temp file on disk — clean it up rather than leaking a growing pile of half-written `.tmp` files on every interrupted download.
     await unlink(tmp).catch(() => {})
     throw cause
   }
@@ -108,8 +94,7 @@ export async function writeCachedFont(
     await rename(tmp, target)
   } catch (cause) {
     await unlink(tmp).catch(() => {})
-    // On Windows a rename over a file another process just created can fail;
-    // if the target is there and non-empty, that other process won the race.
+    // On Windows a rename over a file another process just created can fail; if the target is there and non-empty, that other process won the race.
     if (!isCached(dir, fileName)) throw cause
   }
 

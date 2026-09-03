@@ -6,10 +6,7 @@ export type AvatarCacheOptions = AssetCacheOptions
 /** The cache shared by every `MiQ` instance in the process. */
 export const avatarCache = createAssetCache<Image>({
   maxEntries: 64,
-  // Much shorter than the emoji cache: an avatar is one specific user's
-  // current picture, not a shared asset, and can change. This is only meant
-  // to dedupe a burst of quotes for the same user within a few minutes, not
-  // to serve a stale picture long after it stopped being true.
+  // Much shorter than the emoji cache: an avatar is one specific user's current picture, not a shared asset, and can change. This is only meant to dedupe a burst of quotes for the same user within a few minutes, not to serve a stale picture long after it stopped being true.
   ttlMs: 300_000,
   negativeTtlMs: 30_000,
   enabled: true,

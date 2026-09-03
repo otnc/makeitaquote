@@ -43,8 +43,7 @@ describe('parseColor', () => {
     })
 
     it('cannot see a leading zero byte, so use a string for those', () => {
-      // 0x00FF0000 and 0xFF0000 are the same number; nothing can tell them
-      // apart. The string form carries its own length and is unambiguous.
+      // 0x00FF0000 and 0xFF0000 are the same number; nothing can tell them apart. The string form carries its own length and is unambiguous.
       expect(parseColor(0x00ff0000)).toEqual(RED)
       expect(parseColor('#00FF0000')).toEqual({ r: 0, g: 255, b: 0, a: 0 })
     })
@@ -127,15 +126,12 @@ describe('parseColor', () => {
       expect(parseColor('hsl(0, 100%, 50%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
     })
 
-    // hwb() was only ever defined with space-separated arguments — unlike
-    // rgb()/hsl(), it has no legacy comma form to also accept.
+    // hwb() was only ever defined with space-separated arguments — unlike rgb()/hsl(), it has no legacy comma form to also accept.
     it('reads hwb(), converting to rgb', () => {
       expect(parseColor('hwb(0 0% 0%)')).toEqual({ r: 255, g: 0, b: 0, a: 1 })
     })
 
-    // culori parses the rest of CSS Color 4 too, which `color` (the package
-    // this used to run on) did not — a real capability gained by the switch,
-    // not just a like-for-like swap.
+    // culori parses the rest of CSS Color 4 too, which `color` (the package this used to run on) did not — a real capability gained by the switch, not just a like-for-like swap.
     it('reads lab(), lch(), oklab(), oklch() and color(), converting to rgb', () => {
       expect(parseColor('lab(50% 40 59.5)')).toEqual({ r: 191, g: 87, b: 0, a: 1 })
       expect(parseColor('lch(50% 60 30)')).toEqual({ r: 202, g: 73, b: 72, a: 1 })

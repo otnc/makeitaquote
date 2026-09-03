@@ -27,16 +27,11 @@ export interface ResolveOptions {
 /**
  * Asks Google Fonts where the current files for a family are.
  *
- * Resolving through the CSS API rather than hard-coding URLs means the fonts
- * are always whatever Google serves today — the URLs carry a version that
- * changes when a family is updated. It also doubles as the licence check: if
- * Google does not serve it, this package will not fetch it from anywhere else.
+ * Resolving through the CSS API rather than hard-coding URLs means the fonts are always whatever Google serves today — the URLs carry a version that changes when a family is updated. It also doubles as the licence check: if Google does not serve it, this package will not fetch it from anywhere else.
  *
- * The API answers with TTF for user agents it can't confirm support WOFF2,
- * which includes ours — and TTF is what the canvas can register.
+ * The API answers with TTF for user agents it can't confirm support WOFF2, which includes ours — and TTF is what the canvas can register.
  *
- * `family` may be a `FONT_ALIASES` short name, resolved before anything
- * else so the URL, the parsed faces and any error message all agree.
+ * `family` may be a `FONT_ALIASES` short name, resolved before anything else so the URL, the parsed faces and any error message all agree.
  */
 export async function resolveGoogleFont(
   requested: string,
@@ -130,8 +125,7 @@ function normalizeWeights(weights: number[] | undefined): number[] {
 /**
  * Pulls the font files out of the CSS.
  *
- * Each `@font-face` block carries its own weight and style, so a request for
- * several weights comes back as several blocks.
+ * Each `@font-face` block carries its own weight and style, so a request for several weights comes back as several blocks.
  */
 function parseCss(css: string, requested: string): FontFace[] {
   const faces: FontFace[] = []

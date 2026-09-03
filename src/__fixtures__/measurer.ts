@@ -1,9 +1,7 @@
 import type { EmojiMetrics, TextMeasurer } from '../text/measure'
 
 /**
- * A measurer with no fonts involved: ASCII is one unit wide, everything else
- * two. Close enough to the half-width/full-width split that wrapping tests
- * read like the output they assert on.
+ * A measurer with no fonts involved: ASCII is one unit wide, everything else two. Close enough to the half-width/full-width split that wrapping tests read like the output they assert on.
  */
 export function fakeMeasurer(unit = 10): TextMeasurer {
   return {

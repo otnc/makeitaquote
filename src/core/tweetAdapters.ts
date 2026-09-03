@@ -2,11 +2,9 @@ import { findTweetV2Author } from '@makeitaquote/utils/twitter'
 import type { TweetLike } from './types'
 
 /**
- * The slice of the official API v2's `TweetV2` (e.g. from `twitter-api-v2`)
- * `fromTwitterApiV2Tweet()` reads.
+ * The slice of the official API v2's `TweetV2` (e.g. from `twitter-api-v2`) `fromTwitterApiV2Tweet()` reads.
  *
- * Structural on purpose, the same reason `MessageLike` is: any object with
- * these fields works, whether or not `twitter-api-v2` itself is installed.
+ * Structural on purpose, the same reason `MessageLike` is: any object with these fields works, whether or not `twitter-api-v2` itself is installed.
  */
 export interface TweetV2Like {
   text: string
@@ -24,10 +22,7 @@ export interface UserV2Like {
 /**
  * Adapts an official API v2 response into `TweetLike`.
  *
- * v2 splits a tweet from its author — `tweet.author_id` names them, but the
- * author itself only comes back when the request asked for the
- * `author_id` expansion, arriving separately in `includes.users`. Fetch with
- * that expansion, then pass both halves here:
+ * v2 splits a tweet from its author — `tweet.author_id` names them, but the author itself only comes back when the request asked for the `author_id` expansion, arriving separately in `includes.users`. Fetch with that expansion, then pass both halves here:
  *
  * ```ts
  * const { data: tweet, includes } = await client.v2.singleTweet(id, {
@@ -55,8 +50,7 @@ export function fromTwitterApiV2Tweet(
 }
 
 /**
- * The slice of FxTwitter's `TwitterStatus` (e.g. from the `fxtwitter`
- * package's `getStatus()`) `fromFxTwitterStatus()` reads.
+ * The slice of FxTwitter's `TwitterStatus` (e.g. from the `fxtwitter` package's `getStatus()`) `fromFxTwitterStatus()` reads.
  */
 export interface FxTwitterStatusLike {
   text: string
@@ -70,8 +64,7 @@ export interface FxTwitterStatusLike {
 /**
  * Adapts an FxTwitter API response into `TweetLike`.
  *
- * FxTwitter needs no API key and returns the author inline, so this is the
- * whole thing:
+ * FxTwitter needs no API key and returns the author inline, so this is the whole thing:
  *
  * ```ts
  * const { status } = await new FxTwitterV2().getStatus(id)

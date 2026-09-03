@@ -1,8 +1,5 @@
 /**
- * Shared shape behind `font/catalogue.ts`'s `FONTS` and `theme/colorThemes.ts`'s
- * `OFFICIAL_COLOR_THEMES`/`CUSTOM_COLOR_THEMES`: a fixed list of named rows,
- * each with an optional short alias, that needs both an alias -> key lookup
- * and a "the key itself, tolerant of case/formatting" lookup.
+ * Shared shape behind `font/catalogue.ts`'s `FONTS` and `theme/colorThemes.ts`'s `OFFICIAL_COLOR_THEMES`/`CUSTOM_COLOR_THEMES`: a fixed list of named rows, each with an optional short alias, that needs both an alias -> key lookup and a "the key itself, tolerant of case/formatting" lookup.
  */
 
 /** Alias → canonical key, for rows that have a short option name. */
@@ -20,8 +17,7 @@ export function buildAliasMap<Row, T extends string>(
 }
 
 /**
- * Every row's own key, keyed by `normalize(key)` — the "exact name" half of
- * a resolver, alongside `buildAliasMap`'s "short name" half.
+ * Every row's own key, keyed by `normalize(key)` — the "exact name" half of a resolver, alongside `buildAliasMap`'s "short name" half.
  */
 export function buildNormalizedKeyMap<Row, T extends string>(
   rows: readonly Row[],

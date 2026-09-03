@@ -36,9 +36,7 @@ describe('stripDiscordMarkdown', () => {
   })
 
   describe('code spans are literal', () => {
-    // Discord renders a code span verbatim, so markdown inside one is text.
-    // Unwrapping the backticks first and letting the later passes see the
-    // contents would silently eat it.
+    // Discord renders a code span verbatim, so markdown inside one is text. Unwrapping the backticks first and letting the later passes see the contents would silently eat it.
     it('keeps markdown inside inline code', () => {
       expect(stripDiscordMarkdown('`**not bold**`')).toBe('**not bold**')
       expect(stripDiscordMarkdown('`*x*`')).toBe('*x*')
@@ -58,12 +56,7 @@ describe('stripDiscordMarkdown', () => {
       expect(stripDiscordMarkdown('`**a**` then `~~b~~`')).toBe('**a** then ~~b~~')
     })
 
-    // discomd resolves `\X` escapes wherever they appear, code spans
-    // included — unlike Discord's own client, where a backslash inside code
-    // is literal. Accepted rather than worked around: an escaped-looking
-    // code sample is a narrow case, and matching Discord exactly here would
-    // mean re-introducing the stash/restore machinery this was written to
-    // retire.
+    // discomd resolves `\X` escapes wherever they appear, code spans included — unlike Discord's own client, where a backslash inside code is literal. Accepted rather than worked around: an escaped-looking code sample is a narrow case, and matching Discord exactly here would mean re-introducing the stash/restore machinery this was written to retire.
     it('resolves a backslash escape inside code too', () => {
       expect(stripDiscordMarkdown('`\\*x\\*`')).toBe('*x*')
     })
@@ -96,8 +89,7 @@ describe('stripDiscordMarkdown', () => {
   })
 
   it('does not mistake subtext for a bulleted list item', () => {
-    // The list marker regex requires whitespace right after `-`; `-#` never
-    // has that, so it must fall to the subtext pass instead.
+    // The list marker regex requires whitespace right after `-`; `-#` never has that, so it must fall to the subtext pass instead.
     expect(stripDiscordMarkdown('-# not a list')).toBe('not a list')
   })
 
@@ -141,11 +133,7 @@ describe('stripDiscordMarkdown', () => {
     expect(stripDiscordMarkdown('12:30:45')).toBe('12:30:45')
   })
 
-  // Accepted rather than worked around, same as the in-code escape above:
-  // discomd treats `_x_` as italic regardless of what is on either side of
-  // it, so a variable name with underscores loses them same as real italic
-  // would. Narrow enough in practice not to be worth diverging from discomd
-  // over.
+  // Accepted rather than worked around, same as the in-code escape above: discomd treats `_x_` as italic regardless of what is on either side of it, so a variable name with underscores loses them same as real italic would. Narrow enough in practice not to be worth diverging from discomd over.
   it('treats intraword underscores as italic, same as discomd does', () => {
     expect(stripDiscordMarkdown('snake_case_var')).toBe('snakecasevar')
   })

@@ -3,21 +3,13 @@ import type { ColorInput } from './color'
 import type { BackgroundGradientTheme } from './types'
 
 /**
- * Named background presets, one row each — the single source
- * `COLOR_THEME_CATALOGUE` and `COLOR_THEME_ALIASES` are both built from,
- * the same way `FONTS` is for fonts (`font/catalogue.ts`).
+ * Named background presets, one row each — the single source `COLOR_THEME_CATALOGUE` and `COLOR_THEME_ALIASES` are both built from, the same way `FONTS` is for fonts (`font/catalogue.ts`).
  *
- * `alias` is a short `theme=`-style option name; `null` for none.
- * `textBase` is which of this package's own `dark`/`light` text palettes
- * the theme needs for contrast, fixed per theme rather than left to a
- * `dark`/`light` choice — a pale gradient with white text (or a rich one
- * with black text) would be illegible.
+ * `alias` is a short `theme=`-style option name; `null` for none. `textBase` is which of this package's own `dark`/`light` text palettes the theme needs for contrast, fixed per theme rather than left to a `dark`/`light` choice — a pale gradient with white text (or a rich one with black text) would be illegible.
  *
- * Plain black/white aren't here: they're flat colors, not gradients, and
- * this package already has them as the `dark`/`light` presets themselves.
+ * Plain black/white aren't here: they're flat colors, not gradients, and this package already has them as the `dark`/`light` presets themselves.
  *
- * See `CUSTOM_COLOR_THEMES` below for this package's own additions, kept
- * as a separate list rather than appended here.
+ * See `CUSTOM_COLOR_THEMES` below for this package's own additions, kept as a separate list rather than appended here.
  */
 const OFFICIAL_COLOR_THEMES = [
   {
@@ -152,16 +144,9 @@ const OFFICIAL_COLOR_THEMES = [
 ] as const satisfies readonly ColorThemeRow[]
 
 /**
- * This package's own additions, on top of `OFFICIAL_COLOR_THEMES` — kept as a
- * separate list (and separate export, `CUSTOM_COLOR_THEME_CATALOGUE`) rather
- * than merged into the catalogue above, since a Discord select menu tops out
- * at 25 options: 21 + 18 would not fit in one, so a consumer building a menu
- * needs to choose which list (or a subset) to offer rather than have that
- * decision made for them.
+ * This package's own additions, on top of `OFFICIAL_COLOR_THEMES` — kept as a separate list (and separate export, `CUSTOM_COLOR_THEME_CATALOGUE`) rather than merged into the catalogue above, since a Discord select menu tops out at 25 options: 21 + 18 would not fit in one, so a consumer building a menu needs to choose which list (or a subset) to offer rather than have that decision made for them.
  *
- * Same shape and rules as `OFFICIAL_COLOR_THEMES`, but every alias here is at
- * least 4 characters — the 2-3 letter aliases above were already a tight fit
- * for 21 entries, and this list is expected to grow.
+ * Same shape and rules as `OFFICIAL_COLOR_THEMES`, but every alias here is at least 4 characters — the 2-3 letter aliases above were already a tight fit for 21 entries, and this list is expected to grow.
  */
 const CUSTOM_COLOR_THEMES = [
   {
@@ -363,8 +348,7 @@ function normalize(token: string): string {
 }
 
 /**
- * Turns an alias, a full key, or a key without underscores into the
- * canonical key `colorThemeGradient()`/`colorThemeTextBase()` expect.
+ * Turns an alias, a full key, or a key without underscores into the canonical key `colorThemeGradient()`/`colorThemeTextBase()` expect.
  *
  * ```ts
  * resolveColorTheme('mb')               // 'midnight_blurple' (alias)
@@ -384,8 +368,7 @@ export function resolveColorTheme(token: string): string | undefined {
 /**
  * The `backgroundGradient` theme value for a resolved color theme key.
  *
- * `undefined` for a key `resolveColorTheme()` did not return — pass its
- * result straight through rather than a raw user-typed token.
+ * `undefined` for a key `resolveColorTheme()` did not return — pass its result straight through rather than a raw user-typed token.
  */
 export function colorThemeGradient(key: string): BackgroundGradientTheme | undefined {
   const theme = BY_KEY.get(key)
@@ -402,8 +385,7 @@ export function colorThemeGradient(key: string): BackgroundGradientTheme | undef
 }
 
 /**
- * Which text palette a resolved color theme key needs for contrast — pass
- * to `extends` as `'light'`/`'dark'`, alongside whatever `layout` you want.
+ * Which text palette a resolved color theme key needs for contrast — pass to `extends` as `'light'`/`'dark'`, alongside whatever `layout` you want.
  */
 export function colorThemeTextBase(key: string): 'dark' | 'light' | undefined {
   return BY_KEY.get(key)?.textBase

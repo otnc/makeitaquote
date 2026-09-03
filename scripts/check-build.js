@@ -3,8 +3,7 @@
 //
 // Run with: npm run check:build  (after `npm run build`)
 //
-// vitest only looks at `src/**`, so the guarantees that depend on `dist/`
-// living up to what package.json promises are checked here instead.
+// vitest only looks at `src/**`, so the guarantees that depend on `dist/` living up to what package.json promises are checked here instead.
 // No dependencies — Node >= 22 built-ins only.
 
 import { readFileSync } from 'node:fs'
@@ -35,10 +34,7 @@ function name(file) {
 /**
  * Prints what has failed so far and stops, or returns and lets the run go on.
  *
- * Called before anything that *loads* the build as well as at the very end.
- * A build with an ESM-only dependency left external throws on require(), so
- * without this the run would die with a stack trace and take the collected
- * failures — the ones that actually explain it — down with it.
+ * Called before anything that *loads* the build as well as at the very end. A build with an ESM-only dependency left external throws on require(), so without this the run would die with a stack trace and take the collected failures — the ones that actually explain it — down with it.
  */
 function report() {
   if (failures.length === 0) return
@@ -59,8 +55,7 @@ async function walk(dir) {
 /**
  * Every dist file an entry point can reach, following relative imports.
  *
- * tsdown emits shared chunks, so checking the entry file alone would miss a
- * dependency that arrived one hop away.
+ * tsdown emits shared chunks, so checking the entry file alone would miss a dependency that arrived one hop away.
  */
 async function reachableFrom(entry) {
   const seen = new Set()
@@ -105,12 +100,9 @@ for (const expected of [
 }
 
 // ---------------------------------------------------------------------------
-// 2. An ESM-only dependency must be inlined, never require()d from the CJS
-//    output — `require()` of one throws the moment anything calls into it.
+// 2. An ESM-only dependency must be inlined, never require()d from the CJS output — `require()` of one throws the moment anything calls into it.
 //
-//    Which dependencies those are is worked out from their own package.json
-//    rather than listed here, so a new one is caught the day it is installed
-//    instead of the day someone remembers to add it.
+//    Which dependencies those are is worked out from their own package.json rather than listed here, so a new one is caught the day it is installed instead of the day someone remembers to add it.
 // ---------------------------------------------------------------------------
 
 /** True when a package.json describes ESM only, with no CJS entry to fall back to. */
@@ -137,10 +129,7 @@ function manifestOf(dependency) {
   }
 }
 
-// Every real dependency here is picked partly *because* it isn't ESM-only —
-// see INFO.md — so nothing in `package.json` can be relied on to stay a
-// positive example forever. `isEsmOnly()` is proven against synthetic
-// manifests instead, independent of what is installed.
+// Every real dependency here is picked partly *because* it isn't ESM-only — see INFO.md — so nothing in `package.json` can be relied on to stay a positive example forever. `isEsmOnly()` is proven against synthetic manifests instead, independent of what is installed.
 check(
   'isEsmOnly() catches an ESM-only manifest',
   isEsmOnly({ type: 'module', exports: { '.': { default: './index.mjs' } } }),
@@ -174,8 +163,7 @@ for (const file of files.filter((f) => f.endsWith('.cjs'))) {
   }
 }
 
-// Everything above is static. Anything below loads the build, which a
-// failure above may well make impossible — so stop here if there is one.
+// Everything above is static. Anything below loads the build, which a failure above may well make impossible — so stop here if there is one.
 report()
 
 // ---------------------------------------------------------------------------
@@ -192,9 +180,7 @@ check('dist/index.mjs exports MiQ', typeof esmRoot.MiQ === 'function')
 // ---------------------------------------------------------------------------
 // 4. The native binding must stay external — a bundled .node file won't load.
 //
-//    With several entry points, rolldown may move the import into a shared
-//    chunk rather than the entry file itself, so the check follows relative
-//    imports and accepts the statement wherever the entry can reach it.
+//    With several entry points, rolldown may move the import into a shared chunk rather than the entry file itself, so the check follows relative imports and accepts the statement wherever the entry can reach it.
 // ---------------------------------------------------------------------------
 
 for (const entry of ['index.cjs', 'index.mjs', 'cli/main.cjs', 'cli/main.mjs']) {

@@ -49,9 +49,7 @@ function noticeOnce(key: string, message: string): void {
 /**
  * Whether this run is allowed to fetch anything.
  *
- * `online: false` (or `enabled: false`) keeps everything to the disk cache and
- * whatever the system already provides — for air-gapped deployments, or when
- * you simply do not want a render to depend on a third party being up.
+ * `online: false` (or `enabled: false`) keeps everything to the disk cache and whatever the system already provides — for air-gapped deployments, or when you simply do not want a render to depend on a third party being up.
  */
 function isOnline(options: EnsureOptions): boolean {
   return options.online !== false && options.enabled !== false
@@ -60,15 +58,9 @@ function isOnline(options: EnsureOptions): boolean {
 /**
  * Makes a Google Fonts family available, downloading it only if it has to.
  *
- * Four outcomes, cheapest first: already registered or present on the system,
- * installed in the on-disk cache (works with no network at all), fetched, or
- * given up on. The fetch resolves its URL through the Google Fonts CSS API
- * every time, so the file is always the current release rather than one
- * pinned here — which is also why the disk is only trusted when the API
- * cannot be reached: online, freshness wins; offline, anything beats tofu.
+ * Four outcomes, cheapest first: already registered or present on the system, installed in the on-disk cache (works with no network at all), fetched, or given up on. The fetch resolves its URL through the Google Fonts CSS API every time, so the file is always the current release rather than one pinned here — which is also why the disk is only trusted when the API cannot be reached: online, freshness wins; offline, anything beats tofu.
  *
- * `family` may be a `FONT_ALIASES` short name, resolved once up front so
- * everything past this point agrees on the same real family.
+ * `family` may be a `FONT_ALIASES` short name, resolved once up front so everything past this point agrees on the same real family.
  */
 export async function useFont(requested: string, options: EnsureOptions = {}): Promise<boolean> {
   const family = normalizeFontFamily(requested)
@@ -96,8 +88,7 @@ export async function useFont(requested: string, options: EnsureOptions = {}): P
       ...(options.signal ? { signal: options.signal } : {}),
     })
   } catch (cause) {
-    // The CSS API is unreachable — an air-gapped machine with the family
-    // already installed (`miq install fonts`) should still render.
+    // The CSS API is unreachable — an air-gapped machine with the family already installed (`miq install fonts`) should still render.
     if (await registerFromDiskCache(family, options)) {
       ready.add(family)
       return true
@@ -115,13 +106,9 @@ export async function useFont(requested: string, options: EnsureOptions = {}): P
 /**
  * Downloads a family into the on-disk cache, whether or not it is needed.
  *
- * The install command's entry point, and deliberately not `useFont`: that
- * returns `true` the moment the system already provides the family, which is
- * right for rendering but wrong for installing — the point there is that the
- * *file* exists, so the next machine or an offline one can use it.
+ * The install command's entry point, and deliberately not `useFont`: that returns `true` the moment the system already provides the family, which is right for rendering but wrong for installing — the point there is that the *file* exists, so the next machine or an offline one can use it.
  *
- * Weights default to `[400, 700]` here rather than `useFont`'s `[400]`: an
- * install is for keeps, and a real bold face beats the synthetic stroke.
+ * Weights default to `[400, 700]` here rather than `useFont`'s `[400]`: an install is for keeps, and a real bold face beats the synthetic stroke.
  */
 export async function installFont(
   requested: string,
@@ -151,9 +138,7 @@ export async function installFont(
   }
 
   const results = await Promise.all(faces.map((face) => ensureFace(family, face, options)))
-  // Registration failing is not installation failing: the file landing on
-  // disk is what installing means, and the process that reads it back runs
-  // its own Skia anyway.
+  // Registration failing is not installation failing: the file landing on disk is what installing means, and the process that reads it back runs its own Skia anyway.
   const dir = resolveCacheDir(options.cacheDir)
   return results.some(Boolean) || faces.some((face) => isCached(dir, fileNameFor(face)))
 }
@@ -161,10 +146,7 @@ export async function installFont(
 /**
  * Registers whatever the on-disk cache holds for a family, sight unseen.
  *
- * The offline path: files land there through `miq install fonts` (or an
- * earlier online render), and matching on the family's slug finds them with
- * no network roundtrip. Every weight and style found is registered under the
- * one family name, and Skia picks between them.
+ * The offline path: files land there through `miq install fonts` (or an earlier online render), and matching on the family's slug finds them with no network roundtrip. Every weight and style found is registered under the one family name, and Skia picks between them.
  */
 async function registerFromDiskCache(family: string, options: EnsureOptions): Promise<boolean> {
   const dir = resolveCacheDir(options.cacheDir)
@@ -172,9 +154,7 @@ async function registerFromDiskCache(family: string, options: EnsureOptions): Pr
 
   let names: string[]
   try {
-    // A bare prefix match isn't enough: "Noto-Sans-" is also a prefix of
-    // "Noto-Sans-JP-v30-…", a different family's file. Requiring the version
-    // marker (fileNameFor's `v\d+`) right after the slug rules that out.
+    // A bare prefix match isn't enough: "Noto-Sans-" is also a prefix of "Noto-Sans-JP-v30-…", a different family's file. Requiring the version marker (fileNameFor's `v\d+`) right after the slug rules that out.
     names = readdirSync(dir).filter(
       (name) =>
         name.startsWith(prefix) &&
@@ -225,8 +205,7 @@ async function ensureFace(
     })
 
     const path = await writeCachedFont(dir, fileName, bytes)
-    // Registering from the file rather than the buffer sidesteps the lifetime
-    // problem in GlobalFonts.register — see font/registry.ts.
+    // Registering from the file rather than the buffer sidesteps the lifetime problem in GlobalFonts.register — see font/registry.ts.
     return fonts.registerFromPath(path, family)
   })()
     .catch((cause: unknown) => {
@@ -251,8 +230,7 @@ async function ensureFace(
 /**
  * Fetches an explicit URL rather than going through Google Fonts.
  *
- * The escape hatch for fonts this package will not resolve by name — anything
- * not on Google Fonts, including ones you have licensed yourself.
+ * The escape hatch for fonts this package will not resolve by name — anything not on Google Fonts, including ones you have licensed yourself.
  */
 export async function registerFontFromURL(
   url: string,
@@ -268,10 +246,7 @@ export async function registerFontFromURL(
 /**
  * Makes the default families available.
  *
- * Useful at startup, or at build time with `MIQ_FONT_CACHE_DIR` set, so no
- * render ever waits for a download. Offline, this is what turns files
- * installed by `miq install fonts` into registered families — `useFont`
- * reads the disk when it cannot reach Google.
+ * Useful at startup, or at build time with `MIQ_FONT_CACHE_DIR` set, so no render ever waits for a download. Offline, this is what turns files installed by `miq install fonts` into registered families — `useFont` reads the disk when it cannot reach Google.
  */
 export async function ensureDefaultFonts(options: EnsureOptions = {}): Promise<void> {
   const families = options.families ?? DEFAULT_FONT_FAMILIES
@@ -281,8 +256,7 @@ export async function ensureDefaultFonts(options: EnsureOptions = {}): Promise<v
 /**
  * Warns once that a family is missing, naming the fix.
  *
- * Missing fonts render as tofu, which is baffling if you don't know what
- * caused it — so this says so out loud rather than failing silently.
+ * Missing fonts render as tofu, which is baffling if you don't know what caused it — so this says so out loud rather than failing silently.
  */
 export function warnMissingFamily(request: string): void {
   warnOnce(
@@ -299,10 +273,7 @@ export interface AssetErrorOptions {
 }
 
 /**
- * Reports fonts that are still missing after autoload, following `strictFonts`
- * and `onAssetError` the same way everywhere: `strictFonts` (or `'throw'`)
- * raises, `'ignore'` says nothing, and the default (`'text'`) warns and lets
- * rendering fall through to whatever font the system already has.
+ * Reports fonts that are still missing after autoload, following `strictFonts` and `onAssetError` the same way everywhere: `strictFonts` (or `'throw'`) raises, `'ignore'` says nothing, and the default (`'text'`) warns and lets rendering fall through to whatever font the system already has.
  */
 export function reportMissingFonts(missing: readonly string[], options: AssetErrorOptions): void {
   if (missing.length === 0) return

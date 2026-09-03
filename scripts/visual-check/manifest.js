@@ -9,9 +9,7 @@ export function titleOf(group) {
     .replace(/^./, (c) => c.toUpperCase())
 }
 
-// One file per group (docs/visual/<group>/manifest.json) plus a small index
-// (docs/visual/manifest.json) listing which groups exist — so two PRs
-// touching different groups touch different files, never a shared one.
+// One file per group (docs/visual/<group>/manifest.json) plus a small index (docs/visual/manifest.json) listing which groups exist — so two PRs touching different groups touch different files, never a shared one.
 export async function writeManifests({
   outDir,
   allGroups,
@@ -44,9 +42,7 @@ export async function writeManifests({
     )
   }
 
-  // The index lists every group, not just the ones this run touched —
-  // `allGroups` comes from the full case list, so a partial `--only` run
-  // never shrinks it.
+  // The index lists every group, not just the ones this run touched — `allGroups` comes from the full case list, so a partial `--only` run never shrinks it.
   const index = {
     version: packageVersion,
     groups: allGroups.map((group) => ({ name: group, title: titleOf(group) })),

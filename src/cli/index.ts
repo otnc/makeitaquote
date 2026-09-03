@@ -31,13 +31,7 @@ const JSON_FLAG = {
 /**
  * Runs one command line, returning the process exit code.
  *
- * Command bodies (`install`/`uninstall`/`ls`/`search`/`outdated`, all in
- * `./commands`) are pure orchestration through `deps`/`io`, and that's the
- * whole testable surface: argv parsing, aliases, and `--help`/`--version`
- * are cleye's job, generated from the `help`/`alias` fields below rather
- * than a hand-written usage string. Those three paths print straight to the
- * console and call `process.exit()` internally — exactly what a real CLI
- * should do, but not something to route through `io` or await here.
+ * Command bodies (`install`/`uninstall`/`ls`/`search`/`outdated`, all in `./commands`) are pure orchestration through `deps`/`io`, and that's the whole testable surface: argv parsing, aliases, and `--help`/`--version` are cleye's job, generated from the `help`/`alias` fields below rather than a hand-written usage string. Those three paths print straight to the console and call `process.exit()` internally — exactly what a real CLI should do, but not something to route through `io` or await here.
  */
 export async function run(
   argv: readonly string[],
@@ -273,9 +267,7 @@ export async function run(
       commands: [install, uninstall, ls, search, outdated, update, prune, env, render],
     },
     (root) => {
-      // Only reached when no command matched: nothing was typed, the first
-      // word was `help` (cleye has no built-in alias for that), or it was
-      // something unrecognized.
+      // Only reached when no command matched: nothing was typed, the first word was `help` (cleye has no built-in alias for that), or it was something unrecognized.
       if (root._.length > 0 && root._[0] !== 'help') {
         io.line(`Unknown command: ${root._[0]}`)
         io.line('')

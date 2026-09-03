@@ -66,8 +66,7 @@ describe('wrapSegments', () => {
     // 200 units is 10 full-width characters.
     const lines = wrap('今日は天気です', 60)
 
-    // BudouX offers 今日は / 天気です; the break should land there rather than
-    // mid-phrase.
+    // BudouX offers 今日は / 天気です; the break should land there rather than mid-phrase.
     expect(lines[0]).toBe('今日は')
   })
 
@@ -165,9 +164,7 @@ describe('wrapSegments', () => {
     const everythingLoaded = () => true
 
     it('wraps its fallback text within maxWidth', () => {
-      // The shortcode is 26 ASCII characters — 260 units — where the square it
-      // stood in for was 20. Left as an emoji token it is unbreakable, and the
-      // line runs off the canvas; as text it wraps like anything else.
+      // The shortcode is 26 ASCII characters — 260 units — where the square it stood in for was 20. Left as an emoji token it is unbreakable, and the line runs off the canvas; as text it wraps like anything else.
       const lines = wrapSegments(resolveEmojiSegments(failed, nothingLoaded, 'text'), {
         maxWidth: 100,
         measurer: fakeMeasurer(10),
@@ -236,9 +233,7 @@ describe('wrapSegments with styled segments', () => {
       { kind: 'text', value: 'cd' }, // 2 * 10 = 20
     ]
 
-    // 40 + 20 = 60 fits; a style-blind measurer using the regular width for
-    // both (20 + 20 = 40) would also fit, so this only proves something if
-    // the bold segment is actually measured wider — assert that directly too.
+    // 40 + 20 = 60 fits; a style-blind measurer using the regular width for both (20 + 20 = 40) would also fit, so this only proves something if the bold segment is actually measured wider — assert that directly too.
     const lines = wrapSegments(segments, {
       maxWidth: 60,
       measurer: styleAwareMeasurer(),
@@ -251,9 +246,7 @@ describe('wrapSegments with styled segments', () => {
       measurer: styleAwareMeasurer(),
       metrics: fakeMetrics(20, 0),
     })
-    // Now the bold "ab" (40) alone fits under 50, but adding "cd" (20) would
-    // not (60 > 50) — so it must wrap, which only happens if bold is really
-    // measured at double width.
+    // Now the bold "ab" (40) alone fits under 50, but adding "cd" (20) would not (60 > 50) — so it must wrap, which only happens if bold is really measured at double width.
     expect(wrapped).toEqual([[segments[0]], [segments[1]]])
   })
 

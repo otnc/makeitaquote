@@ -6,8 +6,7 @@ import { fitText, linesToStrings } from './fit'
 import { segmentText } from './segment'
 
 /**
- * Character width scales with the font size, the way a real font does: at
- * 20px an ASCII character is 10 wide, at 10px it is 5.
+ * Character width scales with the font size, the way a real font does: at 20px an ASCII character is 10 wide, at 10px it is 5.
  */
 function options(overrides: Partial<Parameters<typeof fitText>[1]> = {}) {
   return {
@@ -33,8 +32,7 @@ describe('fitText', () => {
   })
 
   it('shrinks until the text fits the box', () => {
-    // 10 lines at 20px would be 200 tall and the box is 100, but at 10px they
-    // fit exactly — so this shrinks rather than truncating.
+    // 10 lines at 20px would be 200 tall and the box is 100, but at 10px they fit exactly — so this shrinks rather than truncating.
     const result = fitText(segmentText('a\nb\nc\nd\ne\nf\ng\nh\ni\nj'), options())
 
     expect(result.fontSize).toBe(10)
@@ -96,8 +94,7 @@ describe('fitText', () => {
   })
 
   it('truncates at the line cap even though shrinking further would fit', () => {
-    // Every line still fits geometrically at the minimum size (10 lines at
-    // 10px in a 200-tall box), but the cap should stop it at 5 anyway.
+    // Every line still fits geometrically at the minimum size (10 lines at 10px in a 200-tall box), but the cap should stop it at 5 anyway.
     const result = fitText(
       segmentText('a\nb\nc\nd\ne\nf\ng\nh\ni\nj'),
       options({ maxHeight: 200, maxLines: 5 }),
@@ -127,11 +124,7 @@ describe('fitText', () => {
   })
 
   it('skips tokenizing and measuring per-character for sizes a width lower bound already rules out', () => {
-    // With no spaces, CJK text without a phrase break gets a fallback break
-    // candidate at every character — so a real wrap of this 500-character
-    // run measures on the order of 500 tokens. At font sizes the width check
-    // can already rule out, none of that tokenizing should happen: only the
-    // single whole-segment measurement `mayFit` itself needs.
+    // With no spaces, CJK text without a phrase break gets a fallback break candidate at every character — so a real wrap of this 500-character run measures on the order of 500 tokens. At font sizes the width check can already rule out, none of that tokenizing should happen: only the single whole-segment measurement `mayFit` itself needs.
     let measureCalls = 0
     const source = '猫'.repeat(500)
     const result = fitText(
@@ -155,9 +148,7 @@ describe('fitText', () => {
 
     expect(result.truncated).toBe(true)
     expect(result.fontSize).toBe(10)
-    // ~990 candidate sizes, each needing only the one `mayFit` measurement,
-    // versus ~500 per size (one per character) if every size were fully
-    // wrapped — the total should land near the former, nowhere near the latter.
+    // ~990 candidate sizes, each needing only the one `mayFit` measurement, versus ~500 per size (one per character) if every size were fully wrapped — the total should land near the former, nowhere near the latter.
     expect(measureCalls).toBeLessThan(2000)
   })
 })

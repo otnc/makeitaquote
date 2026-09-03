@@ -24,8 +24,7 @@ export interface LoadAvatarOptions {
 /**
  * Loads an avatar from wherever it came from.
  *
- * Returns `null` rather than throwing when it can't be loaded — a quote with a
- * placeholder avatar is more useful than no quote at all.
+ * Returns `null` rather than throwing when it can't be loaded — a quote with a placeholder avatar is more useful than no quote at all.
  */
 export async function loadAvatar(
   source: AvatarSource | null,
@@ -51,10 +50,7 @@ export async function loadAvatar(
     }
   }
 
-  // http(s) and local paths are worth caching: the same user's avatar is
-  // often requested again within seconds of the last quote. Buffers and
-  // data: URLs are already in memory, so caching them would only add
-  // bookkeeping for no benefit.
+  // http(s) and local paths are worth caching: the same user's avatar is often requested again within seconds of the last quote. Buffers and data: URLs are already in memory, so caching them would only add bookkeeping for no benefit.
   return loadCached(url, options)
 }
 
@@ -94,8 +90,7 @@ export function avatarBox(layout: { avatar: AvatarBox }): AvatarBox {
 /**
  * The source rectangle that fills `box` without distorting the image.
  *
- * `object-fit: cover` in canvas terms: scale to the larger of the two ratios
- * and centre the overflow.
+ * `object-fit: cover` in canvas terms: scale to the larger of the two ratios and centre the overflow.
  */
 export function coverRect(
   imageWidth: number,
@@ -116,8 +111,7 @@ export function coverRect(
 /**
  * The destination rectangle that fits the whole image inside `box`.
  *
- * `object-fit: contain`: nothing is cropped, and the image is centred in
- * whatever space is left over.
+ * `object-fit: contain`: nothing is cropped, and the image is centred in whatever space is left over.
  */
 export function containRect(imageWidth: number, imageHeight: number, box: AvatarBox): AvatarBox {
   const scale = Math.min(box.width / imageWidth, box.height / imageHeight)
@@ -136,8 +130,7 @@ let filterSupported: boolean | null = null
 /**
  * Whether this build of the canvas honours `ctx.filter`.
  *
- * Detected once by drawing a white pixel through a grayscale filter that also
- * shifts brightness; if the pixel comes back unchanged the filter was ignored.
+ * Detected once by drawing a white pixel through a grayscale filter that also shifts brightness; if the pixel comes back unchanged the filter was ignored.
  */
 function supportsFilter(): boolean {
   if (filterSupported !== null) return filterSupported
@@ -180,14 +173,9 @@ function circleFor(box: AvatarBox): Circle {
 /**
  * Desaturates a region in place, for when `ctx.filter` isn't available.
  *
- * `box` comes from ratio-based layout math and is rarely integer-aligned;
- * `getImageData`/`putImageData` need integer pixels, so this rounds outward
- * (floor the origin, ceil the far edge) rather than truncating, to always
- * cover the whole painted area instead of clipping a row or column of it.
+ * `box` comes from ratio-based layout math and is rarely integer-aligned; `getImageData`/`putImageData` need integer pixels, so this rounds outward (floor the origin, ceil the far edge) rather than truncating, to always cover the whole painted area instead of clipping a row or column of it.
  *
- * `getImageData`/`putImageData` ignore the canvas's own clip path, so a
- * `circle` clip must be re-applied by hand here — otherwise a circle-shaped
- * avatar desaturates the card background sitting in the box's corners too.
+ * `getImageData`/`putImageData` ignore the canvas's own clip path, so a `circle` clip must be re-applied by hand here — otherwise a circle-shaped avatar desaturates the card background sitting in the box's corners too.
  */
 function desaturateRegion(ctx: SKRSContext2D, box: AvatarBox, circle?: Circle): void {
   const x = Math.floor(box.x)
@@ -225,8 +213,7 @@ export interface DrawAvatarOptions {
 /**
  * Clips to the largest circle that fits inside `box`, centred.
  *
- * A wide or tall box leaves background showing at the sides or top and
- * bottom — same as a round profile picture would on any other card shape.
+ * A wide or tall box leaves background showing at the sides or top and bottom — same as a round profile picture would on any other card shape.
  */
 function clipToCircle(ctx: SKRSContext2D, box: AvatarBox): void {
   const { cx, cy, radius } = circleFor(box)
@@ -252,8 +239,7 @@ export function drawAvatar(
     const useFilter = theme.grayscale && supportsFilter()
     if (useFilter) ctx.filter = 'grayscale(100%)'
 
-    // `contain` scales the destination and leaves the source whole; `cover`
-    // does the opposite, cropping the source to fill the destination.
+    // `contain` scales the destination and leaves the source whole; `cover` does the opposite, cropping the source to fill the destination.
     let painted = box
     if (theme.fit === 'contain') {
       painted = containRect(image.width, image.height, box)

@@ -96,14 +96,7 @@ function deps() {
 }
 
 /**
- * `--help`/`-h`/`--version` are handled entirely inside cleye: it writes to
- * `console.log` and calls `process.exit()` directly, with no seam to route
- * either through `io`. That's fine for the real CLI — a real invocation
- * should print and exit — so these three are verified by spying on the
- * console/process globals rather than through `io`, and only for their
- * side effects (something was printed, the right exit code was requested),
- * not cleye's own rendered text — that's cleye's tested behaviour, not this
- * package's.
+ * `--help`/`-h`/`--version` are handled entirely inside cleye: it writes to `console.log` and calls `process.exit()` directly, with no seam to route either through `io`. That's fine for the real CLI — a real invocation should print and exit — so these three are verified by spying on the console/process globals rather than through `io`, and only for their side effects (something was printed, the right exit code was requested), not cleye's own rendered text — that's cleye's tested behaviour, not this package's.
  */
 function mockExit() {
   return vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)

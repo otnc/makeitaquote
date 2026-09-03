@@ -34,17 +34,9 @@ export interface FitResult {
 /**
  * Finds the largest font size at which the quote fits its box.
  *
- * Steps down linearly rather than binary searching: kinsoku rules mean a
- * smaller size can occasionally need *more* lines, so "fits" is not perfectly
- * monotonic and a binary search can settle on the wrong side of a boundary.
- * With measurement memoized this is a handful of microseconds either way.
+ * Steps down linearly rather than binary searching: kinsoku rules mean a smaller size can occasionally need *more* lines, so "fits" is not perfectly monotonic and a binary search can settle on the wrong side of a boundary. With measurement memoized this is a handful of microseconds either way.
  *
- * Before doing a full wrap at each size, `mayFit` checks a cheap lower bound:
- * no wrapping algorithm can pack the segments' total width into fewer lines
- * than `total / maxWidth`, so once even that best case already exceeds the
- * line budget, the real wrap is guaranteed to fail too and can be skipped.
- * This never changes which font size wins — it only skips sizes that were
- * always going to fail — so it's safe alongside the non-monotonicity above.
+ * Before doing a full wrap at each size, `mayFit` checks a cheap lower bound: no wrapping algorithm can pack the segments' total width into fewer lines than `total / maxWidth`, so once even that best case already exceeds the line budget, the real wrap is guaranteed to fail too and can be skipped. This never changes which font size wins — it only skips sizes that were always going to fail — so it's safe alongside the non-monotonicity above.
  */
 export function fitText(segments: readonly Segment[], options: FitOptions): FitResult {
   const step = options.step ?? 1
@@ -110,11 +102,7 @@ function wrapAt(
 }
 
 /**
- * A lower bound on the lines `wrapAt` could possibly need: no wrapping
- * algorithm can fit more than `maxWidth` of content per line, so packing the
- * segments' total width that tightly is the best case. Kinsoku, forced
- * breaks and word boundaries can only need as many or more lines than this,
- * never fewer.
+ * A lower bound on the lines `wrapAt` could possibly need: no wrapping algorithm can fit more than `maxWidth` of content per line, so packing the segments' total width that tightly is the best case. Kinsoku, forced breaks and word boundaries can only need as many or more lines than this, never fewer.
  */
 function mayFit(
   segments: readonly Segment[],
@@ -140,8 +128,7 @@ function fits(lines: Line[], fontSize: number, options: FitOptions): boolean {
 /**
  * Cuts the text down to the lines that fit and marks the cut with an ellipsis.
  *
- * The ellipsis replaces trailing characters rather than being appended, so the
- * last line still fits.
+ * The ellipsis replaces trailing characters rather than being appended, so the last line still fits.
  */
 function truncate(lines: Line[], fontSize: number, options: FitOptions): Line[] {
   const limit = maxLines(fontSize, options)

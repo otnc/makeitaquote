@@ -254,8 +254,7 @@ describe('choosing which name', () => {
   })
 
   it('does not treat displayName as a nickname when none is set', () => {
-    // discord.js reports displayName as "nickname, or the global name", so a
-    // member with no nickname must not shadow the global name.
+    // discord.js reports displayName as "nickname, or the global name", so a member with no nickname must not shadow the global name.
     const message = v14Message({
       author: { username: 'otoneko.', globalName: '音猫｡', discriminator: '0' },
       member: { displayName: '音猫｡' },

@@ -14,13 +14,9 @@ const http = createClient({ timeout: 10_000, retry: 2 })
 /**
  * The production fetcher: a locally installed Twemoji first, the CDN second.
  *
- * A file put on disk by `miq install twemoji` is the whole point of that
- * command — it makes rendering work with no network — so it wins over the
- * CDN whenever one exists. An unreadable local file falls through to the
- * network rather than failing, since a corrupt file is not the CDN's fault.
+ * A file put on disk by `miq install twemoji` is the whole point of that command — it makes rendering work with no network — so it wins over the CDN whenever one exists. An unreadable local file falls through to the network rather than failing, since a corrupt file is not the CDN's fault.
  *
- * The disk check lives here rather than in `loadEmoji` on purpose: tests
- * inject their own fetcher, and must never see the machine's install state.
+ * The disk check lives here rather than in `loadEmoji` on purpose: tests inject their own fetcher, and must never see the machine's install state.
  */
 const defaultFetcher: ImageFetcher = async (url, signal) => {
   const local = localTwemojiFile(url)
@@ -47,20 +43,15 @@ export type EmojiImages = Map<string, Image>
 /**
  * Loads every emoji image a set of segments needs, in parallel.
  *
- * Doing this up front is the point: drawing awaits nothing, so a quote with
- * twenty emoji costs one round of parallel requests rather than twenty
- * sequential ones.
+ * Doing this up front is the point: drawing awaits nothing, so a quote with twenty emoji costs one round of parallel requests rather than twenty sequential ones.
  *
- * Failures are not thrown — they are simply absent from the returned map, and
- * the caller decides whether to draw the source text instead.
+ * Failures are not thrown — they are simply absent from the returned map, and the caller decides whether to draw the source text instead.
  */
 export async function prefetchEmoji(
   segments: readonly Segment[],
   options: PrefetchOptions = {},
 ): Promise<EmojiImages> {
-  // Keyed by the segment's own url, which is what the renderer looks up; the
-  // value is every url worth trying for it. A Misskey shortcode configured
-  // across several instances has one per instance.
+  // Keyed by the segment's own url, which is what the renderer looks up; the value is every url worth trying for it. A Misskey shortcode configured across several instances has one per instance.
   const candidates = new Map<string, readonly string[]>()
   for (const segment of segments) {
     if (segment.kind !== 'emoji') continue
@@ -99,8 +90,7 @@ function alternativesFor(segment: Extract<Segment, { kind: 'emoji' }>): readonly
 /**
  * Loads one emoji image, going through the shared cache.
  *
- * Returns `null` rather than throwing: a missing emoji should degrade the
- * image, not fail the whole render.
+ * Returns `null` rather than throwing: a missing emoji should degrade the image, not fail the whole render.
  */
 export async function loadEmoji(url: string, options: PrefetchOptions = {}): Promise<Image | null> {
   const cached = emojiCache.cached(url)

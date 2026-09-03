@@ -12,8 +12,7 @@ function segmenterFor(locale: string): Intl.Segmenter {
 /**
  * Splits text into user-perceived characters.
  *
- * Breaking a line anywhere else would tear a surrogate pair, a combining mark
- * or a ZWJ emoji sequence in half.
+ * Breaking a line anywhere else would tear a surrogate pair, a combining mark or a ZWJ emoji sequence in half.
  */
 export function graphemes(text: string, locale = 'ja'): string[] {
   const out: string[] = []
